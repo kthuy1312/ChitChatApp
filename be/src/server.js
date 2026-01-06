@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './libs/db.js';
 import authRoute from './routes/authRoute.js';
 import userRoute from './routes/userRoute.js';
+import friendRoute from './routes/friendRoute.js';
 import cookieParser from 'cookie-parser';
 import { protectedRoute } from './middlewares/authMiddleware.js';
 dotenv.config();
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoute);
 
 //private routes
 app.use('/api/users', protectedRoute, userRoute);
+app.use('/api/friends', protectedRoute, friendRoute);
 
 
 connectDB().then(() => {

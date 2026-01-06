@@ -18,17 +18,16 @@ const friendSchema = new mongoose.Schema({
 
 //truoc khi save phai chuan hoa  
 //khi lưu vào db thì sẽ lưu userA luôn là ng có id nhỏ hơn truoc
-friendSchema.pre('save', function (next) {
-    const a = this.userA.toString()
-    const b = this.userB.toString()
+friendSchema.pre("save", async function () {
+    const a = this.userA.toString();
+    const b = this.userB.toString();
+
     if (a > b) {
-        this.userA = mongoose.Schema.Types.ObjectId(b)
-        this.userB = mongoose.Schema.Types.ObjectId(a) //đổi lại thành objectId
+        this.userA = mongoose.Types.ObjectId(b);
+        this.userB = mongoose.Types.ObjectId(a);
     }
 
-    next();
-})
-
+});
 
 friendSchema.index({
     userA: 1,
