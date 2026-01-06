@@ -83,7 +83,7 @@ const signIn = async (req, res) => {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true, //kh thể bị truy cập bởi js
             secure: true,
-            sameSite: 'none',//cho phép be và fe chạy hai domain khác nhau]
+            sameSite: 'none',//cho phép be và fe chạy hai domain khác nhau
             maxAge: REFRESH_TOKEN_TTL
         })
 
@@ -115,6 +115,42 @@ const signOut = async (req, res) => {
     }
 }
 
+//tạo access token mới 
+const refreshToken = async (req, res) => {
+    try {
+        //lấy refresh token từ cookie
+        const token = req.cookies?.refreshToken
+        if (!token) {
+            return res.status(401).json({ message: "Token không tồn tại" })
+        }
+
+        //ss với refresh token trong db
+        const session = await Session.findOne({ refreshToken: token })
+        if (!session) {
+            return res.status(403).json("Token không hợp lệ hoặc đã hết hạn")
+        }
+
+        //coi hết hạn chưa
+        if (session.expiresAt < new Date()) {
+            return res.status(403).json("Token đã hết hạn")
+        }
+
+        //tạo access token mới
+        const accessToken = jwt.sign({ userId: session.userId }, process.env.SECRET, { expiresIn: ACCESS_TOKEN_TTL })
+
+        //trả access token mới
+        return res.status(200).json({
+            message: "Tạo access token mới thành công",
+            accessToken
+        })
+
+    } catch (err) {
+        console.error("Lỗi khi gọi refreshToken", err)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
+}
+
+
 export {
-    signUp, signIn, signOut
+    signUp, signIn, signOut, refreshToken
 }
