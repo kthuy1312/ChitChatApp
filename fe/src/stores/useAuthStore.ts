@@ -12,6 +12,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ accessToken: null, user: null, loading: false })
     },
 
+    setAccessToken: (accessToken) => {
+        set({ accessToken })
+    },
+
     signUp: async (username, password, email, firstname, lastname) => {
 
         try {
@@ -30,7 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             set({ loading: true })
             const { accessToken } = await authService.signIn(username, password)
-            set({ accessToken })
+            get().setAccessToken(accessToken)
 
             await get().fetchMe()
 
@@ -66,6 +70,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } finally {
             set({ loading: false })
         }
-    }
+    },
 
+    refresh: async () => {
+        try {
+            set({ loading: true })
+            const { user, fetchMe } = get()
+            const accessToken = await authService.refresh();
+            get().setAccessToken(accessToken)
+
+            if (!user) {
+                await fetchMe()
+            }
+
+        } catch (err) {
+            console.error(err)
+            toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại')
+            get().clearState() //để xóa toàn bộ tt đăng nhập hiện tại
+        } finally {
+            set({ loading: false })
+        }
+    }
 }))
