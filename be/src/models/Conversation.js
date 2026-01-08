@@ -29,7 +29,7 @@ const groupSchema = new mongoose.Schema({
 
 //luu tt tin nhan cuoi cung (chứa thêm 1 vài tt thêm như ng gửi, tgian gửi)
 const lastMessageSchema = new mongoose.Schema({
-    _id: { type: String }, //kh phải _id của mongoose tạo mà là _id của tn gốc
+    _id: { type: String }, //kh phải _id của mongoose tạo mà là _id của tn message gốc
     content: {
         type: String,
         default: null
@@ -47,7 +47,7 @@ const lastMessageSchema = new mongoose.Schema({
 })
 
 const conversationScheme = new mongoose.Schema({
-    types: {
+    type: {
         type: String,
         enum: ['direct', 'group'],
         required: true

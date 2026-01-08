@@ -31,7 +31,7 @@ const signUp = async (req, res) => {
         //signup
         await User.create({
             username, hashedPassword, email,
-            displayName: `${firstName} ${lastName}`
+            displayName: ` ${lastName} ${firstName}`
         })
         return res.status(201).json({
             message: "Đăng ký thành công"
