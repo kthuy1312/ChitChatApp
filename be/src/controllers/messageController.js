@@ -41,8 +41,8 @@ export const sendDirectMessage = async (req, res) => {
 
         //mỗi lần có tn mới thì phải cần update lại 
         updateConversationAfterCreateMessage(conversation, message, senderId)
-
         await conversation.save();
+
         return res.status(201).json({ message });
 
     } catch (err) {
@@ -53,6 +53,29 @@ export const sendDirectMessage = async (req, res) => {
 }
 
 
-export const sendGroupMessage = (req, res) => {
+export const sendGroupMessage = async (req, res) => {
+    try {
+        const senderId = req.user._id
+        const { conversationId, content } = req.body
+        const conversation = req.conversation
+
+        if (!content) {
+            return res.status(404).json("Thiếu nội dung tin nhắn");
+        }
+
+        const message = await Message.create({
+            conversationId, content, senderId
+        })
+
+        //mỗi lần có tn mới thì phải cần update lại 
+        updateConversationAfterCreateMessage(conversation, message, senderId)
+        await conversation.save();
+
+        return res.status(201).json({ message });
+
+    } catch (error) {
+        console.error("Lỗi xảy ra khi gửi tin nhắn nhóm", error);
+        return res.status(500).json({ message: "Lỗi hệ thống" });
+    }
 
 }

@@ -45,3 +45,31 @@ export const checkFriendship = async (req, res, next) => {
     }
 }
 
+export const checkGroupMembership = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const { conversationId } = req.body
+
+        const conversation = await Conversation.findById(conversationId)
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Conversation Id không tồn tại" })
+        }
+
+        const isMember = conversation.participants.some(
+            (p) => p.userID.toString() === userId.toString()
+        )
+
+        if (!isMember) {
+            return res.status(403).json({ message: "Bạn không phải là thành viên của group này" })
+        }
+
+        req.conversation = conversation
+
+        next()
+    } catch (error) {
+        console.error("Lỗi checkGroupMembership:", error);
+        return res.status(500).json({ message: "Lỗi hệ thống" });
+    }
+
+}

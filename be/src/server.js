@@ -9,6 +9,9 @@ import messageRoute from './routes/messageRoute.js';
 import conversationRoute from './routes/conversationRoute.js';
 import cookieParser from 'cookie-parser';
 import { protectedRoute } from './middlewares/authMiddleware.js';
+import swaggerUi from 'swagger-ui-express'
+import fs from 'fs'
+
 dotenv.config();
 
 const app = express();
@@ -19,6 +22,10 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+//swagger
+const swaggerDocument = JSON.parse(fs.readFileSync("./src/swagger.json", "utf-8"))
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //public routes
 app.use('/api/auth', authRoute);
