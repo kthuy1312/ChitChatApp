@@ -1,5 +1,6 @@
 
 import Conversation from "../models/Conversation.js"
+import Message from "../models/Message.js"
 
 
 export const createConversation = async (req, res) => {
@@ -76,12 +77,92 @@ export const createConversation = async (req, res) => {
     } catch (error) {
         console.error("Lỗi khi tạo conversation", error)
         return res.status(500).json({ message: "Lỗi hệ thống" })
-
     }
 }
+
+
 export const getConversations = async (req, res) => {
+    try {
+        const userId = req.user?._id
 
+        const conversation = await Conversation.find({ "participants.userID": userId })
+
+            .sort({ lastMessageAt: -1, updatedAt: -1 })
+            .populate({
+                path: "participants.userID",
+                select: "displayName avatarUrl"
+            })
+            .populate({
+                path: "lastMessage.senderId",
+                select: "displayName avatarUrl"
+            })
+            .populate({
+                path: "seenBy",
+                select: "displayName avatarUrl"
+            })
+
+        //format mỗi conversation lại
+        const formatted = conversation.map((conver) => {
+            const participants = (conver.participants || []).map((p) => ({
+                _id: p.userID?._id,
+                displayName: p.userID?.displayName,
+                avatarUrl: p.userID?.avatarUrl ?? null,
+                joinAt: p.joinedAt
+            }))
+
+            return {
+                ...conver.toObject(), //chuyển moogose doc thành js thuần bỏ những data kh cần thiết
+                unreadCounts: conver.unreadCounts || {},
+                participants
+            }
+        })
+
+        return res.status(200).json({
+            conversation: formatted
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi lấy conversation", error)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
 }
-export const getMessages = async (req, res) => {
 
+
+export const getMessages = async (req, res) => {
+    try {
+        const { conversationId } = req.params
+        const { limit = 50, cursor } = req.query //cursor: mốc thời gian để load tin cũ hơn
+
+        const query = { conversationId }
+
+        //nếu có cursor nghĩa là đang load thêm tn cũ
+        if (cursor) {
+            //cần query tn cũ hơn
+            query.createdAt = { $lt: new Date(cursor) }
+        }
+
+        let messages = await Message.find(query)
+            .sort({ createdAt: -1 })
+            .limit((+limit) + 1)
+
+        let nextCursor = null
+
+        //nếu vẫn còn trang tiếp theo 
+        if (messages.length > (+limit)) {
+            const nextMessage = messages[messages.length - 1] //lấy tn cuối cùng
+            nextCursor = nextMessage.createdAt.toISOString(); //g cursor tiếp theo sẽ lấy từ tn cuối cùng đó trở đi về sau
+            messages.pop() //bỏ tin cuối cùng ra 
+        }
+
+        messages = messages.reverse()
+
+        return res.status(200).json({
+            messages,
+            nextCursor
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi lấy messages", error)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
 }

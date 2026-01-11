@@ -22,7 +22,7 @@ export const sendDirectMessage = async (req, res) => {
 
         if (!conversation) {
             conversation = await Conversation.create({
-                types: "direct",
+                type: "direct",
                 participants: [
                     { userID: senderId, joinedAt: new Date() },
                     { userID: recipientId, joinedAt: new Date() }
