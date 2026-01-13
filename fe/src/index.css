@@ -149,8 +149,10 @@
 
     /* Dark mode gradients */
     --gradient-primary: linear-gradient(135deg,
-        hsl(340, 70%, 60%),
-        hsl(320, 60%, 50%));
+        hsl(345, 50%, 64%),
+        /* pink milk */
+        hsl(335, 45%, 56%));
+
     --gradient-chat: linear-gradient(135deg,
         hsl(340, 70%, 60%),
         hsl(330, 70%, 65%));
