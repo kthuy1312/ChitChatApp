@@ -19,9 +19,9 @@
     --popover-foreground: 350 20% 20%;
 
     /* Primary - Hồng Sakura chủ đạo */
-    --primary: 340 82% 75%;
+    --primary: 340 85% 60%;
     --primary-foreground: 350 100% 99%;
-    --primary-glow: 340 100% 85%;
+    --primary-glow: 345 100% 78%;
 
     /* Secondary - Hồng phấn nhạt */
     --secondary: 340 40% 95%;
@@ -92,14 +92,14 @@
     --shadow-bubble: 0 4px 20px -4px hsla(340, 50%, 70%, 0.15);
 
     /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 350 20% 30%;
-    --sidebar-primary: 340 82% 75%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 40% 97%;
-    --sidebar-accent-foreground: 340 82% 45%;
-    --sidebar-border: 340 30% 94%;
-    --sidebar-ring: 340 82% 75%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -170,14 +170,14 @@
     --shadow-glow: 0 0 40px hsla(340, 75%, 65%, 0.35);
     --shadow-bubble: 0 4px 20px -4px hsla(340, 80%, 50%, 0.3);
 
-    --sidebar-background: 340 15% 10%;
-    --sidebar-foreground: 340 10% 90%;
-    --sidebar-primary: 340 75% 65%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 15% 15%;
-    --sidebar-accent-foreground: 340 75% 80%;
-    --sidebar-border: 340 20% 18%;
-    --sidebar-ring: 340 75% 65%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   body {
@@ -285,5 +285,15 @@
       opacity: 1;
       transform: translateY(0) scale(1);
     }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
   }
 }
