@@ -1,3 +1,4 @@
+import type { Conversation, Message } from "./chat";
 import type { User } from "./user";
 
 export interface AuthState {
@@ -21,4 +22,18 @@ export interface ThemeState {
     isDark: boolean;
     toggleTheme: () => void;
     setTheme: (dark: boolean) => void;
+}
+
+export interface ChatState {
+    conversations: Conversation[];
+    message: Record<string, {
+        items: Message[],
+        hasMore: boolean, //cờ để biết có còn tn cũ chưa load hay kh
+        nextCursor?: string | null //phân trang
+    }>; //chia message theo tunng record
+    activeConversationId: string | null;//cuộc hội thoại nào đang được user chọn
+    loading: boolean;
+
+    reset: () => void;
+    setActiveConversation: (id: string | null) => void
 }
