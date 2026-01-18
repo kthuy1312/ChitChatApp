@@ -118,7 +118,7 @@ export const getConversations = async (req, res) => {
         })
 
         return res.status(200).json({
-            conversation: formatted
+            conversations: formatted
         })
 
     } catch (error) {

@@ -11,7 +11,8 @@ const DirectMessageList = () => {
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
             {
                 directconversations.map((conver) => (
-                    <DirectMessageCard conver={conver} />
+                    <DirectMessageCard conver={conver} key={conver._id}
+                    />
                 ))
             }
         </div>
