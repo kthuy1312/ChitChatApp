@@ -61,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       {/* CONTENT */}
-      <SidebarContent>
+      <SidebarContent className="beautiful-scrollbar">
 
         {/* new chat */}
         <SidebarGroup>

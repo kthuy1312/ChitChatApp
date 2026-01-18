@@ -32,9 +32,11 @@ export interface ChatState {
         nextCursor?: string | null //phân trang
     }>; //chia message theo tunng record
     activeConversationId: string | null;//cuộc hội thoại nào đang được user chọn
-    loading: boolean;
+    converloading: boolean;
+    messageLoading: boolean;
 
     reset: () => void;
-    setActiveConversation: (id: string | null) => void
-    fetchConversations: () => void
+    setActiveConversation: (id: string | null) => void;
+    fetchConversations: () => Promise<void>;
+    fetchMessages: (conversationId?: string) => Promise<void>;
 }
