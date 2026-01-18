@@ -26,7 +26,7 @@ export interface ThemeState {
 
 export interface ChatState {
     conversations: Conversation[];
-    message: Record<string, {
+    messages: Record<string, {
         items: Message[],
         hasMore: boolean, //cờ để biết có còn tn cũ chưa load hay kh
         nextCursor?: string | null //phân trang
@@ -36,4 +36,5 @@ export interface ChatState {
 
     reset: () => void;
     setActiveConversation: (id: string | null) => void
+    fetchConversations: () => void
 }
