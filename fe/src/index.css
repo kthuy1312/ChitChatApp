@@ -70,7 +70,7 @@
         hsl(var(--primary)),
         hsl(var(--primary-glow)));
     --gradient-chat: linear-gradient(135deg,
-        hsl(340, 75%, 70%),
+        hsl(340, 100%, 76%),
         hsl(325, 80%, 80%));
     --gradient-accent: linear-gradient(90deg,
         hsl(var(--accent)),
@@ -107,6 +107,7 @@
   }
 
   .dark {
+    /* Dark mode - neon on dark aesthetic */
     /* Dark mode - Deep Pink/Charcoal Aesthetic */
     --background: 340 15% 12%;
     --foreground: 340 10% 90%;
@@ -126,6 +127,7 @@
 
     --muted: 340 15% 18%;
     --muted-foreground: 340 10% 65%;
+
 
     --accent: 180 60% 55%;
     --accent-foreground: 340 15% 10%;
@@ -147,6 +149,7 @@
     --input: 340 20% 20%;
     --ring: 340 75% 65%;
 
+
     /* Dark mode gradients */
     --gradient-primary: linear-gradient(135deg,
         hsl(345, 50%, 64%),
@@ -154,7 +157,7 @@
         hsl(335, 45%, 56%));
 
     --gradient-chat: linear-gradient(135deg,
-        hsl(340, 70%, 60%),
+        hsl(340, 66%, 71%),
         hsl(330, 70%, 65%));
     --gradient-accent: linear-gradient(90deg,
         hsl(180, 60%, 55%),
