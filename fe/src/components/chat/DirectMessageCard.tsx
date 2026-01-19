@@ -6,11 +6,14 @@ import { cn } from '@/lib/utils'
 import UserAvatar from './UserAvatar'
 import StatusBadge from './StatusBadge'
 import UnreadCountBadge from './UnreadCountBadge'
+import { useSocketStore } from '@/stores/useSocketStore'
 
 const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
 
     const { user } = useAuthStore()
     const { activeConversationId, setActiveConversation, messages, fetchMessages } = useChatStore()
+
+    const { onlineUsers } = useSocketStore();
 
     if (!user) return null
 
@@ -43,8 +46,10 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
                         avatarUrl={otherUser.avatarUrl ?? undefined}
                     />
 
-                    {/* todo socket io */}
-                    <StatusBadge status="offline" />
+                    {/* todo: socket io */}
+                    <StatusBadge
+                        status={onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"}
+                    />
 
                     {unreadCounts > 0 && <UnreadCountBadge unreadCounts={unreadCounts} />}
 

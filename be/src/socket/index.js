@@ -17,12 +17,25 @@ const io = new Server(server, {
 
 io.use(socketAuthMiddleWare)
 
+const onlineUsers = new Map(); //{userId:socketId}
+
 io.on('connection', async (socket) => {
     const user = socket.user;
+
     console.log(`${user.displayName} online với ${socket.id}`);
 
+    onlineUsers.set(user._id, socket.id); //them user online vo
+
+    io.emit("online-users", Array.from(onlineUsers.keys())); // convert sang array
+
     socket.on("disconnect", () => {
-        console.log(`socket disconnected: ${socket.id}`)
+
+        //user offline
+        onlineUsers.delete(user._id);
+        io.emit("online-users", Array.from(onlineUsers.keys())); // convert sang array
+
+        console.log(`socket disconnected: ${socket.id}`);
+
     })
 });
 
