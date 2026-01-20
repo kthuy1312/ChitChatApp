@@ -109,6 +109,58 @@ export const useChatStore = create<ChatState>()(
                     console.error("Lỗi xảy ra khi sendGroupMessage:", error);
 
                 }
+            },
+
+            //chịu dữ liệu thêm tn mới vào store mỗi khi nhận dlieu từ socket
+            addMessage: async (message) => {
+                try {
+                    const { user } = useAuthStore.getState();
+                    const { fetchMessages } = get();
+
+                    //đánh dấu tin nhắn của mình
+                    message.isOwn = message.senderId === user?._id
+
+                    const converId = message.conversationId
+
+                    //lấy danh sách tin nhắn hiện tại (nếu có)
+                    //nếu trước đó đã từng mở conver này rồi thì bây g item sẽ chứa tn cũ
+                    //nếu chưa mở thì []
+                    let prevItems = get().messages[converId]?.items ?? []
+
+                    if (prevItems.length === 0) {
+                        //nếu chưa có tn nào thì phải fetch tn cũ trước
+                        await fetchMessages(message.conversationId);
+                        prevItems = get().messages[converId]?.items ?? []
+                    }
+
+                    set((state) => {
+
+                        //tránh thêm trùng message
+                        if (prevItems.some((m) => m._id === message._id)) {
+                            return state
+                        }
+
+                        //thêm message mới
+                        return {
+                            messages: {
+                                ...state.messages,
+                                [converId]: {
+                                    items: [...prevItems, message],
+                                    hasMore: state.messages[converId].hasMore,
+                                    nextCursor: state.messages[converId].nextCursor ?? undefined
+                                }
+                            }
+                        }
+                    })
+                } catch (error) {
+                    console.error("Lỗi xảy ra khi addMessage:", error);
+                }
+            },
+
+            updateConversation: async (conversation) => {
+                set((state) => ({
+                    conversations: state.conversations.map((c) => c._id === conversation._id ? { ...c, ...conversation } : c)
+                }));
             }
 
 

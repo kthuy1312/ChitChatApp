@@ -1,6 +1,7 @@
-import { updateConversationAfterCreateMessage } from "../../utils/messageHelper.js";
+import { emitNewMessage, updateConversationAfterCreateMessage } from "../../utils/messageHelper.js";
 import Conversation from "../models/Conversation.js"
 import Message from "../models/Message.js";
+import { io } from "../socket/index.js";
 
 
 export const sendDirectMessage = async (req, res) => {
@@ -43,6 +44,9 @@ export const sendDirectMessage = async (req, res) => {
         updateConversationAfterCreateMessage(conversation, message, senderId)
         await conversation.save();
 
+        //socket
+        emitNewMessage(io, conversation, message)
+
         return res.status(201).json({ message });
 
     } catch (err) {
@@ -70,6 +74,9 @@ export const sendGroupMessage = async (req, res) => {
         //mỗi lần có tn mới thì phải cần update lại 
         updateConversationAfterCreateMessage(conversation, message, senderId)
         await conversation.save();
+
+        //socket
+        emitNewMessage(io, conversation, message)
 
         return res.status(201).json({ message });
 

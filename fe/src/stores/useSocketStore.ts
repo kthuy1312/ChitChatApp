@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { connect, io, type Socket } from "socket.io-client";
 import { useAuthStore } from "./useAuthStore";
 import type { SocketState } from "@/types/store";
+import { useChatStore } from "./useChatStore";
 
 
 const baseURL = import.meta.env.VITE_SOCKET_URL;
@@ -30,6 +31,34 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         // connect xong thì lắng nghe sự kiện online user từ be
         socket.on("online-users", (userIds) => {
             set({ onlineUsers: userIds })
+        })
+
+        //lắng nghe sự kiện new message
+        socket.on("new-message", ({ message, conversation, unreadCounts }) => {
+            useChatStore.getState().addMessage(message);
+            const lastMessage = {
+                _id: conversation.lastMessage._id,
+                content: conversation.lastMessage.content,
+                createdAt: conversation.lastMessage.createdAt,
+                sender: {
+                    _id: conversation.lastMessage.senderId,
+                    displayName: "",
+                    avatarUrl: null
+                }
+            };
+
+            const updatedConversation = {
+                ...conversation,
+                lastMessage,
+                unreadCounts
+            }
+
+            //nếu tn đang bật thì đánh dấu là đã đọc
+            if (useChatStore.getState().activeConversationId === message.conversationId) {
+                //đánh dấu đã đọc
+            }
+
+            useChatStore.getState().updateConversation(updatedConversation);
         })
     },
 

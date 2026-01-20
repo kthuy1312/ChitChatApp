@@ -20,5 +20,18 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
         const preCount = conversation.unreadCounts.get(memberId) || 0 //lấy count hiện tại của ng đó
         conversation.unreadCounts.set(memberId, isSender ? 0 : preCount + 1)
     })
+}
 
+export const emitNewMessage = (io, conversation, message) => {
+    //socket.to(room1).emit(...)
+    //bên file index đã join user đúng room của họ theo conversationId
+    io.to(conversation._id.toString()).emit("new-message", {
+        message,
+        conversation: {
+            _id: conversation._id,
+            lastMessage: conversation.lastMessage,
+            lastMessageAt: conversation.lastMessageAt
+        },
+        unreadCounts: conversation.unreadCounts
+    })
 }

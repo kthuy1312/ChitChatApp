@@ -46,11 +46,19 @@ export interface ChatState {
         content: string,
         imgUrl?: string
     ) => Promise<void>;
+
     sendGroupMessage: (
         conversationId: string,
         content: string,
         imgUrl?: string
     ) => Promise<void>;
+
+    //khi gửi tn mới cần thêm tn đó vào store
+    addMessage: (message: Message) => Promise<void>;
+
+    //số lượng tn chưa đọc, trạng thái đọc hay chưa và last message thay đổi (update conver)
+    updateConversation: (conversation: Conversation) => Promise<void>;
+
 }
 
 export interface SocketState {
