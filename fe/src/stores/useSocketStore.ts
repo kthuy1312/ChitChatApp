@@ -56,10 +56,28 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             //nếu tn đang bật thì đánh dấu là đã đọc
             if (useChatStore.getState().activeConversationId === message.conversationId) {
                 //đánh dấu đã đọc
+                useChatStore.getState().markAsSeen();
             }
 
             useChatStore.getState().updateConversation(updatedConversation);
         })
+
+        //lắng nghe sự kiện read-message khi user đọc tn
+        socket.on("read-message", ({
+            conversation,
+            lastMessage,
+        }) => {
+            //những thông tin cần cập nhật của conversation
+            const updated = {
+                _id: conversation._id,
+                lastMessage,
+                lastMessageAt: conversation.lastMessageAt,
+                unreadCounts: conversation.unreadCounts,
+                seenBy: conversation.seenBy
+            };
+            useChatStore.getState().updateConversation(updated);
+        })
+
     },
 
     disconnectSocket: () => {

@@ -57,8 +57,10 @@ export interface ChatState {
     addMessage: (message: Message) => Promise<void>;
 
     //số lượng tn chưa đọc, trạng thái đọc hay chưa và last message thay đổi (update conver)
-    updateConversation: (conversation: Conversation) => Promise<void>;
+    updateConversation: (conversation: unknown) => void;
 
+    //seen
+    markAsSeen: () => Promise<void>;
 }
 
 export interface SocketState {

@@ -157,10 +157,57 @@ export const useChatStore = create<ChatState>()(
                 }
             },
 
-            updateConversation: async (conversation) => {
+            updateConversation: (conversation) => {
+                const conv = conversation as any;
+
                 set((state) => ({
-                    conversations: state.conversations.map((c) => c._id === conversation._id ? { ...c, ...conversation } : c)
+                    conversations: state.conversations.map((c) =>
+                        c._id === conv._id ? { ...c, ...conv } : c
+                    ),
                 }));
+            },
+
+
+            markAsSeen: async () => {
+                try {
+
+                    const { conversations, activeConversationId } = get();
+                    const { user } = useAuthStore.getState();
+
+                    if (!activeConversationId || !user) {
+                        return;
+                    }
+
+                    const conver = conversations.find((c) => c._id === activeConversationId)
+                    if (!conver) {
+                        return;
+                    }
+
+                    //nếu kh có tn nào có unReadCount > 0 thì kh cần seen gì cả
+                    if ((conver.unreadCounts?.[user._id] ?? 0) === 0) {
+                        return;
+                    }
+
+                    //seen
+                    await chatService.markAsSeen(activeConversationId);
+
+                    //update state
+                    set((state) => ({
+                        conversations: state.conversations.map((c) => (
+                            c._id === activeConversationId && c.lastMessage ? {
+                                ...c,
+                                unreadCounts: {
+                                    ...c.unreadCounts,
+                                    [user._id]: 0
+                                }
+                            }
+                                : c
+                        ))
+                    }))
+
+                } catch (error) {
+                    console.error("Lỗi xảy ra khi markAsSeen:", error);
+                }
             }
 
 
