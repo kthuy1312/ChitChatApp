@@ -3,6 +3,7 @@ import type { ChatState } from "@/types/store";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
+import { useSocketStore } from "./useSocketStore";
 
 export const useChatStore = create<ChatState>()(
     persist(
@@ -12,6 +13,8 @@ export const useChatStore = create<ChatState>()(
             activeConversationId: null,
             converloading: false,
             messageLoading: false,
+            loading: false,
+
 
             setActiveConversation: (id) => set({ activeConversationId: id }),
             reset: () => {
@@ -208,15 +211,53 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi xảy ra khi markAsSeen:", error);
                 }
-            }
+            },
+
+            addConver: (conver) => {
+                set((state) => {
+                    const exists = state.conversations.some(
+                        (c) => c._id.toString() === conver._id.toString()
+                    );
+
+                    return {
+                        conversations: exists
+                            ? state.conversations
+                            : [conver, ...state.conversations],
+                        activeConversationId: conver._id,
+                    };
+                });
+            },
 
 
+            createConversation: async (type, name, memberIds) => {
+                try {
+                    set({ loading: true });
+                    const conversation = await chatService.createConversation(
+                        type,
+                        name,
+                        memberIds
+                    );
+
+                    get().addConver(conversation);
+
+
+                    useSocketStore
+                        .getState()
+                        .socket?.emit("join-conversation", conversation._id);
+
+                    //FETCH MESSAGE NGAY (dành cho conver nào đã có hội thoại r)
+                    await get().fetchMessages(conversation._id);
+
+                } catch (error) {
+                    console.error("Lỗi xảy ra khi gọi createConversation trong store", error);
+                } finally {
+                    set({ loading: false });
+                }
+            },
         }),
         {
             name: "chat-storage",
-            partialize: (state) => ({
-                conversations: state.conversations,
-            }),
+            partialize: (state) => ({ conversations: state.conversations }),
         }
     )
-)
+);

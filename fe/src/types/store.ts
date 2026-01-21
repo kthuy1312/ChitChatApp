@@ -35,6 +35,8 @@ export interface ChatState {
     activeConversationId: string | null;//cuộc hội thoại nào đang được user chọn
     converloading: boolean;
     messageLoading: boolean;
+    loading: boolean,
+
 
     reset: () => void;
     setActiveConversation: (id: string | null) => void;
@@ -61,6 +63,14 @@ export interface ChatState {
 
     //seen
     markAsSeen: () => Promise<void>;
+
+    //thêm conversation mới
+    addConver: (conver: Conversation) => void;
+    createConversation: (
+        type: "group" | "direct",
+        name: string,
+        memberIds: string[]
+    ) => Promise<void>;
 }
 
 export interface SocketState {

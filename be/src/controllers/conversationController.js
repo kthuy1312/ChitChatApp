@@ -72,7 +72,16 @@ export const createConversation = async (req, res) => {
 
         ])
 
-        return res.status(201).json({ conversation })
+        const participants = (conversation.participants || []).map((p) => ({
+            _id: p.userID?._id,
+            displayName: p.userID?.displayName,
+            avatarUrl: p.userID?.avatarUrl ?? null,
+            joinAt: p.joinedAt
+        }))
+
+        const formatted = { ...conversation.toObject(), participants }
+
+        return res.status(201).json({ conversation: formatted })
 
 
     } catch (error) {

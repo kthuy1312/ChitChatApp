@@ -88,17 +88,29 @@ export const acceptFriendRequest = async (req, res) => {
             })
         }
 
-        //nếu tất cả ok thì chấp nhận và xóa lời mời đó
-        await Friend.create({
-            userA: request.from,
-            userB: request.to
-        })
-        await FriendRequest.findByIdAndDelete(requestId)
+        // tránh tạo trùng bạn bè
+        const [userA, userB] = [
+            request.from.toString(),
+            request.to.toString()
+        ].sort();
 
-        //lấy tt của ng gửi yc kết bạn để hiển thị cho fe
-        const friendInf = await User.findById(request.from).select("_id displayName avatarUrl").lean() //lean() query nhanh hơn
+        const existed = await Friend.findOne({ userA, userB });
 
-        //hiện dlieu cho fe với newFriend có dlieu là (_id displayName avatarUrl)
+        if (!existed) {
+            await Friend.create({ userA, userB });
+        }
+
+        await FriendRequest.deleteOne({ _id: requestId });
+
+        const friendInf = await User.findById(request.from)
+            .select("_id displayName avatarUrl")
+            .lean();
+
+        if (!friendInf) {
+            return res.status(404).json({
+                message: "Không tìm thấy thông tin người gửi lời mời"
+            });
+        }
         return res.status(200).json({
             message: "Chấp nhận lời mời kết bạn thành công",
             newFriend: {
@@ -106,11 +118,12 @@ export const acceptFriendRequest = async (req, res) => {
                 displayName: friendInf.displayName,
                 avatarUrl: friendInf.avatarUrl,
             }
+        });
 
-        })
     } catch (err) {
-        console.error('Lỗi khi chấp nhận lời mời kết bạn', err);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("ACCEPT FRIEND ERROR:", err.message);
+        console.error(err);
+        return res.status(500).json({ message: err.message });
     }
 }
 

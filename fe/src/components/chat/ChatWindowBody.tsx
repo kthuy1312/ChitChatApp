@@ -9,7 +9,7 @@ const ChatWindowBody = () => {
         activeConversationId,
         conversations,
         messages: allMessages,
-        fetchMessages
+        fetchMessages,
     } = useChatStore();
 
     const messages = allMessages[activeConversationId!]?.items ?? []; //lấy messages của cuộc hội thoại đang active

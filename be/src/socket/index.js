@@ -33,6 +33,11 @@ io.on('connection', async (socket) => {
     const conversationIds = await getUserConversationForSocketIO(user.id)
     conversationIds.forEach((id) => {
         socket.join(id) //mỗi user sẽ join đúng room hội thoại của họ
+    });
+
+    //logic mới để khi user tạo conversation mới ở fe thì server sẽ join vào room
+    socket.on("join-conversation", (conversationId) => {
+        socket.join(conversationId);
     })
 
     socket.on("disconnect", () => {
