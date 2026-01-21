@@ -35,6 +35,12 @@ const MessageItem = ({
 
     return (
         <>
+            {/* time */}
+            {isShowTime && (
+                <span className="flex justify-center text-xs text-muted-foreground px-1">
+                    {formatMessageTime(new Date(message.createdAt))}
+                </span>
+            )}
 
             <div
                 className={cn(
@@ -70,13 +76,6 @@ const MessageItem = ({
                     >
                         <p className="text-sm leading-relaxed break-words">{message.content}</p>
                     </Card>
-
-                    {/* time */}
-                    {isShowTime && (
-                        <span className="flex justify-center text-xs text-muted-foreground px-1">
-                            {formatMessageTime(new Date(message.createdAt))}
-                        </span>
-                    )}
 
                     {/* seen/ delivered */}
                     {message.isOwn && message._id === selectedConvo.lastMessage?._id && (
