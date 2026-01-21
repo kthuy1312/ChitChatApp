@@ -40,6 +40,9 @@ io.on('connection', async (socket) => {
         socket.join(conversationId);
     })
 
+    //tạo phòng theo user id (nhóm)
+    socket.join(user._id.toString())
+
     socket.on("disconnect", () => {
 
         //user offline

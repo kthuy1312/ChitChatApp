@@ -81,6 +81,13 @@ export const createConversation = async (req, res) => {
 
         const formatted = { ...conversation.toObject(), participants }
 
+        //khi user tạo nhóm thì real time cho các user khác vào duoc liền luôn
+        if (type === "group") {
+            memberIds.forEach((userId) => {
+                io.to(userId).emit('new-group', formatted)
+            })
+        }
+
         return res.status(201).json({ conversation: formatted })
 
 

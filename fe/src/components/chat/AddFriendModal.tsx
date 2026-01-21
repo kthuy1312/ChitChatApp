@@ -6,7 +6,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../ui/dialog";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Plus } from "lucide-react";
 import type { User } from "@/types/user";
 import { useFriendStore } from "@/stores/useFriendStore";
 import { useForm } from "react-hook-form";
@@ -97,7 +97,7 @@ const AddFriendModal = () => {
         <Dialog>
             <DialogTrigger asChild>
                 <div className="flex justify-center items-center size-5 rounded-full hover:bg-sidebar-accent cursor-pointer z-10">
-                    <UserPlus className="size-4" />
+                    <Plus className="size-4" />
                     <span className="sr-only">Kết bạn</span>
                 </div>
             </DialogTrigger>
