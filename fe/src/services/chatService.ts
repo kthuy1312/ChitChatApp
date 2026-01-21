@@ -6,7 +6,7 @@ interface FetchMessageProps {
     cursor?: string;
 }
 
-const pageLimit = 50
+const pageLimit = 10
 
 export const chatService = {
 
