@@ -1,16 +1,6 @@
-"use client"
+import { Bell, ChevronsUpDown, UserIcon } from "lucide-react";
 
-import {
-  Bell,
-  ChevronsUpDown,
-  UserIcon,
-} from "lucide-react"
-
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,74 +9,86 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import type { User } from "@/types/user"
-import Logout from "../auth/logout"
+} from "@/components/ui/sidebar";
+import type { User } from "@/types/user";
+import { useState } from "react";
+import Logout from "../auth/logout";
+import FriendRequestDialog from "../friendRequest/FriendRequestDialog";
 
-export function NavUser({
-  user,
-}: {
-  user: User
-}) {
-  const { isMobile } = useSidebar()
+
+export function NavUser({ user }: { user: User }) {
+  const { isMobile } = useSidebar();
+  const [friendRequestOpen, setfriendRequestOpen] = useState(false);
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatarUrl} alt={user.displayName} />
-                <AvatarFallback className="rounded-lg uppercase">{user.displayName.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.displayName}</span>
-                <span className="truncate text-xs">{user.username}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatarUrl} alt={user.username} />
-                  <AvatarFallback className="rounded-lg uppercase">{user.displayName.charAt(0)}</AvatarFallback>
+                  <AvatarImage
+                    src={user.avatarUrl}
+                    alt={user.displayName}
+                  />
+                  <AvatarFallback className="rounded-lg">
+                    {user.displayName.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.displayName}</span>
+                  <span className="truncate font-medium">{user.displayName}</span>
                   <span className="truncate text-xs">{user.username}</span>
                 </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserIcon className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
-                Tài khoản
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
-                Thông báo
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="
+                <ChevronsUpDown className="ml-auto size-4" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              side={isMobile ? "bottom" : "right"}
+              align="end"
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src={user.avatarUrl}
+                      alt={user.username}
+                    />
+                    <AvatarFallback className="rounded-lg">
+                      {user.displayName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.displayName}</span>
+                    <span className="truncate text-xs">{user.username}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem >
+                  <UserIcon className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
+                  Tài Khoản
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setfriendRequestOpen(true)}>
+                  <Bell className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
+                  Thông Báo
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="
                   cursor-pointer
                   flex items-center gap-2
                   text-destructive
@@ -97,13 +99,20 @@ export function NavUser({
                   focus:bg-destructive/20
                   rounded-md
                   "
-            >
-              <Logout />
-            </DropdownMenuItem>
+              >
+                <Logout />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
 
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  )
+      <FriendRequestDialog
+        open={friendRequestOpen}
+        setOpen={setfriendRequestOpen}
+      />
+
+
+    </>
+  );
 }
