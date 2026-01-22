@@ -20,7 +20,7 @@ export interface LastMessage {
   _id: string;
   content: string;
   createdAt: string;
-  sender: {
+  senderId: {
     _id: string;
     displayName: string;
     avatarUrl?: string | null;

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFriendStore } from "@/stores/useFriendStore";
 import SentRequests from "./SentRequests";
 import ReceivedRequests from "./ReceivedRequests";
+import { Users } from "lucide-react";
 
 interface FriendRequestDialogProps {
   open: boolean;
@@ -37,9 +38,21 @@ const FriendRequestDialog = ({ open, setOpen }: FriendRequestDialogProps) => {
       onOpenChange={setOpen}
     >
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Lời mời kết bạn</DialogTitle>
+        <DialogHeader className="pb-3 border-b border-primary/10">
+          <DialogTitle
+            className="
+                   flex items-center gap-2
+                   text-lg font-semibold
+                   bg-gradient-primary
+                   bg-clip-text
+                   text-transparent
+                 "
+          >
+            <Users className="h-5 w-5 text-primary" />
+            Lời mời kết bạn
+          </DialogTitle>
         </DialogHeader>
+
         <Tabs
           value={tab}
           onValueChange={setTab}

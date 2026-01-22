@@ -29,6 +29,7 @@ const FriendRequestItem = ({ requestInfo, actions, type }: RequestItemProps) => 
           <UserAvatar
             type="sidebar"
             name={info.displayName}
+            avatarUrl={info.avatarUrl}
           />
 
           <div className="min-w-0">

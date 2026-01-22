@@ -2,7 +2,7 @@ import type { Conversation } from '@/types/chat'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useChatStore } from '@/stores/useChatStore'
 import ChatCard from './ChatCard'
-import { cn } from '@/lib/utils'
+import { cn, formatOnlineTime } from '@/lib/utils'
 import UserAvatar from './UserAvatar'
 import StatusBadge from './StatusBadge'
 import UnreadCountBadge from './UnreadCountBadge'
@@ -21,7 +21,23 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
     if (!otherUser) return null
 
     const unreadCounts = conver.unreadCounts[user._id]
-    const lastMessage = conver.lastMessage?.content ?? ""
+    const timestamp = conver.lastMessage?.createdAt ? new Date(conver.lastMessage.createdAt) : undefined
+
+    //coi coi lastMessage có phải của mình không 
+    const isMyLastMessage =
+        conver.lastMessage?.senderId?._id === user._id;
+
+    const lastMessageText = conver.lastMessage
+        ? isMyLastMessage
+            ? `Bạn: ${conver.lastMessage.content ?? ""}`
+            : conver.lastMessage.content ?? ""
+        : "";
+
+    //ng đó đã seen chưa?
+    const isSeen =
+        isMyLastMessage &&
+        conver.seenBy?.some((u) => u._id === otherUser._id);
+
 
     const handleSelectConversation = async (id: string) => {
         setActiveConversation(id)
@@ -34,10 +50,11 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
         <ChatCard
             converId={conver._id}
             name={otherUser.displayName ?? ""}
-            timestamp={conver.lastMessage?.createdAt ? new Date(conver.lastMessage.createdAt) : undefined}
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}
             unreadCounts={unreadCounts}
+            isMyLastMessage={isMyLastMessage}
+            isSeen={isSeen}
             leftSection={
                 <>
                     <UserAvatar
@@ -54,14 +71,28 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
                     {unreadCounts > 0 && <UnreadCountBadge unreadCounts={unreadCounts} />}
 
                 </>}
+
             subtitle={
-                <p className={cn("text-sm truncate"
-                    , unreadCounts > 0 ? "font-medium text-foreground" : "text-muted-foreground"
-                )}
-                >
-                    {lastMessage}
-                </p>
+                <div className="flex items-center gap-1 min-w-0">
+                    <p
+                        className={cn(
+                            "flex-1 truncate text-sm leading-snug",
+                            unreadCounts > 0
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground"
+                        )}
+                    >
+                        {lastMessageText}
+                    </p>
+
+                    {timestamp && (
+                        <span className="shrink-0 text-[11px] text-muted-foreground">
+                            {formatOnlineTime(timestamp)}
+                        </span>
+                    )}
+                </div>
             }
+
         />
     )
 }

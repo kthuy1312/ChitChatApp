@@ -21,12 +21,18 @@ import { useState } from "react";
 import Logout from "../auth/logout";
 import FriendRequestDialog from "../friendRequest/FriendRequestDialog";
 import ProfileDialog from "../profile/ProfileDialog";
+import { useFriendStore } from "@/stores/useFriendStore";
+import { Badge } from "../ui/badge";
 
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
   const [friendRequestOpen, setfriendRequestOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+
+  //lấy count lời mời để hiện lên cái chuông
+  const { receivedList } = useFriendStore();
+  const notificationCount = receivedList?.length ?? 0;
 
   return (
     <>
@@ -36,26 +42,62 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="
+    relative
+    data-[state=open]:bg-sidebar-accent
+    data-[state=open]:text-sidebar-accent-foreground
+  "
               >
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={user.avatarUrl}
-                    alt={user.displayName}
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    {user.displayName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+                {/* Avatar + badge */}
+                <div className="relative">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+                    <AvatarFallback className="rounded-lg">
+                      {user.displayName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  {notificationCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="
+                            absolute
+                            -top-1.5
+                            -right-1.5
+                            h-4 min-w-4
+                            px-1
+                            flex items-center justify-center
+                            text-[10px]
+                            leading-none
+                          "
+                    >
+                      {notificationCount > 9 ? "9+" : notificationCount}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* User info */}
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.displayName}</span>
                   <span className="truncate text-xs">{user.username}</span>
                 </div>
+
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
-            </DropdownMenuTrigger>
+
+            </DropdownMenuTrigger>x
             <DropdownMenuContent
-              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              className="
+                       w-(--radix-dropdown-menu-trigger-width)
+                       min-w-56
+                       rounded-lg
+                       !bg-[hsl(var(--popover))]
+                       !text-[hsl(var(--popover-foreground))]
+                       border
+                       shadow-xl
+                       backdrop-blur-none
+                       opacity-100
+                     "
               side={isMobile ? "bottom" : "right"}
               align="end"
               sideOffset={4}
@@ -84,9 +126,32 @@ export function NavUser({ user }: { user: User }) {
                   Tài Khoản
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setfriendRequestOpen(true)}>
-                  <Bell className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
-                  Thông Báo
+                  <div className="relative flex items-center">
+                    <Bell className="h-4 w-4 text-muted-foreground dark:group-focus:!text-accent-foreground" />
+
+                    {notificationCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="
+                          absolute
+                          -top-1.5
+                          -right-1.5
+                          h-4 min-w-4
+                          px-1
+                          flex items-center justify-center
+                          text-[10px]
+                          leading-none
+                        "
+                      >
+                        {notificationCount > 9 ? "9+" : notificationCount}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <span>Thông Báo</span>
                 </DropdownMenuItem>
+
+
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -97,10 +162,10 @@ export function NavUser({ user }: { user: User }) {
                   bg-destructive/10
                   hover:bg-destructive/20
                   data-[highlighted]:bg-destructive/20
-                  data-[highlighted]:text-destructive
-                  focus:bg-destructive/20
-                  rounded-md
-                  "
+                    data-[highlighted]:text-destructive
+                    focus:bg-destructive/20
+                    rounded-md
+                    "
               >
                 <Logout />
               </DropdownMenuItem>
