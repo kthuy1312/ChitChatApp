@@ -23,22 +23,6 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
     const unreadCounts = conver.unreadCounts[user._id]
     const timestamp = conver.lastMessage?.createdAt ? new Date(conver.lastMessage.createdAt) : undefined
 
-    //coi coi lastMessage có phải của mình không 
-    const isMyLastMessage =
-        conver.lastMessage?.senderId?._id === user._id;
-
-    const lastMessageText = conver.lastMessage
-        ? isMyLastMessage
-            ? `Bạn: ${conver.lastMessage.content ?? ""}`
-            : conver.lastMessage.content ?? ""
-        : "";
-
-    //ng đó đã seen chưa?
-    const isSeen =
-        isMyLastMessage &&
-        conver.seenBy?.some((u) => u._id === otherUser._id);
-
-
     const handleSelectConversation = async (id: string) => {
         setActiveConversation(id)
         if (!messages[id]) {
@@ -53,8 +37,6 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}
             unreadCounts={unreadCounts}
-            isMyLastMessage={isMyLastMessage}
-            isSeen={isSeen}
             leftSection={
                 <>
                     <UserAvatar
@@ -82,12 +64,12 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
                                 : "text-muted-foreground"
                         )}
                     >
-                        {lastMessageText}
+                        {conver?.lastMessage?.content ?? ""}
                     </p>
 
                     {timestamp && (
                         <span className="shrink-0 text-[11px] text-muted-foreground">
-                            {formatOnlineTime(timestamp)}
+                            • {formatOnlineTime(timestamp)}
                         </span>
                     )}
                 </div>

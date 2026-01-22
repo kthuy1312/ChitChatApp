@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card"
-import { cn, formatOnlineTime } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import ChatCardOptions from "./ChatCardOptions";
 
 interface ChatCardProps {
