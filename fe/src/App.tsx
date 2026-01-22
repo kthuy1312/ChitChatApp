@@ -8,6 +8,7 @@ import { useThemeStore } from "./stores/useThemeStore"
 import { useEffect } from "react"
 import { useAuthStore } from "./stores/useAuthStore"
 import { useSocketStore } from "./stores/useSocketStore"
+import AuthRoute from "./components/auth/AuthRoute"
 
 function App() {
   const { isDark, setTheme } = useThemeStore();
@@ -32,10 +33,11 @@ function App() {
       <Toaster richColors />
       <BrowserRouter>
         <Routes>
-          {/* public routes */}
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-
+          <Route element={<AuthRoute />}>
+            {/* public routes */}
+            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+          </Route>
           {/* private routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<ChatAppPage />} />
