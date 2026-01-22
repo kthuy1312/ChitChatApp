@@ -20,14 +20,22 @@ const ProfileDialog = ({ open, setOpen }: ProfileDialogProps) => {
       onOpenChange={setOpen}
     >
       <DialogContent className="overflow-y-auto max-h-[95vh] p-0 bg-transparent border-0 shadow-2xl">
-        <div className="bg-gradient-glass">
+        <div className="
+             bg-white
+             dark:bg-[#221b20]
+             backdrop-blur-xl
+             rounded-2xl
+           ">
           <div className="max-w-4xl mx-auto p-4">
-            {/* heading */}
-            <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-bold text-foreground">
-                Profile & Settings
+            <DialogHeader className="mb-6 space-y-1">
+              <DialogTitle className="text-2xl font-semibold tracking-tight">
+                Profile - Settings
               </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Quản lý tài khoản và tuỳ chỉnh ứng dụng
+              </p>
             </DialogHeader>
+
 
             <ProfileCard user={user} />
 

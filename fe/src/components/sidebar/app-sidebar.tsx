@@ -41,23 +41,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               size="lg"
               asChild
-              className="bg-gradient-primary"
+              className="
+                      bg-gradient-primary
+                      rounded-xl
+                      shadow-glow
+                      hover:shadow-xl
+                      transition-all
+                    "
             >
               <a href="#">
-                <div className="flex w-full items-center px-2 justify-between">
-                  <h1 className="text-xl font-bold text-white">Moji</h1>
+                <div className="flex w-full items-center justify-between px-3 py-2">
+                  <h1 className="text-xl font-bold tracking-tight text-white">
+                    ChitChat
+                  </h1>
+
                   <div className="flex items-center gap-2">
-                    <Sun className="size-4 text-white/80" />
+                    <Sun className="size-4 text-white/70" />
+
                     <Switch
                       checked={isDark}
                       onCheckedChange={toggleTheme}
-                      className="data-[state=checked]:bg-background/80"
+                      className="
+                              scale-90
+                              border border-white/20
+                              bg-white/20
+                              data-[state=checked]:bg-white/90
+                            "
                     />
-                    <Moon className="size-4 text-white/80" />
+
+                    <Moon className="size-4 text-white/70" />
                   </div>
                 </div>
               </a>
             </SidebarMenuButton>
+
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

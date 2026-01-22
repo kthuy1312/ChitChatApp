@@ -31,9 +31,11 @@
     --muted: 340 20% 96%;
     --muted-foreground: 340 10% 50%;
 
-    /* Accent - Màu xanh Mint nhạt cân bằng lại tone hồng */
-    --accent: 160 40% 92%;
-    --accent-foreground: 160 60% 30%;
+    /* Accent  */
+    --accent: 220 15% 94%;
+    --accent-foreground: 220 10% 35%;
+
+
 
     /* Chat colors */
     --chat-bubble-sent: 340 82% 75%;
@@ -128,9 +130,8 @@
     --muted: 340 15% 18%;
     --muted-foreground: 340 10% 65%;
 
-
-    --accent: 180 60% 55%;
-    --accent-foreground: 340 15% 10%;
+    --accent: 220 8% 18%;
+    --accent-foreground: 220 8% 78%;
 
     /* Chat bubbles in dark mode */
     --chat-bubble-sent: 340 70% 60%;

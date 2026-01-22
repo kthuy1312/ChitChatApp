@@ -31,48 +31,60 @@ const PreferencesForm = () => {
         {/* Dark Mode */}
         <div className="flex items-center justify-between">
           <div>
-            <Label
-              htmlFor="theme-toggle"
-              className="text-base font-medium"
-            >
+            <Label htmlFor="theme-toggle" className="text-base font-medium">
               Chế độ tối
             </Label>
             <p className="text-sm text-muted-foreground">
               Chuyển đổi giữa giao diện sáng và tối
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Sun className="h-4 w-4 text-muted-foreground" />
+
+          {/* CỘT PHẢI CỐ ĐỊNH */}
+          <div className="flex w-28 items-center justify-end gap-2">
             <Switch
               id="theme-toggle"
               checked={isDark}
               onCheckedChange={toggleTheme}
-              className="data-[state=checked]:bg-primary-glow"
-            />
-            <Moon className="h-4 w-4 text-muted-foreground" />
+              className="
+               border border-border
+               bg-muted
+               shadow-inner
+               data-[state=checked]:bg-primary
+               data-[state=checked]:border-primary
+               data-[state=checked]:shadow-[0_0_0_2px_hsl(var(--primary)/0.35)]
+                        "             />
           </div>
         </div>
 
         {/* Online Status */}
         <div className="flex items-center justify-between">
           <div>
-            <Label
-              htmlFor="online-status"
-              className="text-base font-medium"
-            >
+            <Label htmlFor="online-status" className="text-base font-medium">
               Hiển thị trạng thái online
             </Label>
             <p className="text-sm text-muted-foreground">
               Cho phép người khác thấy khi bạn đang online
             </p>
           </div>
-          <Switch
-            id="online-status"
-            checked={onlineStatus}
-            onCheckedChange={setOnlineStatus}
-            className="data-[state=checked]:bg-primary-glow"
-          />
+
+          {/* CỘT PHẢI CÙNG WIDTH */}
+          <div className="flex w-28 items-center justify-end">
+            <Switch
+              id="online-status"
+              checked={onlineStatus}
+              onCheckedChange={setOnlineStatus}
+              className="
+               border border-border
+               bg-muted
+               shadow-inner
+               data-[state=checked]:bg-primary
+               data-[state=checked]:border-primary
+               data-[state=checked]:shadow-[0_0_0_2px_hsl(var(--primary)/0.35)]
+                        "
+            />
+          </div>
         </div>
+
       </CardContent>
     </Card>
   );

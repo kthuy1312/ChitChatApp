@@ -48,7 +48,7 @@ const PrivacySettings = () => (
       </div>
 
       <div className="pt-4 border-t border-border/30">
-        <h4 className="font-medium mb-3 text-destructive">Khu vực nguy hiểm</h4>
+        <h4 className="font-medium mb-3 text-destructive/90">Khu vực nguy hiểm</h4>
         <Button
           variant="destructive"
           className="w-full"
