@@ -144,6 +144,18 @@ export const getConversations = async (req, res) => {
     }
 }
 
+export const getConversationsByUserId = async (req, res) => {
+    const userId = req.user?._id
+
+    const conversations = await Conversation.find({
+        "participants.userID": userId
+    })
+
+    return res.status(200).json({
+        message: `Converstations của ${userId}:`,
+        conversations
+    })
+}
 
 export const getMessages = async (req, res) => {
     try {
@@ -256,4 +268,41 @@ export const markAsSeen = async (req, res) => {
         console.error("Lỗi khi markAsSeen", error)
         return res.status(500).json({ message: "Lỗi hệ thống" })
     }
+}
+
+export const pinMessage = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        const conversation = await Conversation.findById(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ message: "không tìm thấy conversation" })
+        }
+
+        if (conversation.participants.includes(userId)) {
+            return res.status(403).json({ message: "Bạn không có quyền thao tác" })
+        }
+
+        const updatedConversation = await Conversation.findByIdAndUpdate(
+            conversationId,
+            {
+                $set: {
+                    isPinned: !conversation.isPinned,
+                },
+            },
+            { new: true }
+        )
+
+        return res.status(200).json({
+            message: updatedConversation.isPinned ? "Đã ghim" : "Đã bỏ ghim",
+            conversation: updatedConversation,
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi pinMessage", error)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
+
 }

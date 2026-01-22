@@ -74,6 +74,10 @@ const conversationScheme = new mongoose.Schema({
         type: Map,
         of: Number,
         default: {}
+    },
+    isPinned: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
@@ -81,7 +85,8 @@ const conversationScheme = new mongoose.Schema({
 
 conversationScheme.index({
     "participants.userID": 1,//dlieu duoc sx theo ng tham gia
-    lastMessageAt: -1 //mỗi ng conversation có tin nhắn mới nhất sẽ nằm trên cùng
+    lastMessageAt: -1, //mỗi ng conversation có tin nhắn mới nhất sẽ nằm trên cùng
+    isPinned: -1,
 })
 
 const Conversation = mongoose.model("Conversation", conversationScheme)
