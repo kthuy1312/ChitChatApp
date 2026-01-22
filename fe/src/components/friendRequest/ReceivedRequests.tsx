@@ -8,11 +8,17 @@ const ReceivedRequests = () => {
 
   if (!receivedList || receivedList.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Bạn chưa có lời mời kết bạn nào.
-      </p>
+      <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+        <p className="text-sm font-medium">
+          Không có lời mời kết bạn
+        </p>
+        <p className="text-xs text-muted-foreground max-w-[260px]">
+          Khi ai đó gửi lời mời kết bạn, bạn sẽ thấy tại đây
+        </p>
+      </div>
     );
   }
+
 
   const handleAccept = async (requestId: string) => {
     try {
@@ -32,6 +38,7 @@ const ReceivedRequests = () => {
     }
   };
 
+  console.log(receivedList)
 
   return (
     <div className="space-y-3 mt-4">
@@ -40,25 +47,28 @@ const ReceivedRequests = () => {
           key={req._id}
           requestInfo={req}
           actions={
-            <div className="flex gap-2">
+            <>
               <Button
                 size="sm"
                 variant="primary"
                 onClick={() => handleAccept(req._id)}
                 disabled={loading}
+                className="w-full"
               >
-                Chấp nhận
+                {loading ? "Đang xử lý  ..." : "Chấp nhận"}
               </Button>
               <Button
                 size="sm"
                 variant="destructiveOutline"
                 onClick={() => handleDecline(req._id)}
                 disabled={loading}
+                className="w-full"
               >
-                Từ chối
+                {loading ? "Đang xử lý..." : "Từ chối"}
               </Button>
-            </div>
+            </>
           }
+
           type="received"
         />
       ))}
