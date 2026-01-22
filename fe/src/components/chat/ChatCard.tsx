@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card"
 import { cn, formatOnlineTime } from "@/lib/utils"
-import { MoreHorizontal } from "lucide-react";
+import ChatCardOptions from "./ChatCardOptions";
 
 interface ChatCardProps {
     converId: string;
@@ -9,11 +9,10 @@ interface ChatCardProps {
     onSelect: (id: string) => void;
     unreadCounts?: number;
 
-    isMyLastMessage: boolean;
-    isSeen: boolean;
-
     leftSection: React.ReactNode; //phan avatar
     subtitle: React.ReactNode; //phan hien thi preview tn cuoi 
+
+    isGroup?: boolean
 }
 
 const ChatCard = ({
@@ -22,10 +21,9 @@ const ChatCard = ({
     isActive,
     onSelect,
     unreadCounts,
-    isMyLastMessage,
-    isSeen,
     leftSection,
     subtitle,
+    isGroup = false,
 }: ChatCardProps) => {
 
     return (
@@ -37,30 +35,18 @@ const ChatCard = ({
             )}
             onClick={() => onSelect(converId)}
         >
-
             <div className="absolute right-3 top-3 bottom-3 flex flex-col justify-between items-end">
-                {/* MORE */}
-                <button
-                    className="
-                          text-muted-foreground
-                          opacity-0 group-hover:opacity-100
-                          hover:text-foreground
-                          transition
-                      "
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <MoreHorizontal className="h-4 w-4" />
-                </button>
-
-                {/* SEEN */}
-                {isMyLastMessage && (
-                    <span className="text-[11px] text-muted-foreground">
-                        {isSeen ? "Seen" : "Delivered"}
-                    </span>
-                )}
-
+                <ChatCardOptions
+                    converId={converId}
+                    isGroup={isGroup}
+                    onArchive={(id) => console.log("archive", id)}
+                    onPin={(id) => console.log("pin", id)}
+                    onRestrict={(id) => console.log("restrict", id)}
+                    onDelete={(id) => console.log("delete", id)}
+                    onBlock={(id) => console.log("block", id)}
+                    onLeaveGroup={(id) => console.log("leave group", id)}
+                />
             </div>
-
 
             <div className="flex items-center gap-3">
                 <div className="relative">{leftSection}</div>

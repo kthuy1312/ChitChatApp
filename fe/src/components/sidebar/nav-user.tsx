@@ -1,4 +1,4 @@
-import { Bell, ChevronsUpDown, UserIcon } from "lucide-react";
+import { Bell, ChevronsUpDown, UserIcon, Settings } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,12 +23,14 @@ import FriendRequestDialog from "../friendRequest/FriendRequestDialog";
 import ProfileDialog from "../profile/ProfileDialog";
 import { useFriendStore } from "@/stores/useFriendStore";
 import { Badge } from "../ui/badge";
+import ManageChatDialog from "../manageChat/ManageChatDialog";
 
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
   const [friendRequestOpen, setfriendRequestOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false)
 
   //lấy count lời mời để hiện lên cái chuông
   const { receivedList } = useFriendStore();
@@ -85,7 +87,7 @@ export function NavUser({ user }: { user: User }) {
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
 
-            </DropdownMenuTrigger>x
+            </DropdownMenuTrigger>
             <DropdownMenuContent
               className="
                        w-(--radix-dropdown-menu-trigger-width)
@@ -151,6 +153,14 @@ export function NavUser({ user }: { user: User }) {
                   <span>Thông Báo</span>
                 </DropdownMenuItem>
 
+                <DropdownMenuItem
+                  onClick={() => setManageOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  Quản lý chat
+                </DropdownMenuItem>
+
 
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -182,6 +192,11 @@ export function NavUser({ user }: { user: User }) {
       <ProfileDialog
         open={profileOpen}
         setOpen={setProfileOpen}
+      />
+
+      <ManageChatDialog
+        open={manageOpen}
+        setOpen={setManageOpen}
       />
     </>
   );

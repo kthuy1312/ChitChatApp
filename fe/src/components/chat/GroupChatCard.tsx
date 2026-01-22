@@ -4,6 +4,7 @@ import type { Conversation } from "@/types/chat";
 import ChatCard from "./ChatCard";
 import UnreadCountBadge from "./UnreadCountBadge";
 import GroupChatAvatar from "./GroupChatAvatar";
+import { cn, formatOnlineTime } from "@/lib/utils";
 
 const GroupChatCard = ({ conver }: { conver: Conversation }) => {
     const { user } = useAuthStore();
@@ -19,16 +20,13 @@ const GroupChatCard = ({ conver }: { conver: Conversation }) => {
             await fetchMessages()
         }
     };
+    const timestamp = conver.lastMessage?.createdAt ? new Date(conver.lastMessage.createdAt) : undefined
+
 
     return (
         <ChatCard
             converId={conver._id}
             name={name}
-            timestamp={
-                conver.lastMessage?.createdAt
-                    ? new Date(conver.lastMessage.createdAt)
-                    : undefined
-            }
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}
             unreadCounts={unreadCounts}
@@ -42,10 +40,20 @@ const GroupChatCard = ({ conver }: { conver: Conversation }) => {
                 </>
             }
             subtitle={
-                <p className="text-sm truncate text-muted-foreground">
-                    {conver.participants.length} thành viên
-                </p>
+                <div className="flex items-center gap-1 min-w-0">
+                    <p className="text-sm truncate text-muted-foreground">
+                        {conver.participants.length} thành viên
+                    </p>
+
+                    {timestamp && (
+                        <span className="shrink-0 text-[11px] text-muted-foreground">
+                            · {formatOnlineTime(timestamp)}
+                        </span>
+                    )}
+                </div>
             }
+            isGroup={true}
+
         />
     );
 };
