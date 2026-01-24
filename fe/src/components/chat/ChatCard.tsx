@@ -1,9 +1,11 @@
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import ChatCardOptions from "./ChatCardOptions";
+import { Pin } from "lucide-react";
 
 interface ChatCardProps {
     converId: string;
+    isPinned?: boolean;
     name: string;
     isActive: boolean;
     onSelect: (id: string) => void;
@@ -17,6 +19,7 @@ interface ChatCardProps {
 
 const ChatCard = ({
     converId,
+    isPinned,
     name,
     isActive,
     onSelect,
@@ -27,7 +30,8 @@ const ChatCard = ({
 }: ChatCardProps) => {
 
     return (
-        <Card key={converId}
+        <Card
+            key={converId}
             className={cn(
                 "group relative border-none p-3 cursor-pointer transition-smooth glass hover:bg-muted/30",
                 isActive &&
@@ -35,9 +39,32 @@ const ChatCard = ({
             )}
             onClick={() => onSelect(converId)}
         >
-            <div className="absolute right-3 top-3 bottom-3 flex flex-col justify-between items-end">
+
+            {isPinned && (
+                <div
+                    className="
+                            absolute
+                            -top-2
+                            -left-2
+                            z-10
+                            bg-background
+                            rounded-full
+                            p-1
+                            shadow-md
+                            rotate-[-20deg]
+                         "
+                >
+                    <Pin
+                        className="h-3.5 w-3.5 text-primary"
+                        strokeWidth={2.3}
+                    />
+                </div>
+            )}
+
+            <div className="absolute bottom-2 right-2">
                 <ChatCardOptions
                     converId={converId}
+                    isPinned={isPinned}
                     isGroup={isGroup}
                     onArchive={(id) => console.log("archive", id)}
                     onPin={(id) => console.log("pin", id)}

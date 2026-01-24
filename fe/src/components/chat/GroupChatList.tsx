@@ -35,7 +35,9 @@ const GroupChatList = () => {
     return (
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
             {groupChats.map((conver) => (
-                <GroupChatCard conver={conver} key={conver._id} />
+                <GroupChatCard
+                    conver={conver}
+                    key={conver._id} />
             ))}
         </div>
     );

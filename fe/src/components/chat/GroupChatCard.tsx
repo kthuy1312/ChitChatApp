@@ -26,6 +26,7 @@ const GroupChatCard = ({ conver }: { conver: Conversation }) => {
     return (
         <ChatCard
             converId={conver._id}
+            isPinned={conver.isPinned}
             name={name}
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}

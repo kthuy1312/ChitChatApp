@@ -38,6 +38,8 @@ export interface Conversation {
   unreadCounts: Record<string, number>; // key = userId, value = unread count
   createdAt: string;
   updatedAt: string;
+
+  isPinned?: boolean
 }
 
 export interface ConversationResponse {

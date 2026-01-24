@@ -129,6 +129,7 @@ export const getConversations = async (req, res) => {
 
             return {
                 ...conver.toObject(), //chuyển moogose doc thành js thuần bỏ những data kh cần thiết
+                isPinned: conver.isPinned ?? false,
                 unreadCounts: conver.unreadCounts || {},
                 participants
             }

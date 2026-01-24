@@ -17,7 +17,7 @@ import {
 
 interface ChatCardOptionsProps {
     converId: string
-
+    isPinned?: boolean
     onArchive?: (id: string) => void
     onPin?: (id: string) => void
     onRestrict?: (id: string) => void
@@ -30,6 +30,7 @@ interface ChatCardOptionsProps {
 
 const ChatCardOptions = ({
     converId,
+    isPinned,
     onArchive,
     onPin,
     onRestrict,
@@ -38,18 +39,19 @@ const ChatCardOptions = ({
     onLeaveGroup,
     isGroup = false,
 }: ChatCardOptionsProps) => {
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <button
                     className="
-            rounded-md p-1
-            text-muted-foreground
-            opacity-0 group-hover:opacity-100
-            hover:bg-muted
-            hover:text-foreground
-            transition
-          "
+                               rounded-md p-1
+                               text-muted-foreground
+                               opacity-0 group-hover:opacity-100
+                               hover:bg-muted
+                               hover:text-foreground
+                               transition
+                             "
                     onClick={(e) => e.stopPropagation()}
                 >
                     <MoreHorizontal className="h-4 w-4" />
@@ -61,13 +63,13 @@ const ChatCardOptions = ({
                 align="start"
                 sideOffset={8}
                 className="
-    min-w-56
-    rounded-lg
-    bg-[hsl(var(--popover))]
-    text-[hsl(var(--popover-foreground))]
-    border
-    shadow-xl
-  "
+                       min-w-56
+                       rounded-lg
+                       bg-[hsl(var(--popover))]
+                       text-[hsl(var(--popover-foreground))]
+                       border
+                       shadow-xl
+                         "
                 onClick={(e) => e.stopPropagation()}
             >
                 <DropdownMenuItem
@@ -75,7 +77,7 @@ const ChatCardOptions = ({
                     onClick={() => onPin?.(converId)}
                 >
                     <Pin className="h-4 w-4" />
-                    <span>Ghim</span>
+                    {isPinned ? "Bỏ ghim" : "Ghim"}
                 </DropdownMenuItem>
 
                 <DropdownMenuItem

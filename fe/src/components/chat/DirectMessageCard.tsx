@@ -33,6 +33,7 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
     return (
         <ChatCard
             converId={conver._id}
+            isPinned={conver.isPinned}
             name={otherUser.displayName ?? ""}
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}

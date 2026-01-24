@@ -5,7 +5,24 @@ import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
 import { useSocketStore } from "./useSocketStore";
 
+//hàm sorr conversation theo pinned lên đầu
+const sortConversations = (conversations: any[]) => {
+    return conversations.slice().sort((a, b) => {
+
+        //pinned lên đầu
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+
+        //cùng trạng thái pin thì sort theo lastMessage
+        const timeA = new Date(a.lastMessage?.createdAt || 0).getTime()
+        const timeB = new Date(b.lastMessage?.createdAt || 0).getTime()
+
+        return timeB - timeA
+    })
+}
+
 export const useChatStore = create<ChatState>()(
+
     persist(
         (set, get) => ({
             conversations: [],
@@ -26,18 +43,23 @@ export const useChatStore = create<ChatState>()(
                     messageLoading: false,
                 })
             },
+
             fetchConversations: async () => {
                 try {
                     set({ converloading: true })
                     const { conversations } = await chatService.fetchConversations()
 
-                    set({ conversations, converloading: false })
+                    set({
+                        conversations: sortConversations(conversations),
+                        converloading: false
+                    })
 
                 } catch (error) {
                     console.error("Lỗi xảy ra khi fetchConversations: ", error)
                     set({ converloading: false })
                 }
             },
+
             fetchMessages: async (conversationId) => {
                 const { activeConversationId, messages } = get();
                 const { user } = useAuthStore.getState();
