@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import ChatCardOptions from "./ChatCardOptions";
 import { Pin } from "lucide-react";
+import { useChatStore } from "@/stores/useChatStore";
 
 interface ChatCardProps {
     converId: string;
@@ -28,6 +29,8 @@ const ChatCard = ({
     subtitle,
     isGroup = false,
 }: ChatCardProps) => {
+
+    const { togglePin } = useChatStore()
 
     return (
         <Card
@@ -67,7 +70,7 @@ const ChatCard = ({
                     isPinned={isPinned}
                     isGroup={isGroup}
                     onArchive={(id) => console.log("archive", id)}
-                    onPin={(id) => console.log("pin", id)}
+                    onPin={(id) => togglePin(id)}
                     onRestrict={(id) => console.log("restrict", id)}
                     onDelete={(id) => console.log("delete", id)}
                     onBlock={(id) => console.log("block", id)}

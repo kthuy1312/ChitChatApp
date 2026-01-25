@@ -172,26 +172,39 @@ export const useChatStore = create<ChatState>()(
                                 [converId]: {
                                     items: [...prevItems, message],
                                     hasMore: state.messages[converId].hasMore,
-                                    nextCursor: state.messages[converId].nextCursor ?? undefined
-                                }
-                            }
-                        }
-                    })
+                                    nextCursor: state.messages[converId].nextCursor ?? undefined,
+                                },
+                            },
+                        };
+                    });
+
+                    set((state) => ({
+                        conversations: sortConversations(
+                            state.conversations.map((c) =>
+                                c._id === converId
+                                    ? { ...c, lastMessage: message }
+                                    : c
+                            )
+                        ),
+                    }));
+
                 } catch (error) {
                     console.error("Lỗi xảy ra khi addMessage:", error);
                 }
             },
 
+
             updateConversation: (conversation) => {
                 const conv = conversation as any;
 
                 set((state) => ({
-                    conversations: state.conversations.map((c) =>
-                        c._id === conv._id ? { ...c, ...conv } : c
+                    conversations: sortConversations(
+                        state.conversations.map((c) =>
+                            c._id === conv._id ? { ...c, ...conv } : c
+                        )
                     ),
                 }));
             },
-
 
             markAsSeen: async () => {
                 try {
@@ -250,7 +263,6 @@ export const useChatStore = create<ChatState>()(
                 });
             },
 
-
             createConversation: async (type, name, memberIds) => {
                 try {
                     set({ loading: true });
@@ -276,6 +288,34 @@ export const useChatStore = create<ChatState>()(
                     set({ loading: false });
                 }
             },
+
+            togglePin: async (conversationId: string) => {
+                try {
+
+                    //gọi api để pin
+                    const updatedConversation = await chatService.togglePinConversation(conversationId)
+
+                    //update state
+                    set((state) => ({
+                        conversations: sortConversations(
+                            state.conversations.map((c) =>
+                                c._id === conversationId
+                                    ? { ...c, isPinned: updatedConversation.isPinned }
+                                    : c
+                            )
+                        ),
+                    }))
+
+                    //socket
+                    const socket = useSocketStore.getState().socket;
+                    socket?.emit("pin-conversation", updatedConversation)
+
+                } catch (error) {
+                    console.error("Lỗi togglePin:", error)
+                }
+            },
+
+
         }),
         {
             name: "chat-storage",

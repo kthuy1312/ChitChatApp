@@ -47,4 +47,9 @@ export const chatService = {
         const res = await api.post("/conversations", { type, name, memberIds });
         return res.data.conversation;
     },
+
+    async togglePinConversation(conversationId: string) {
+        const res = await api.patch(`/conversations/${conversationId}/pin`)
+        return res.data.conversation
+    }
 };

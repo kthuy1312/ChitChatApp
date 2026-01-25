@@ -72,6 +72,10 @@ export interface ChatState {
         name: string,
         memberIds: string[]
     ) => Promise<void>;
+
+    //pin
+    togglePin: (conversationId: string) => void;
+
 }
 
 export interface SocketState {

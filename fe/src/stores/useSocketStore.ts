@@ -85,6 +85,11 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             socket.emit('join-conversation', conversation._id)
         })
 
+        //pin conversation
+        socket.on("pin-conversation", (updatedConversation) => {
+            useChatStore.getState().updateConversation(updatedConversation)
+        })
+
     },
 
     disconnectSocket: () => {

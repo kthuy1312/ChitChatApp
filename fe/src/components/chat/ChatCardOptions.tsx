@@ -14,6 +14,7 @@ import {
     Trash2,
     MoreHorizontal
 } from "lucide-react"
+import { toast } from "sonner"
 
 interface ChatCardOptionsProps {
     converId: string
@@ -39,6 +40,17 @@ const ChatCardOptions = ({
     onLeaveGroup,
     isGroup = false,
 }: ChatCardOptionsProps) => {
+
+    const handlePin = () => {
+        try {
+            onPin?.(converId)
+            toast.success(
+                isPinned ? "Đã bỏ ghim cuộc trò chuyện" : "Đã ghim cuộc trò chuyện"
+            )
+        } catch {
+            toast.error("Không thể thực hiện thao tác")
+        }
+    }
 
     return (
         <DropdownMenu>
@@ -74,7 +86,7 @@ const ChatCardOptions = ({
             >
                 <DropdownMenuItem
                     className="flex items-center gap-2 cursor-pointer"
-                    onClick={() => onPin?.(converId)}
+                    onClick={() => handlePin()}
                 >
                     <Pin className="h-4 w-4" />
                     {isPinned ? "Bỏ ghim" : "Ghim"}
