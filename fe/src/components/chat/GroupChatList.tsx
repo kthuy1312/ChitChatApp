@@ -1,15 +1,24 @@
 import { Users } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import GroupChatCard from "./GroupChatCard";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useMemo } from "react";
 
 const GroupChatList = () => {
     const { conversations } = useChatStore();
-
+    const { user } = useAuthStore()
     if (!conversations) return null;
 
-    const groupChats = conversations.filter(
-        (conver) => conver.type === "group"
-    );
+    const groupChats = useMemo(() => {
+        if (!user?._id) return [];
+
+        return conversations
+            .filter(c => c.type === "group")
+            .filter(c => {
+                const me = c.participants.find(p => p._id === user._id);
+                return !me?.isArchived;
+            })
+    }, [conversations, user?._id]);
 
     if (groupChats.length === 0) {
         return (

@@ -76,6 +76,9 @@ export interface ChatState {
     //pin
     togglePin: (conversationId: string) => void;
 
+    //archive
+    toggleArchive: (conversationId: string) => void;
+
 }
 
 export interface SocketState {

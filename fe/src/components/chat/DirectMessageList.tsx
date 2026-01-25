@@ -1,15 +1,23 @@
 import { MessageCircle } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useMemo } from "react";
 import DirectMessageCard from "./DirectMessageCard";
 
 const DirectMessageList = () => {
     const { conversations } = useChatStore();
+    const { user } = useAuthStore();
 
-    if (!conversations) return null;
+    const directConversations = useMemo(() => {
+        if (!user?._id) return []
 
-    const directConversations = conversations.filter(
-        (conver) => conver.type === "direct"
-    );
+        return conversations
+            .filter(c => c.type === "direct")
+            .filter(c => {
+                const me = c.participants.find(p => p._id === user._id)
+                return !me?.isArchived
+            })
+    }, [conversations, user?._id])
 
     if (directConversations.length === 0) {
         return (
@@ -18,16 +26,7 @@ const DirectMessageList = () => {
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground shadow-sm">
                         <MessageCircle className="h-7 w-7" />
                     </div>
-
-                    <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                            Chưa có cuộc trò chuyện nào
-                        </p>
-                        <p className="text-xs text-muted-foreground max-w-[220px]">
-                            Bắt đầu nhắn tin riêng với bạn bè để kết nối nhanh hơn
-                        </p>
-                    </div>
-
+                    <p className="text-sm font-medium">Chưa có cuộc trò chuyện nào</p>
                 </div>
             </div>
         );
@@ -35,11 +34,8 @@ const DirectMessageList = () => {
 
     return (
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
-            {directConversations.map((conver) => (
-                <DirectMessageCard
-                    conver={conver}
-                    key={conver._id}
-                />
+            {directConversations.map(conver => (
+                <DirectMessageCard key={conver._id} conver={conver} />
             ))}
         </div>
     );

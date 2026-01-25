@@ -121,21 +121,24 @@ export const getConversations = async (req, res) => {
         //format mỗi conversation lại
         const formatted = conversation.map((conver) => {
 
-            //tìm participant của user đang login
-            const me = conver.participants.find(
-                p => p.userID?._id.toString() === userId
-            )
-
             const participants = (conver.participants || []).map((p) => ({
                 _id: p.userID?._id,
                 displayName: p.userID?.displayName,
                 avatarUrl: p.userID?.avatarUrl ?? null,
-                joinAt: p.joinedAt,
-                isPinned: p.isPinned ?? false
+                joinedAt: p.joinedAt,
+                isPinned: p.isPinned ?? false,
+                isArchived: p.isArchived ?? false,
             }))
 
+            const {
+                participants: _,
+                isPinned,
+                isArchived,
+                ...safe
+            } = conver.toObject()
+
             return {
-                ...conver.toObject(), //chuyển moogose doc thành js thuần bỏ những data kh cần thiết
+                ...safe,
                 unreadCounts: conver.unreadCounts || {},
                 participants
             }
@@ -312,11 +315,6 @@ export const pinConversation = async (req, res) => {
         }
         )
 
-        io.to(userId).emit("pin-conversation", {
-            conversationId,
-            isPinned: newPinnedState
-        });
-
         return res.status(200).json({
             message: newPinnedState ? "Đã ghim" : "Đã bỏ ghim",
             conversationId,
@@ -365,11 +363,6 @@ export const archiveConversation = async (req, res) => {
             new: true
         }
         )
-
-        io.to(userId).emit("archive-conversation", {
-            conversationId,
-            isArchived: newArchiveState
-        });
 
         return res.status(200).json({
             message: newArchiveState ? "Đã lưu trữ" : "Đã bỏ lưu trữ",

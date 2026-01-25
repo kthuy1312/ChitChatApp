@@ -51,5 +51,10 @@ export const chatService = {
     async togglePinConversation(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/pin`)
         return res.data
+    },
+
+    async toggleArchiveConversation(conversationId: string) {
+        const res = await api.patch(`/conversations/${conversationId}/archive`)
+        return res.data
     }
 };

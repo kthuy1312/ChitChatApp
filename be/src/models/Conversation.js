@@ -89,9 +89,8 @@ const conversationScheme = new mongoose.Schema({
 })
 
 conversationScheme.index({
-    "participants.userID": 1,//dlieu duoc sx theo ng tham gia
-    "participants.isPinned": -1,
-    lastMessageAt: -1, //mỗi ng conversation có tin nhắn mới nhất sẽ nằm trên cùng
+    "participants.userID": 1,
+    lastMessageAt: -1,
 })
 
 const Conversation = mongoose.model("Conversation", conversationScheme)

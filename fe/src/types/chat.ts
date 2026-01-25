@@ -3,8 +3,8 @@ export interface Participant {
   displayName: string;
   avatarUrl?: string | null;
   joinedAt: string;
-  isPinned?: boolean
-
+  isPinned?: boolean;
+  isArchived?: boolean;
 }
 
 export interface SeenUser {

@@ -52,6 +52,15 @@ const ChatCardOptions = ({
         }
     }
 
+    const handleArchive = () => {
+        try {
+            onArchive?.(converId)
+            toast.success("Đã lưu trữ cuộc trò chuyện")
+        } catch {
+            toast.error("Không thể thực hiện thao tác")
+        }
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -94,7 +103,7 @@ const ChatCardOptions = ({
 
                 <DropdownMenuItem
                     className="flex items-center gap-2 cursor-pointer"
-                    onClick={() => onArchive?.(converId)}
+                    onClick={() => handleArchive()}
                 >
                     <Archive className="h-4 w-4" />
                     <span>Lưu trữ</span>

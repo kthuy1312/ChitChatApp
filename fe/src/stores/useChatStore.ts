@@ -57,6 +57,14 @@ export const useChatStore = create<ChatState>()(
                     set({ converloading: true })
                     const { conversations } = await chatService.fetchConversations()
 
+                    const currentUserId = useAuthStore.getState().user?._id
+
+                    if (!currentUserId) {
+                        set({ conversations: [], converloading: false })
+                        return
+                    }
+
+
                     set({
                         conversations: sortConversations(conversations),
                         converloading: false
@@ -222,6 +230,15 @@ export const useChatStore = create<ChatState>()(
                                 )
                             }
 
+                            //update archive (socket archive-conversation)
+                            if ("isArchived" in payload) {
+                                updated.participants = c.participants.map((p) =>
+                                    p._id === currentUserId
+                                        ? { ...p, isArchived: payload.isArchived }
+                                        : p
+                                )
+                            }
+
                             // update lastMessage
                             if (payload.lastMessage) {
                                 updated.lastMessage = payload.lastMessage
@@ -356,7 +373,34 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi togglePin:", error)
                 }
+            },
+
+            toggleArchive: async (conversationId: string) => {
+                try {
+                    const { conversationId: id, isArchived } = await chatService.toggleArchiveConversation(conversationId)
+                    const currentUserId = useAuthStore.getState().user?._id
+
+                    set((state) => ({
+                        conversations: sortConversations(
+                            state.conversations.map((c) =>
+                                c._id === id
+                                    ? {
+                                        ...c,
+                                        participants: c.participants.map((p) =>
+                                            p._id === currentUserId
+                                                ? { ...p, isArchived }
+                                                : p
+                                        ),
+                                    }
+                                    : c
+                            )
+                        ),
+                    }))
+                } catch (error) {
+                    console.error("Lỗi toggleArchive:", error)
+                }
             }
+
 
         }),
         {

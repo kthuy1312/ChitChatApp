@@ -85,15 +85,6 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             socket.emit('join-conversation', conversation._id)
         })
 
-        //pin conversation (lắng nghe từ conversationController)
-        socket.on("pin-conversation", ({ conversationId, isPinned }) => {
-            useChatStore.getState().updateConversation({
-                _id: conversationId,
-                isPinned
-            })
-        })
-
-
     },
 
     disconnectSocket: () => {
