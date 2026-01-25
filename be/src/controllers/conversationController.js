@@ -329,3 +329,57 @@ export const pinConversation = async (req, res) => {
     }
 
 }
+
+export const archiveConversation = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        const conversation = await Conversation.findById(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ message: "không tìm thấy conversation" })
+        }
+
+        const participant = conversation.participants.find(
+            p => p.userID.toString() === userId
+        )
+
+        if (!participant) {
+            return res.status(403).json({ message: "Bạn không có quyền thao tác" })
+        }
+
+        const newArchiveState = !participant.isArchived
+
+        await Conversation.updateOne(
+            {
+                _id: conversationId,
+                "participants.userID": userId
+            },
+            {
+                $set: {
+                    "participants.$.isArchived": newArchiveState,
+                    "participants.$.isPinned": false
+                }
+            }, {
+            new: true
+        }
+        )
+
+        io.to(userId).emit("archive-conversation", {
+            conversationId,
+            isArchived: newArchiveState
+        });
+
+        return res.status(200).json({
+            message: newArchiveState ? "Đã lưu trữ" : "Đã bỏ lưu trữ",
+            conversationId,
+            isArchived: newArchiveState
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi archiveConversation", error)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
+
+}
