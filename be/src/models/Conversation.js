@@ -9,7 +9,11 @@ const participantSchema = new mongoose.Schema({
     joinedAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    isPinned: {
+        type: Boolean,
+        default: false
+    },
 }, {
     _id: false //kh tạo id riêng cho từng phần tử vì đây chri là 1 bảng phụ nên kh cần
 })
@@ -75,18 +79,15 @@ const conversationScheme = new mongoose.Schema({
         of: Number,
         default: {}
     },
-    isPinned: {
-        type: Boolean,
-        default: false
-    }
+
 }, {
     timestamps: true
 })
 
 conversationScheme.index({
     "participants.userID": 1,//dlieu duoc sx theo ng tham gia
+    "participants.isPinned": -1,
     lastMessageAt: -1, //mỗi ng conversation có tin nhắn mới nhất sẽ nằm trên cùng
-    isPinned: -1,
 })
 
 const Conversation = mongoose.model("Conversation", conversationScheme)

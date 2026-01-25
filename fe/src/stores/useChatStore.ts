@@ -5,21 +5,29 @@ import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
 import { useSocketStore } from "./useSocketStore";
 
-//hàm sorr conversation theo pinned lên đầu
+
+//hàm sort conversation theo pinned lên đầu
 const sortConversations = (conversations: any[]) => {
+    const currentUserId = useAuthStore.getState().user?._id
+    if (!currentUserId) return conversations
+
+    const getPinned = (c: any) =>
+        c.participants.find((p: any) => p._id === currentUserId)?.isPinned ?? false
+
     return conversations.slice().sort((a, b) => {
+        const pinnedA = getPinned(a)
+        const pinnedB = getPinned(b)
 
-        //pinned lên đầu
-        if (a.isPinned && !b.isPinned) return -1
-        if (!a.isPinned && b.isPinned) return 1
+        if (pinnedA && !pinnedB) return -1
+        if (!pinnedA && pinnedB) return 1
 
-        //cùng trạng thái pin thì sort theo lastMessage
-        const timeA = new Date(a.lastMessage?.createdAt || 0).getTime()
-        const timeB = new Date(b.lastMessage?.createdAt || 0).getTime()
+        const timeA = new Date(a.lastMessageAt || 0).getTime()
+        const timeB = new Date(b.lastMessageAt || 0).getTime()
 
         return timeB - timeA
     })
 }
+
 
 export const useChatStore = create<ChatState>()(
 
@@ -194,17 +202,52 @@ export const useChatStore = create<ChatState>()(
             },
 
 
-            updateConversation: (conversation) => {
-                const conv = conversation as any;
+            updateConversation: (payload: any) => {
+                const currentUserId = useAuthStore.getState().user?._id
+                if (!currentUserId) return
 
                 set((state) => ({
                     conversations: sortConversations(
-                        state.conversations.map((c) =>
-                            c._id === conv._id ? { ...c, ...conv } : c
-                        )
+                        state.conversations.map((c) => {
+                            if (c._id !== payload._id) return c
+
+                            let updated = { ...c }
+
+                            //update pin (socket pin-conversation)
+                            if ("isPinned" in payload) {
+                                updated.participants = c.participants.map((p) =>
+                                    p._id === currentUserId
+                                        ? { ...p, isPinned: payload.isPinned }
+                                        : p
+                                )
+                            }
+
+                            // update lastMessage
+                            if (payload.lastMessage) {
+                                updated.lastMessage = payload.lastMessage
+                            }
+
+                            //update unreadCounts
+                            if (payload.unreadCounts) {
+                                updated.unreadCounts = payload.unreadCounts
+                            }
+
+                            //update seenBy
+                            if (payload.seenBy) {
+                                updated.seenBy = payload.seenBy
+                            }
+
+                            //update lastMessageAt
+                            if (payload.lastMessageAt) {
+                                updated.lastMessageAt = payload.lastMessageAt
+                            }
+
+                            return updated
+                        })
                     ),
-                }));
+                }))
             },
+
 
             markAsSeen: async () => {
                 try {
@@ -291,30 +334,29 @@ export const useChatStore = create<ChatState>()(
 
             togglePin: async (conversationId: string) => {
                 try {
+                    const { conversationId: id, isPinned } = await chatService.togglePinConversation(conversationId)
+                    const currentUserId = useAuthStore.getState().user?._id
 
-                    //gọi api để pin
-                    const updatedConversation = await chatService.togglePinConversation(conversationId)
-
-                    //update state
                     set((state) => ({
                         conversations: sortConversations(
                             state.conversations.map((c) =>
-                                c._id === conversationId
-                                    ? { ...c, isPinned: updatedConversation.isPinned }
+                                c._id === id
+                                    ? {
+                                        ...c,
+                                        participants: c.participants.map((p) =>
+                                            p._id === currentUserId
+                                                ? { ...p, isPinned }
+                                                : p
+                                        ),
+                                    }
                                     : c
                             )
                         ),
                     }))
-
-                    //socket
-                    const socket = useSocketStore.getState().socket;
-                    socket?.emit("pin-conversation", updatedConversation)
-
                 } catch (error) {
                     console.error("Lỗi togglePin:", error)
                 }
-            },
-
+            }
 
         }),
         {

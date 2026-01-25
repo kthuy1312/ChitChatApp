@@ -12,6 +12,10 @@ const GroupChatCard = ({ conver }: { conver: Conversation }) => {
 
     if (!user) return null;
 
+    //lấy pin
+    const me = conver.participants.find(p => p._id === user._id)
+    const isPinned = me?.isPinned ?? false
+
     const unreadCounts = conver.unreadCounts[user._id];
     const name = conver.group?.name ?? "";
     const handleSelectConversation = async (id: string) => {
@@ -26,7 +30,7 @@ const GroupChatCard = ({ conver }: { conver: Conversation }) => {
     return (
         <ChatCard
             converId={conver._id}
-            isPinned={conver.isPinned}
+            isPinned={isPinned}
             name={name}
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}

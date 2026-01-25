@@ -3,6 +3,8 @@ export interface Participant {
   displayName: string;
   avatarUrl?: string | null;
   joinedAt: string;
+  isPinned?: boolean
+
 }
 
 export interface SeenUser {
@@ -39,7 +41,6 @@ export interface Conversation {
   createdAt: string;
   updatedAt: string;
 
-  isPinned?: boolean
 }
 
 export interface ConversationResponse {

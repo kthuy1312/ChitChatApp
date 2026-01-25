@@ -120,16 +120,22 @@ export const getConversations = async (req, res) => {
 
         //format mỗi conversation lại
         const formatted = conversation.map((conver) => {
+
+            //tìm participant của user đang login
+            const me = conver.participants.find(
+                p => p.userID?._id.toString() === userId
+            )
+
             const participants = (conver.participants || []).map((p) => ({
                 _id: p.userID?._id,
                 displayName: p.userID?.displayName,
                 avatarUrl: p.userID?.avatarUrl ?? null,
-                joinAt: p.joinedAt
+                joinAt: p.joinedAt,
+                isPinned: p.isPinned ?? false
             }))
 
             return {
                 ...conver.toObject(), //chuyển moogose doc thành js thuần bỏ những data kh cần thiết
-                isPinned: conver.isPinned ?? false,
                 unreadCounts: conver.unreadCounts || {},
                 participants
             }
@@ -282,23 +288,39 @@ export const pinMessage = async (req, res) => {
             return res.status(404).json({ message: "không tìm thấy conversation" })
         }
 
-        if (conversation.participants.includes(userId)) {
+        const participant = conversation.participants.find(
+            p => p.userID.toString() === userId
+        )
+
+        if (!participant) {
             return res.status(403).json({ message: "Bạn không có quyền thao tác" })
         }
 
-        const updatedConversation = await Conversation.findByIdAndUpdate(
-            conversationId,
+        const newPinnedState = !participant.isPinned
+
+        await Conversation.updateOne(
+            {
+                _id: conversationId,
+                "participants.userID": userId
+            },
             {
                 $set: {
-                    isPinned: !conversation.isPinned,
-                },
-            },
-            { new: true }
+                    "participants.$.isPinned": newPinnedState,
+                }
+            }, {
+            new: true
+        }
         )
 
+        io.to(userId).emit("pin-conversation", {
+            conversationId,
+            isPinned: newPinnedState
+        });
+
         return res.status(200).json({
-            message: updatedConversation.isPinned ? "Đã ghim" : "Đã bỏ ghim",
-            conversation: updatedConversation,
+            message: newPinnedState ? "Đã ghim" : "Đã bỏ ghim",
+            conversationId,
+            isPinned: newPinnedState
         })
 
     } catch (error) {

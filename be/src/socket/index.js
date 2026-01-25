@@ -43,11 +43,6 @@ io.on('connection', async (socket) => {
     //tạo phòng theo user id (nhóm)
     socket.join(user._id.toString())
 
-    //pin conversation
-    socket.on("pin-conversation", (updatedConversation) => {
-        socket.to(user._id.toString()).emit("pin-conversation", updatedConversation)
-    })
-
     socket.on("disconnect", () => {
 
         //user offline
