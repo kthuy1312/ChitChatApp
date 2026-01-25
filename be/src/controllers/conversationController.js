@@ -277,7 +277,7 @@ export const markAsSeen = async (req, res) => {
     }
 }
 
-export const pinMessage = async (req, res) => {
+export const pinConversation = async (req, res) => {
     try {
         const { conversationId } = req.params;
         const userId = req.user._id.toString();
@@ -324,7 +324,7 @@ export const pinMessage = async (req, res) => {
         })
 
     } catch (error) {
-        console.error("Lỗi khi pinMessage", error)
+        console.error("Lỗi khi pinConversation", error)
         return res.status(500).json({ message: "Lỗi hệ thống" })
     }
 
