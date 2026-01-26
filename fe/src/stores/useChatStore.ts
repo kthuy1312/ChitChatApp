@@ -265,7 +265,6 @@ export const useChatStore = create<ChatState>()(
                 }))
             },
 
-
             markAsSeen: async () => {
                 try {
 

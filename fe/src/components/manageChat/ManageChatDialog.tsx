@@ -12,6 +12,7 @@ import {
     Ban,
     Settings,
 } from "lucide-react";
+import ArchivedChatList from "./ArchivedChatList";
 
 interface ManageChatDialogProps {
     open: boolean;
@@ -73,9 +74,8 @@ const ManageChatDialog = ({ open, setOpen }: ManageChatDialogProps) => {
 
                     <TabsContent value="archived" className="mt-4">
                         <div className="text-sm text-muted-foreground">
-                            Danh sách chat đã lưu trữ
+                            <ArchivedChatList />
                         </div>
-                        {/* TODO: ArchivedChatList */}
                     </TabsContent>
 
                     <TabsContent value="restricted" className="mt-4">

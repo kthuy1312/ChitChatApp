@@ -17,13 +17,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { User } from "@/types/user";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Logout from "../auth/logout";
 import FriendRequestDialog from "../friendRequest/FriendRequestDialog";
 import ProfileDialog from "../profile/ProfileDialog";
 import { useFriendStore } from "@/stores/useFriendStore";
 import { Badge } from "../ui/badge";
 import ManageChatDialog from "../manageChat/ManageChatDialog";
+import { useChatStore } from "@/stores/useChatStore";
 
 
 export function NavUser({ user }: { user: User }) {
@@ -34,7 +35,31 @@ export function NavUser({ user }: { user: User }) {
 
   //lấy count lời mời để hiện lên cái chuông
   const { receivedList } = useFriendStore();
-  const notificationCount = receivedList?.length ?? 0;
+  const { conversations } = useChatStore();
+
+  //tn chưa read
+  const archivedUnreadCount = useMemo(() => {
+    if (!user?._id) return 0;
+
+    return conversations.filter((c) => {
+      const me = c.participants.find((p) => p._id === user._id);
+      if (!me?.isArchived) return false;
+
+      const unread = c.unreadCounts?.[user._id] ?? 0;
+      return unread > 0;
+    }).length;
+  }, [conversations, user?._id]);
+
+  //số lời mời kết bạn
+  const friendRequestCount = receivedList?.length ?? 0;
+
+  //số đoạn chat lưu trữ có tin nhắn mới (mỗi conversation = 1)
+  const archivedChatUnreadCount = archivedUnreadCount;
+
+  // tổng 
+  const totalNotificationCount =
+    friendRequestCount + archivedChatUnreadCount;
+
 
   return (
     <>
@@ -59,7 +84,7 @@ export function NavUser({ user }: { user: User }) {
                     </AvatarFallback>
                   </Avatar>
 
-                  {notificationCount > 0 && (
+                  {totalNotificationCount > 0 && (
                     <Badge
                       variant="destructive"
                       className="
@@ -73,7 +98,7 @@ export function NavUser({ user }: { user: User }) {
                             leading-none
                           "
                     >
-                      {notificationCount > 9 ? "9+" : notificationCount}
+                      {totalNotificationCount > 9 ? "9+" : totalNotificationCount}
                     </Badge>
                   )}
                 </div>
@@ -131,7 +156,7 @@ export function NavUser({ user }: { user: User }) {
                   <div className="relative flex items-center">
                     <Bell className="h-4 w-4 text-muted-foreground dark:group-focus:!text-accent-foreground" />
 
-                    {notificationCount > 0 && (
+                    {friendRequestCount > 0 && (
                       <Badge
                         variant="destructive"
                         className="
@@ -145,7 +170,7 @@ export function NavUser({ user }: { user: User }) {
                           leading-none
                         "
                       >
-                        {notificationCount > 9 ? "9+" : notificationCount}
+                        {friendRequestCount > 9 ? "9+" : friendRequestCount}
                       </Badge>
                     )}
                   </div>
@@ -157,8 +182,29 @@ export function NavUser({ user }: { user: User }) {
                   onClick={() => setManageOpen(true)}
                   className="flex items-center gap-2"
                 >
-                  <Settings className="h-4 w-4 text-muted-foreground" />
-                  Quản lý chat
+                  <div className="relative flex items-center">
+                    <Settings className="h-4 w-4 text-muted-foreground dark:group-focus:!text-accent-foreground" />
+
+                    {archivedChatUnreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="
+                          absolute
+                          -top-1.5
+                          -right-1.5
+                          h-4 min-w-4
+                          px-1
+                          flex items-center justify-center
+                          text-[10px]
+                          leading-none
+                        "
+                      >
+                        {archivedChatUnreadCount > 9 ? "9+" : archivedChatUnreadCount}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <span>Quản Lý Chat</span>
                 </DropdownMenuItem>
 
 
