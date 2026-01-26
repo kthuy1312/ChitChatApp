@@ -310,9 +310,7 @@ export const pinConversation = async (req, res) => {
                 $set: {
                     "participants.$.isPinned": newPinnedState,
                 }
-            }, {
-            new: true
-        }
+            }
         )
 
         return res.status(200).json({
@@ -375,4 +373,57 @@ export const archiveConversation = async (req, res) => {
         return res.status(500).json({ message: "Lỗi hệ thống" })
     }
 
+}
+
+export const restrictConversation = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        const conversation = await Conversation.findById(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy conversation" })
+        }
+
+        //group thì kh được hạn chế
+        if (conversation.type === "group") {
+            return res.status(400).json({ message: "Bạn không thể hạn chế nhóm chat" })
+        }
+
+        const participant = conversation.participants.find(
+            p => p.userID.toString() === userId
+        )
+
+        if (!participant) {
+            return res.status(403).json({ message: "Bạn không có quyền thao tác" })
+        }
+
+        const newRestrictedState = !participant.isRestricted
+
+        const updatedConversation = await Conversation.findOneAndUpdate(
+            {
+                _id: conversationId,
+                "participants.userID": userId
+            },
+            {
+                $set: {
+                    "participants.$.isRestricted": newRestrictedState,
+                    "participants.$.isArchived": false,
+                    "participants.$.isPinned": false
+                }
+            },
+            { new: true }
+        )
+        return res.status(200).json({
+            message: newRestrictedState ? "Đã hạn chế" : "Đã bỏ hạn chế",
+            conversationId,
+            isRestricted: newRestrictedState,
+            conversation: updatedConversation
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi restrictConversation", error)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
 }
