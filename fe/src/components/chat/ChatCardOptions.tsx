@@ -41,9 +41,9 @@ const ChatCardOptions = ({
     isGroup = false,
 }: ChatCardOptionsProps) => {
 
-    const handlePin = () => {
+    const handlePin = async () => {
         try {
-            onPin?.(converId)
+            await onPin?.(converId)
             toast.success(
                 isPinned ? "Đã bỏ ghim cuộc trò chuyện" : "Đã ghim cuộc trò chuyện"
             )
@@ -52,11 +52,21 @@ const ChatCardOptions = ({
         }
     }
 
-    const handleArchive = () => {
+    const handleArchive = async () => {
         try {
-            onArchive?.(converId)
+            await onArchive?.(converId)
             toast.success("Đã lưu trữ cuộc trò chuyện")
         } catch {
+            toast.error("Không thể thực hiện thao tác")
+        }
+    }
+
+    const handleRestrict = async () => {
+        try {
+            await onRestrict?.(converId)
+            toast.success("Đã hạn chế người dùng")
+        } catch (err) {
+            console.error(err)
             toast.error("Không thể thực hiện thao tác")
         }
     }
@@ -109,14 +119,15 @@ const ChatCardOptions = ({
                     <span>Lưu trữ</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem
-                    className="flex items-center gap-2 cursor-pointer"
-                    onClick={() => onRestrict?.(converId)}
-                >
-                    <ShieldOff className="h-4 w-4" />
-                    <span>Hạn chế</span>
-                </DropdownMenuItem>
-
+                {!isGroup && (
+                    <DropdownMenuItem
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={() => handleRestrict()}
+                    >
+                        <ShieldOff className="h-4 w-4" />
+                        <span>Hạn chế</span>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
 
                 {isGroup && (

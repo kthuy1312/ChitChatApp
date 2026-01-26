@@ -74,10 +74,13 @@ export interface ChatState {
     ) => Promise<void>;
 
     //pin
-    togglePin: (conversationId: string) => void;
+    togglePin: (conversationId: string) => Promise<void>;
 
     //archive
-    toggleArchive: (conversationId: string) => void;
+    toggleArchive: (conversationId: string) => Promise<void>;
+
+    //retrict
+    toggleRestrict: (conversationId: string) => Promise<void>;
 
 }
 

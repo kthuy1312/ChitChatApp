@@ -379,59 +379,52 @@ export const archiveConversation = async (req, res) => {
 
 export const restrictConversation = async (req, res) => {
     try {
-        const { conversationId } = req.params;
-        const userId = req.user._id.toString();
+        const { conversationId } = req.params
+        const userId = req.user._id.toString()
 
-        const conversation = await Conversation.findById(conversationId);
-
+        const conversation = await Conversation.findById(conversationId)
         if (!conversation) {
             return res.status(404).json({ message: "Không tìm thấy conversation" })
         }
 
-        //group thì kh được hạn chế
         if (conversation.type === "group") {
-            return res.status(400).json({ message: "Bạn không thể hạn chế nhóm chat" })
+            return res.status(400).json({ message: "Không thể hạn chế nhóm chat" })
         }
 
-        //kh có quyền
-        const participant = conversation.participants.find(
+        const me = conversation.participants.find(
             p => p.userID.toString() === userId
         )
 
-        if (!participant) {
-            return res.status(403).json({ message: "Bạn không có quyền thao tác" })
+        if (!me) {
+            return res.status(403).json({ message: "Không có quyền" })
         }
 
-        //lấy ng bị hạn chế
-        const otherUser = conversation.participants.find(
-            p => p.userID.toString() !== userId
-        );
-
-        const newRestrictedState = !otherUser.isRestricted
+        const newState = !me.isRestricted
 
         const updatedConversation = await Conversation.findOneAndUpdate(
             {
                 _id: conversationId,
-                "participants.userID": otherUser.userID
+                "participants.userID": userId,
             },
             {
                 $set: {
-                    "participants.$.isRestricted": newRestrictedState,
+                    "participants.$.isRestricted": newState,
                     "participants.$.isArchived": false,
-                    "participants.$.isPinned": false
-                }
+                    "participants.$.isPinned": false,
+                },
             },
             { new: true }
         )
-        return res.status(200).json({
-            message: newRestrictedState ? "Đã hạn chế" : "Đã bỏ hạn chế",
-            conversationId,
-            isRestricted: newRestrictedState,
-            conversation: updatedConversation
-        })
+            .populate("participants.userID", "displayName avatarUrl username")
 
-    } catch (error) {
-        console.error("Lỗi khi restrictConversation", error)
+        return res.status(200).json({
+            message: newState ? "Đã hạn chế" : "Đã bỏ hạn chế",
+            conversationId,
+            isRestricted: newState,
+            conversation: updatedConversation,
+        })
+    } catch (err) {
+        console.error(err)
         return res.status(500).json({ message: "Lỗi hệ thống" })
     }
 }

@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useChatStore } from "@/stores/useChatStore"
 import { useAuthStore } from "@/stores/useAuthStore"
 import GroupChatAvatar from "@/components/chat/GroupChatAvatar"
@@ -13,7 +13,11 @@ const ArchivedChatList = () => {
         setActiveConversation,
         fetchMessages,
     } = useChatStore()
+
     const { user } = useAuthStore()
+
+    const [unarchivingId, setUnarchivingId] = useState<string | null>(null) //loading
+
 
     const archivedGroups = useMemo(() => {
         if (!user?._id) return []
@@ -42,19 +46,24 @@ const ArchivedChatList = () => {
 
 
     //handle 
-    const handleUnarchive = (
+    const handleUnarchive = async (
         e: React.MouseEvent,
         conversationId: string
     ) => {
         e.stopPropagation()
 
         try {
-            toggleArchive(conversationId)
+            setUnarchivingId(conversationId)
+            await toggleArchive(conversationId)
             toast.success("Đã bỏ lưu trữ")
-        } catch {
+        } catch (err) {
+            console.error(err)
             toast.error("Bỏ lưu trữ thất bại")
+        } finally {
+            setUnarchivingId(null)
         }
     }
+
 
 
     return (
@@ -116,17 +125,29 @@ const ArchivedChatList = () => {
 
                                     <button
                                         onClick={(e) => handleUnarchive(e, c._id)}
-                                        className="
+                                        disabled={unarchivingId === c._id}
+                                        className={`
                                                  text-xs font-medium
                                                  px-3 py-1.5
                                                  rounded-full
-                                                 bg-background border
-                                                 hover:bg-primary hover:text-primary-foreground
+                                                 border
                                                  transition
-                                             "
+                                                 ${unarchivingId === c._id
+                                                ? "opacity-60 cursor-not-allowed"
+                                                : "bg-background hover:bg-primary hover:text-primary-foreground"
+                                            }
+                                             `}
                                     >
-                                        Bỏ lưu trữ
+                                        {unarchivingId === c._id ? (
+                                            <span className="flex items-center gap-1">
+                                                <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                Đang bỏ lưu trữ...
+                                            </span>
+                                        ) : (
+                                            "Bỏ lưu trữ"
+                                        )}
                                     </button>
+
                                 </div>
                             )
                         })}
@@ -169,7 +190,7 @@ const ArchivedChatList = () => {
                                             ? "bg-primary/10 ring-1 ring-primary/40 shadow-sm animate-archived-pop"
                                             : "bg-card hover:bg-muted"
                                         }
-                    `}
+                                                            `}
                                 >
                                     <UserAvatar
                                         type="sidebar"
@@ -199,17 +220,38 @@ const ArchivedChatList = () => {
 
                                     <button
                                         onClick={(e) => handleUnarchive(e, c._id)}
-                                        className="
-                                                   text-xs font-medium
-                                                   px-3 py-1.5
-                                                   rounded-full
-                                                   bg-muted
-                                                   hover:bg-primary hover:text-primary-foreground
-                                                   transition
-                                               "
+                                        disabled={unarchivingId === c._id}
+                                        className={`
+                                                 text-xs font-medium
+                                                 px-3 py-1.5
+                                                 rounded-full
+                                                 border
+                                                 transition
+                                                 ${unarchivingId === c._id
+                                                ? "opacity-60 cursor-not-allowed"
+                                                : "bg-background hover:bg-primary hover:text-primary-foreground"
+                                            }
+                                             `}
                                     >
-                                        Bỏ lưu trữ
+                                        {unarchivingId === c._id ? (
+                                            <span className="flex items-center gap-1">
+                                                <span
+                                                    className="
+                                                            animate-spin
+                                                            h-3 w-3
+                                                            border-2
+                                                            border-current
+                                                            border-t-transparent
+                                                            rounded-full
+                                                        "
+                                                />
+                                                Đang bỏ lưu trữ...
+                                            </span>
+                                        ) : (
+                                            "Bỏ lưu trữ"
+                                        )}
                                     </button>
+
                                 </div>
                             )
                         })}

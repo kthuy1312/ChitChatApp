@@ -30,7 +30,7 @@ const ChatCard = ({
     isGroup = false,
 }: ChatCardProps) => {
 
-    const { togglePin, toggleArchive } = useChatStore()
+    const { togglePin, toggleArchive, toggleRestrict } = useChatStore()
 
     return (
         <Card
@@ -71,7 +71,7 @@ const ChatCard = ({
                     isGroup={isGroup}
                     onArchive={(id) => toggleArchive(id)}
                     onPin={(id) => togglePin(id)}
-                    onRestrict={(id) => console.log("restrict", id)}
+                    onRestrict={(id) => toggleRestrict(id)}
                     onDelete={(id) => console.log("delete", id)}
                     onBlock={(id) => console.log("block", id)}
                     onLeaveGroup={(id) => console.log("leave group", id)}

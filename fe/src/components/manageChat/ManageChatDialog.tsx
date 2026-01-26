@@ -13,6 +13,7 @@ import {
     Settings,
 } from "lucide-react";
 import ArchivedChatList from "./ArchivedChatList";
+import RestrictedChatList from "./RestrictedChatList";
 
 interface ManageChatDialogProps {
     open: boolean;
@@ -80,9 +81,8 @@ const ManageChatDialog = ({ open, setOpen }: ManageChatDialogProps) => {
 
                     <TabsContent value="restricted" className="mt-4">
                         <div className="text-sm text-muted-foreground">
-                            Danh sách chat bị hạn chế
+                            <RestrictedChatList />
                         </div>
-                        {/* TODO: RestrictedChatList */}
                     </TabsContent>
 
                     <TabsContent value="blocked" className="mt-4">

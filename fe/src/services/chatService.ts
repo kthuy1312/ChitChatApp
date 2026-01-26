@@ -56,5 +56,9 @@ export const chatService = {
     async toggleArchiveConversation(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/archive`)
         return res.data
+    },
+    async toggleRestrictConversation(conversationId: string) {
+        const res = await api.patch(`/conversations/${conversationId}/restrict`)
+        return res.data
     }
 };

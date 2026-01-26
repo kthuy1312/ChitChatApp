@@ -10,10 +10,37 @@ import { toast } from "sonner";
 
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     const { user } = useAuthStore();
-    const { sendDirectMessage, sendGroupMessage } = useChatStore();
+
+    const { sendDirectMessage, sendGroupMessage, toggleRestrict } = useChatStore();
+
+    const [unrestricting, setUnrestricting] = useState(false) //để loading khi bỏ hạn chế cho nút
+
     const [value, setValue] = useState("");
 
     if (!user) return;
+
+    //hội thoại bị hạn chế
+    const me = selectedConvo.participants.find(p => p._id === user?._id)
+    const isRestricted = me?.isRestricted
+
+    //other user
+    const participants = selectedConvo.participants;
+    const otherUser = participants.filter((p) => p._id !== user._id)[0];
+
+    const handleUnrestrict = async () => {
+        if (!selectedConvo?._id) return
+
+        try {
+            setUnrestricting(true)
+            await toggleRestrict(selectedConvo._id)
+            toast.success("Đã bỏ hạn chế thành công")
+        } catch (err) {
+            console.error(err)
+            toast.error("Bỏ hạn chế thất bại")
+        } finally {
+            setUnrestricting(false)
+        }
+    }
 
 
     const sendMessage = async () => {
@@ -26,8 +53,6 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
 
         try {
             if (selectedConvo.type === 'direct') {
-                const participants = selectedConvo.participants;
-                const otherUser = participants.filter((p) => p._id !== user._id)[0];
                 await sendDirectMessage(otherUser._id, currValue);
             } else {
                 await sendGroupMessage(selectedConvo._id, currValue);
@@ -44,57 +69,80 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             sendMessage();
         }
     }
-
     return (
-        <div className="flex items-center gap-2 p-3 min-h-[56px] bg-background">
-            <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-primary/10 transition-smooth"
-            >
-                <ImagePlus className="size-4" />
-            </Button>
-
-            <div className="flex-1 relative">
-                <Input
-                    onKeyPress={handleKeyPress}
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    placeholder="Soạn tin nhắn..."
+        <div className="p-3 min-h-[56px] bg-background">
+            {/* khi người dùng bị hạn chế thì hiện ra nút bỏ hạn chế */}
+            {isRestricted ? (
+                <div
                     className="
-                       pr-20 h-9
-                       bg-background
-                       text-foreground
-                       placeholder:text-muted-foreground
-                       border-border/50
-                       focus:border-primary/50
-                       transition-smooth
-                     "
-                ></Input>
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                           flex flex-col items-center gap-1
+                           px-4 py-3
+                           rounded-xl
+                           bg-muted
+                           border border-border
+                           text-center
+                       "
+                >
+                    <span className="text-sm font-medium text-foreground">
+                        Bạn đã hạn chế {otherUser.displayName}
+                    </span>
+
+                    <span className="text-xs text-muted-foreground">
+                        Họ sẽ không biết khi nào bạn online hoặc đọc tin nhắn của họ
+                    </span>
+
                     <Button
-                        asChild
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 hover:bg-primary/10 transition-smooth"
+                        onClick={handleUnrestrict}
+                        disabled={unrestricting}
+                        size="lg"
+                        variant="outline"
+                        className="
+                               mt-1
+                               h-8
+                               px-9
+                               rounded-full
+                               text-xs
+                           "
                     >
-                        <div>
-                            {/* emoji picker */}
-                            <EmojiPicker onChange={(emoji: string) => setValue(`${value}${emoji}`)} />
-                        </div>
+                        {unrestricting ? "Đang xử lý..." : "Bỏ hạn chế"}
                     </Button>
                 </div>
-            </div>
+            ) : (
 
-            <Button
-                className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105"
-                disabled={!value.trim()}
-                onClick={sendMessage}
-            >
-                <Send className="size-4 text-white" />
-            </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-primary/10 transition-smooth"
+                    >
+                        <ImagePlus className="size-4" />
+                    </Button>
+
+                    <div className="flex-1 relative">
+                        <Input
+                            onKeyPress={handleKeyPress}
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            placeholder="Soạn tin nhắn..."
+                            className="pr-20 h-9"
+                        />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                            <EmojiPicker onChange={(emoji: string) => setValue(`${value}${emoji}`)} />
+                        </div>
+                    </div>
+
+                    <Button
+                        disabled={!value.trim()}
+                        onClick={sendMessage}
+                        className="bg-gradient-chat"
+                    >
+                        <Send className="size-4 text-white" />
+                    </Button>
+                </div>
+            )}
         </div>
-    );
+    )
+
 };
 
 export default MessageInput;

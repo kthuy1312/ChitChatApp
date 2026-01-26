@@ -221,7 +221,7 @@ export const useChatStore = create<ChatState>()(
 
                             let updated = { ...c }
 
-                            //update pin (socket pin-conversation)
+                            //update pin
                             if ("isPinned" in payload) {
                                 updated.participants = c.participants.map((p) =>
                                     p._id === currentUserId
@@ -230,11 +230,20 @@ export const useChatStore = create<ChatState>()(
                                 )
                             }
 
-                            //update archive (socket archive-conversation)
+                            //update archive
                             if ("isArchived" in payload) {
                                 updated.participants = c.participants.map((p) =>
                                     p._id === currentUserId
                                         ? { ...p, isArchived: payload.isArchived }
+                                        : p
+                                )
+                            }
+
+                            //update restrict
+                            if ("isRestricted" in payload) {
+                                updated.participants = c.participants.map((p) =>
+                                    p._id === currentUserId
+                                        ? { ...p, isRestricted: payload.isRestricted }
                                         : p
                                 )
                             }
@@ -398,6 +407,38 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi toggleArchive:", error)
                 }
+            },
+
+            toggleRestrict: async (conversationId: string) => {
+                const { conversation } =
+                    await chatService.toggleRestrictConversation(conversationId)
+
+                set((state) => ({
+                    conversations: sortConversations(
+                        state.conversations.map((c) => {
+                            if (c._id !== conversation._id) return c
+
+                            return {
+                                ...c,
+                                participants: c.participants.map((p) => {
+                                    const updated = conversation.participants.find(
+                                        (up: any) =>
+                                            up.userID?._id === p._id
+                                    )
+
+                                    return updated
+                                        ? {
+                                            ...p,
+                                            isRestricted: updated.isRestricted,
+                                            isArchived: updated.isArchived,
+                                            isPinned: updated.isPinned,
+                                        }
+                                        : p
+                                }),
+                            }
+                        })
+                    ),
+                }))
             }
 
 
