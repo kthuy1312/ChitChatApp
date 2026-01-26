@@ -5,6 +5,7 @@ export interface Participant {
   joinedAt: string;
   isPinned?: boolean;
   isArchived?: boolean;
+  isRestricted?: boolean
 }
 
 export interface SeenUser {

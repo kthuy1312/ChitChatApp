@@ -128,12 +128,14 @@ export const getConversations = async (req, res) => {
                 joinedAt: p.joinedAt,
                 isPinned: p.isPinned ?? false,
                 isArchived: p.isArchived ?? false,
+                isRestricted: p.isRestricted ?? false,
             }))
 
             const {
                 participants: _,
                 isPinned,
                 isArchived,
+                isRestricted,
                 ...safe
             } = conver.toObject()
 
@@ -391,6 +393,7 @@ export const restrictConversation = async (req, res) => {
             return res.status(400).json({ message: "Bạn không thể hạn chế nhóm chat" })
         }
 
+        //kh có quyền
         const participant = conversation.participants.find(
             p => p.userID.toString() === userId
         )
@@ -399,12 +402,17 @@ export const restrictConversation = async (req, res) => {
             return res.status(403).json({ message: "Bạn không có quyền thao tác" })
         }
 
-        const newRestrictedState = !participant.isRestricted
+        //lấy ng bị hạn chế
+        const otherUser = conversation.participants.find(
+            p => p.userID.toString() !== userId
+        );
+
+        const newRestrictedState = !otherUser.isRestricted
 
         const updatedConversation = await Conversation.findOneAndUpdate(
             {
                 _id: conversationId,
-                "participants.userID": userId
+                "participants.userID": otherUser.userID
             },
             {
                 $set: {

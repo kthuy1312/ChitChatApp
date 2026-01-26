@@ -17,7 +17,12 @@ const DirectMessageList = () => {
                 const me = c.participants.find(p => p._id === user._id)
                 return !me?.isArchived
             })
+            .filter(c => {
+                const other = c.participants.find(p => p._id !== user._id)
+                return !other?.isRestricted
+            })
     }, [conversations, user?._id])
+
 
     if (directConversations.length === 0) {
         return (
