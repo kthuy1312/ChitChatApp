@@ -3,6 +3,7 @@ import http from 'http'
 import express from 'express'
 import { socketAuthMiddleWare } from '../middlewares/socketMiddleware.js';
 import { getUserConversationForSocketIO } from '../controllers/conversationController.js';
+import Conversation from '../models/Conversation.js';
 
 
 const app = express();
@@ -16,18 +17,57 @@ const io = new Server(server, {
     }
 })
 
+
 io.use(socketAuthMiddleWare)
 
 const onlineUsers = new Map(); //{userId:socketId}
+
+//những online user kh bị hạn chế để truyền
+const getVisibleOnlineUsers = async (userId) => {
+    const onlineUserIds = Array.from(onlineUsers.keys())
+
+    //tìm tất cả conver của user với type direct 
+    const conversations = await Conversation.find({
+        type: "direct",
+        "participants.userID": userId
+    })
+
+    const restrictedUserIds = []
+
+    conversations.forEach(conver => {
+
+        //chiều mình hạn chế ngt
+        const me = conver.participants.find(p => p.userID.toString() === userId)
+
+        if (me?.isRestricted) {
+            const other = conver.participants.find(p => p.userID.toString() !== userId)
+            if (other) {
+                restrictedUserIds.push(other.userID.toString())
+            }
+        }
+
+        //check chiều ngược lại (neu ngt hạn chế mình)
+        const other = conver.participants.find(p => p.userID.toString() !== userId)
+        if (other?.isRestricted) {
+            restrictedUserIds.push(other.userID.toString())
+        }
+    })
+
+    return onlineUserIds.filter(id => !restrictedUserIds.includes(id))
+}
 
 io.on('connection', async (socket) => {
     const user = socket.user;
 
     console.log(`${user.displayName} online với ${socket.id}`);
 
-    onlineUsers.set(user._id, socket.id); //them user online vo
+    onlineUsers.set(user._id.toString(), socket.id)
 
-    io.emit("online-users", Array.from(onlineUsers.keys())); // convert sang array
+    //lấy online user (kh lấy ng đã hạn chế)
+    for (const [userId, socketId] of onlineUsers.entries()) {
+        const visibleUsers = await getVisibleOnlineUsers(userId)
+        io.to(socketId).emit("online-users", visibleUsers)
+    }
 
     //lấy cuộc hội thoại của user 
     const conversationIds = await getUserConversationForSocketIO(user.id)
@@ -46,7 +86,7 @@ io.on('connection', async (socket) => {
     socket.on("disconnect", () => {
 
         //user offline
-        onlineUsers.delete(user._id);
+        onlineUsers.delete(user._id.toString());
         io.emit("online-users", Array.from(onlineUsers.keys())); // convert sang array
 
         console.log(`socket disconnected: ${socket.id}`);
@@ -54,4 +94,4 @@ io.on('connection', async (socket) => {
     })
 });
 
-export { io, app, server };
+export { io, app, server, onlineUsers, getVisibleOnlineUsers };

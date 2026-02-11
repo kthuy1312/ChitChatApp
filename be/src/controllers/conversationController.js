@@ -1,7 +1,7 @@
 
 import Conversation from "../models/Conversation.js"
 import Message from "../models/Message.js"
-import { io } from "../socket/index.js";
+import { io, onlineUsers, getVisibleOnlineUsers } from "../socket/index.js";
 
 
 export const createConversation = async (req, res) => {
@@ -416,6 +416,12 @@ export const restrictConversation = async (req, res) => {
             { new: true }
         )
             .populate("participants.userID", "displayName avatarUrl username")
+
+        // realtime update online list
+        for (const [userId, socketId] of onlineUsers.entries()) {
+            const visibleUsers = await getVisibleOnlineUsers(userId)
+            io.to(socketId).emit("online-users", visibleUsers)
+        }
 
         return res.status(200).json({
             message: newState ? "Đã hạn chế" : "Đã bỏ hạn chế",
