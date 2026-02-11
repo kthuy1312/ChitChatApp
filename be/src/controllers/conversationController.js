@@ -225,6 +225,17 @@ export const getUserConversationForSocketIO = async (userId) => {
     }
 }
 
+//hai ng có đang hạn chế nhau kh (dùng cho read-message)
+export const isRestrictedBetween = async (conversationId) => {
+    const conversation = await Conversation.findById(conversationId)
+        .select("participants")
+
+    if (!conversation) return false
+
+    //nếu có ít nhất 1 participant đang restrict
+    return conversation.participants.some(p => p.isRestricted === true)
+}
+
 
 export const markAsSeen = async (req, res) => {
     try {
@@ -259,16 +270,21 @@ export const markAsSeen = async (req, res) => {
         }
         )
 
-        io.to(conversationId).emit("read-message", {
-            conversation: updated,
-            lastMessage: {
-                _id: updated?.lastMessage._id,
-                content: updated?.lastMessage.content,
-                senderId: {
-                    _id: updated?.lastMessage.senderId
+        //coi có hạn chế kh (nếu có thì kh emit read-message)
+        const restricted = await isRestrictedBetween(conversationId)
+
+        if (!restricted) {
+            io.to(conversationId).emit("read-message", {
+                conversation: updated,
+                lastMessage: {
+                    _id: updated?.lastMessage._id,
+                    content: updated?.lastMessage.content,
+                    senderId: {
+                        _id: updated?.lastMessage.senderId
+                    }
                 }
-            }
-        })
+            })
+        }
 
         return res.status(200).json({
             message: "mark as seen thành công",
@@ -421,6 +437,22 @@ export const restrictConversation = async (req, res) => {
         for (const [userId, socketId] of onlineUsers.entries()) {
             const visibleUsers = await getVisibleOnlineUsers(userId)
             io.to(socketId).emit("online-users", visibleUsers)
+        }
+
+        //bỏ hạn chế thì cập nhật lại read-message
+        if (!newState) {
+            const freshConversation = await Conversation.findById(conversationId)
+
+            io.to(conversationId).emit("read-message", {
+                conversation: freshConversation,
+                lastMessage: {
+                    _id: freshConversation?.lastMessage?._id,
+                    content: freshConversation?.lastMessage?.content,
+                    senderId: {
+                        _id: freshConversation?.lastMessage?.senderId
+                    }
+                }
+            })
         }
 
         return res.status(200).json({
