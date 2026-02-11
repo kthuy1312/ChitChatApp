@@ -71,6 +71,16 @@ const ChatCardOptions = ({
         }
     }
 
+    const handleLeaveGroup = async () => {
+        try {
+            await onLeaveGroup?.(converId)
+            toast.success("Rời nhóm thành công")
+        } catch (err) {
+            console.error(err)
+            toast.error("Không thể thực hiện thao tác")
+        }
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -133,7 +143,7 @@ const ChatCardOptions = ({
                 {isGroup && (
                     <DropdownMenuItem
                         className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                        onClick={() => onLeaveGroup?.(converId)}
+                        onClick={() => handleLeaveGroup()}
                     >
                         <LogOut className="h-4 w-4" />
                         <span>Rời nhóm</span>

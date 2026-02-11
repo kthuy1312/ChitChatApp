@@ -85,6 +85,23 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             socket.emit('join-conversation', conversation._id)
         })
 
+        // lắng nghe khi có member rời nhóm
+        socket.on("member-left", ({ conversationId, userId }) => {
+
+            //nếu chính mình bị remove khỏi group (bị kick)
+            if (userId === useAuthStore.getState().user?._id) {
+                useChatStore.getState().leaveGroup(conversationId);
+                return;
+            }
+
+            // nếu người khác rời group thì update participants
+            useChatStore.getState().updateConversation({
+                _id: conversationId,
+                removeMemberId: userId
+            });
+        });
+
+
     },
 
     disconnectSocket: () => {

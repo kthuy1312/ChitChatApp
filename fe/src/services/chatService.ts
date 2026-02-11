@@ -60,5 +60,9 @@ export const chatService = {
     async toggleRestrictConversation(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/restrict`)
         return res.data
+    },
+    async leaveGroup(conversationId: string) {
+        const res = await api.patch(`/conversations/${conversationId}/leaveGroup`)
+        return res.data
     }
 };

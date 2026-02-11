@@ -268,6 +268,14 @@ export const useChatStore = create<ChatState>()(
                                 updated.lastMessageAt = payload.lastMessageAt
                             }
 
+                            // remove member
+                            if (payload.removeMemberId) {
+                                updated.participants = c.participants.filter(
+                                    (p) => p._id !== payload.removeMemberId
+                                );
+                            }
+
+
                             return updated
                         })
                     ),
@@ -439,8 +447,38 @@ export const useChatStore = create<ChatState>()(
                         })
                     ),
                 }))
-            }
+            },
 
+            leaveGroup: async (conversationId: string) => {
+                try {
+                    await chatService.leaveGroup(conversationId)
+
+                    const { activeConversationId } = get()
+
+                    // rời socket room
+                    useSocketStore
+                        .getState()
+                        .socket?.emit("leave-conversation", conversationId)
+
+                    set((state) => ({
+                        conversations: state.conversations.filter(
+                            (c) => c._id !== conversationId
+                        ),
+                        messages: Object.fromEntries(
+                            Object.entries(state.messages).filter(
+                                ([key]) => key !== conversationId
+                            )
+                        ),
+                        activeConversationId:
+                            activeConversationId === conversationId
+                                ? null
+                                : activeConversationId
+                    }))
+
+                } catch (error) {
+                    console.error("Lỗi leaveGroup:", error)
+                }
+            }
 
         }),
         {

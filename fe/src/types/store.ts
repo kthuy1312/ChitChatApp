@@ -82,6 +82,9 @@ export interface ChatState {
     //retrict
     toggleRestrict: (conversationId: string) => Promise<void>;
 
+    //leave group
+    leaveGroup: (conversationId: string) => Promise<void>;
+
 }
 
 export interface SocketState {

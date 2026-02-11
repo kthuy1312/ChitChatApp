@@ -83,6 +83,11 @@ io.on('connection', async (socket) => {
     //tạo phòng theo user id (nhóm)
     socket.join(user._id.toString())
 
+    //rời nhóm 
+    socket.on("leave-conversation", (conversationId) => {
+        socket.leave(conversationId)
+    })
+
     socket.on("disconnect", () => {
 
         //user offline
