@@ -466,3 +466,59 @@ export const restrictConversation = async (req, res) => {
         return res.status(500).json({ message: "Lỗi hệ thống" })
     }
 }
+
+export const leaveGroup = async (req, res) => {
+    try {
+        const { conversationId } = req.params
+        const userId = req.user._id
+
+        const conversation = await Conversation.findById(conversationId)
+
+        if (!conversation)
+            return res.status(404).json({ message: "Conversation not found" })
+
+        if (conversation.type !== "group")
+            return res.status(400).json({ message: "Not a group conversation" })
+
+        //coi thuộc group đó không
+        const isMember = conversation.participants.some(
+            p => p.userID.toString() === userId.toString()
+        )
+
+        if (!isMember) {
+            return res.status(403).json({ message: "You are not in this group" })
+        }
+
+        //remove khỏi participants
+        conversation.participants = conversation.participants.filter(
+            p => p.userID.toString() !== userId.toString()
+        )
+
+        //remove khỏi seenBy
+        conversation.seenBy = conversation.seenBy.filter(
+            id => id.toString() !== userId.toString()
+        )
+
+        //remove khỏi unreadCounts
+        conversation.unreadCounts.delete(userId.toString())
+
+        //nếu group không còn ai thì có thể xoá luôn
+        if (conversation.participants.length === 0) {
+            await Conversation.findByIdAndDelete(conversationId)
+            return res.json({ message: "Group deleted (no members left)" })
+        }
+
+        await conversation.save()
+
+        //emit socket cho những member còn lại
+        io.to(conversationId).emit("member-left", {
+            conversationId,
+            userId
+        })
+
+        res.json({ message: "Left group successfully" })
+
+    } catch (err) {
+        res.status(500).json({ message: "Server error" })
+    }
+}
