@@ -15,6 +15,17 @@ import {
     MoreHorizontal
 } from "lucide-react"
 import { toast } from "sonner"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useState } from "react"
 
 interface ChatCardOptionsProps {
     converId: string
@@ -40,6 +51,8 @@ const ChatCardOptions = ({
     onLeaveGroup,
     isGroup = false,
 }: ChatCardOptionsProps) => {
+
+    const [openLeaveDialog, setOpenLeaveDialog] = useState(false)
 
     const handlePin = async () => {
         try {
@@ -75,6 +88,7 @@ const ChatCardOptions = ({
         try {
             await onLeaveGroup?.(converId)
             toast.success("Rời nhóm thành công")
+            setOpenLeaveDialog(false)
         } catch (err) {
             console.error(err)
             toast.error("Không thể thực hiện thao tác")
@@ -143,7 +157,7 @@ const ChatCardOptions = ({
                 {isGroup && (
                     <DropdownMenuItem
                         className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                        onClick={() => handleLeaveGroup()}
+                        onClick={() => setOpenLeaveDialog(true)}
                     >
                         <LogOut className="h-4 w-4" />
                         <span>Rời nhóm</span>
@@ -169,8 +183,29 @@ const ChatCardOptions = ({
                 </DropdownMenuItem>
             </DropdownMenuContent>
 
+            <AlertDialog open={openLeaveDialog} onOpenChange={setOpenLeaveDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Bạn chắc chắn muốn rời nhóm?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Sau khi rời nhóm bạn sẽ không còn nhận được tin nhắn từ nhóm này.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleLeaveGroup}
+                            className="bg-red-400 hover:bg-red-500"
+                        >
+                            Rời nhóm
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
         </DropdownMenu>
+
+
     )
 }
 
