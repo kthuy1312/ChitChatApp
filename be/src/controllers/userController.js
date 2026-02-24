@@ -116,6 +116,12 @@ const blockUser = async (req, res) => {
                 { userA: userId, userB: myId }
             ]
         })
+
+        //socket báo cho ng bị block
+        io.to(userId.toString()).emit("blocked", {
+            by: myId.toString()
+        })
+
         return res.status(200).json({
             message: "Đã chặn người dùng thành công",
             blocked: true
