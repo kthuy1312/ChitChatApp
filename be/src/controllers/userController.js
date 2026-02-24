@@ -73,4 +73,56 @@ const uploadAvatar = async (req, res) => {
 
 }
 
-export { authMe, getAllUser, searchUserByUsername, uploadAvatar }
+const blockUser = async (req, res) => {
+    const { userId } = req.params //ng bị block
+    const myId = req.user._id
+
+    //ktra userId
+    if (!userId) {
+        return res.status(404).json("Thiếu userId")
+    }
+
+    if (userId.toString() === myId.toString()) {
+        return res.status(400).json("Không thể tự block chính mình")
+    }
+
+    const currentUser = await User.findById(myId)
+
+    //coi ng đó có bị block chưa
+    const isBlocked = currentUser.blockedUsers.some(
+        id => id.toString() === userId.toString()
+    )
+    //nếu bị block thì sẽ unblock
+    if (isBlocked) {
+        //pull là xóa khỏi mảng, push là thêm vào mảng(có thể trùng)
+        await User.findByIdAndUpdate(myId, {
+            $pull: { blockedUsers: userId }
+        })
+
+        return res.status(200).json({
+            message: "Đã bỏ chặn người dùng thành công",
+            blocked: false
+        })
+    } else {
+        //nếu chưa block thì block
+        await User.findByIdAndUpdate(myId, {
+            $addToSet: { blockedUsers: userId }
+        })
+
+        //xóa friend
+        await Friend.deleteMany({
+            $or: [
+                { userA: myId, userB: userId },
+                { userA: userId, userB: myId }
+            ]
+        })
+        return res.status(200).json({
+            message: "Đã chặn người dùng thành công",
+            blocked: true
+        })
+
+    }
+
+}
+
+export { authMe, getAllUser, searchUserByUsername, uploadAvatar, blockUser }

@@ -39,6 +39,12 @@ const userSchema = new mongoose.Schema(
             type: String,
             sparse: true, //cho phép null, nhưng không được trùng
         },
+        blockedUsers: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            }
+        ]
     },
     {
         timestamps: true,
