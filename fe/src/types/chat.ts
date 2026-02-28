@@ -30,6 +30,11 @@ export interface LastMessage {
   };
 }
 
+export interface ClearedAt {
+  userId: string;
+  timestamp: string;
+}
+
 export interface Conversation {
   _id: string;
   type: "direct" | "group";
@@ -39,6 +44,10 @@ export interface Conversation {
   seenBy: SeenUser[];
   lastMessage: LastMessage | null;
   unreadCounts: Record<string, number>; // key = userId, value = unread count
+
+  hiddenFor?: string[];
+  clearedAt?: ClearedAt[];
+
   createdAt: string;
   updatedAt: string;
 

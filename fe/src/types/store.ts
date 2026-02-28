@@ -85,6 +85,9 @@ export interface ChatState {
     //leave group
     leaveGroup: (conversationId: string) => Promise<void>;
 
+    //clear conversation
+    clearConversation: (conversationId: string) => Promise<void>;
+
 }
 
 export interface SocketState {

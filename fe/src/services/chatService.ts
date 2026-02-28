@@ -64,5 +64,9 @@ export const chatService = {
     async leaveGroup(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/leaveGroup`)
         return res.data
+    },
+    async clearConversation(conversationId: string) {
+        const res = await api.patch(`/conversations/${conversationId}/clearConversation`)
+        return res.data
     }
 };

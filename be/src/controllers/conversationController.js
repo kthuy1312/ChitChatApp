@@ -102,7 +102,10 @@ export const getConversations = async (req, res) => {
     try {
         const userId = req.user?._id
 
-        const conversation = await Conversation.find({ "participants.userID": userId })
+        const conversation = await Conversation.find({
+            "participants.userID": userId,
+            hiddenFor: { $nin: [userId] } //kh ẩn cho user đó
+        })
 
             .sort({ lastMessageAt: -1, updatedAt: -1 })
             .populate({
@@ -171,15 +174,33 @@ export const getConversationsByUserId = async (req, res) => {
 
 export const getMessages = async (req, res) => {
     try {
+        const userId = req.user._id
         const { conversationId } = req.params
         const { limit = 50, cursor } = req.query //cursor: mốc thời gian để load tin cũ hơn
 
+        //lấy conversation để check clearedAt (trong delete conversation)
+        const conversation = await Conversation.findById(conversationId)
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" })
+        }
+
         const query = { conversationId }
+
+        //nếu user đã clear data trước đó
+        const clearData = conversation?.clearedAt.find(c => c.userId.toString() === userId.toString())
+
+        if (clearData) {
+            query.createdAt = { $gt: clearData.timestamp }
+        }
 
         //nếu có cursor nghĩa là đang load thêm tn cũ
         if (cursor) {
             //cần query tn cũ hơn
-            query.createdAt = { $lt: new Date(cursor) }
+            query.createdAt = {
+                ...(query.createdAt || {}),
+                $lt: new Date(cursor)
+            }
         }
 
         let messages = await Message.find(query)
@@ -519,6 +540,62 @@ export const leaveGroup = async (req, res) => {
         res.json({ message: "Left group successfully" })
 
     } catch (err) {
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
+export const clearConversation = async (req, res) => {
+    try {
+
+        const userId = req.user._id
+        const { conversationId } = req.params
+
+        const conversation = await Conversation.findById(conversationId)
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy conversation" })
+        }
+
+        //coi đã clear trước đó chưa (tức là đã record clearAt chưa)
+        const existing = conversation?.clearedAt.find(
+            c => c.userId.toString() === userId.toString()
+        )
+
+        //nếu đã có record clear conversation trước đó thì cập nhật lại timestand thôi
+        if (existing) {
+            await Conversation.updateOne(
+                { _id: conversationId, "clearedAt.userId": userId },
+                {
+                    $set: { "clearedAt.$.timestamp": new Date() },
+                    $addToSet: { hiddenFor: userId }
+                }
+            )
+
+        }
+        else {
+            //tạo record clearAt mới 
+            await Conversation.updateOne(
+                { _id: conversationId },
+                {
+                    $push: {
+                        clearedAt: {
+                            userId,
+                            timestamp: new Date()
+                        }
+                    },
+                    $addToSet: { hiddenFor: userId }
+                }
+            )
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật clear conversation thành công"
+        })
+
+
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ message: "Server error" })
     }
 }

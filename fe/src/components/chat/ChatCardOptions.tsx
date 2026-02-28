@@ -53,6 +53,7 @@ const ChatCardOptions = ({
 }: ChatCardOptionsProps) => {
 
     const [openLeaveDialog, setOpenLeaveDialog] = useState(false)
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
 
     const handlePin = async () => {
         try {
@@ -89,6 +90,17 @@ const ChatCardOptions = ({
             await onLeaveGroup?.(converId)
             toast.success("Rời nhóm thành công")
             setOpenLeaveDialog(false)
+        } catch (err) {
+            console.error(err)
+            toast.error("Không thể thực hiện thao tác")
+        }
+    }
+
+    const handleDelete = async () => {
+        try {
+            await onDelete?.(converId)
+            toast.success("Xóa cuộc hội thoại thành công")
+            setOpenDeleteDialog(false)
         } catch (err) {
             console.error(err)
             toast.error("Không thể thực hiện thao tác")
@@ -176,13 +188,14 @@ const ChatCardOptions = ({
 
                 <DropdownMenuItem
                     className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                    onClick={() => onDelete?.(converId)}
+                    onClick={() => setOpenDeleteDialog(true)}
                 >
                     <Trash2 className="h-4 w-4" />
                     <span>Xóa</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
 
+            {/* modal rời nhóm */}
             <AlertDialog open={openLeaveDialog} onOpenChange={setOpenLeaveDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -198,6 +211,30 @@ const ChatCardOptions = ({
                             className="bg-red-400 hover:bg-red-500"
                         >
                             Rời nhóm
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* modal xóa tn */}
+            <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Bạn chắc chắn muốn xoá cuộc trò chuyện?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Sau khi xoá, bạn sẽ không còn thấy cuộc trò chuyện này nữa.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-red-400 hover:bg-red-500"
+                        >
+                            Xoá
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

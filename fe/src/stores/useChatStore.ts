@@ -156,12 +156,20 @@ export const useChatStore = create<ChatState>()(
             addMessage: async (message) => {
                 try {
                     const { user } = useAuthStore.getState();
-                    const { fetchMessages } = get();
+                    const { fetchMessages, conversations } = get();
 
                     //đánh dấu tin nhắn của mình
                     message.isOwn = message.senderId === user?._id
 
                     const converId = message.conversationId
+
+                    //Nếu conversation chưa tồn tại (do đã clear)
+                    const exists = conversations.some(c => c._id === converId)
+
+                    if (!exists) {
+                        await get().fetchConversations()
+                        return
+                    }
 
                     //lấy danh sách tin nhắn hiện tại (nếu có)
                     //nếu trước đó đã từng mở conver này rồi thì bây g item sẽ chứa tn cũ
@@ -198,7 +206,7 @@ export const useChatStore = create<ChatState>()(
                         conversations: sortConversations(
                             state.conversations.map((c) =>
                                 c._id === converId
-                                    ? { ...c, lastMessage: message }
+                                    ? { ...c, lastMessage: message, lastMessageAt: message.createdAt, }
                                     : c
                             )
                         ),
@@ -477,6 +485,32 @@ export const useChatStore = create<ChatState>()(
 
                 } catch (error) {
                     console.error("Lỗi leaveGroup:", error)
+                }
+            },
+
+            clearConversation: async (conversationId: string) => {
+                try {
+                    await chatService.clearConversation(conversationId)
+
+                    const { activeConversationId } = get()
+
+                    set((state) => ({
+                        conversations: state.conversations.filter(
+                            (c) => c._id !== conversationId
+                        ),
+                        messages: Object.fromEntries(
+                            Object.entries(state.messages).filter(
+                                ([key]) => key !== conversationId
+                            )
+                        ),
+                        activeConversationId:
+                            activeConversationId === conversationId
+                                ? null
+                                : activeConversationId
+                    }))
+
+                } catch (error) {
+                    console.error("Lỗi clearConversation:", error)
                 }
             }
 

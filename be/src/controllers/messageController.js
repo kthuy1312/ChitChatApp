@@ -40,6 +40,12 @@ export const sendDirectMessage = async (req, res) => {
             content
         })
 
+        // khi gửi message mới thì bỏ id ng nhận khỏi hiddenFor nếu có - để hiển thị lại conver đó
+        // (vì delete conversation sẽ thêm ng đó dô hiddenFor)
+        await Conversation.findByIdAndUpdate(conversation._id, {
+            $pull: { hiddenFor: recipientId }
+        })
+
         //mỗi lần có tn mới thì phải cần update lại 
         updateConversationAfterCreateMessage(conversation, message, senderId)
         await conversation.save();

@@ -88,6 +88,22 @@ const conversationScheme = new mongoose.Schema({
         default: {}
     },
 
+    // cho việc xóa conversation
+    hiddenFor: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: []
+    }],
+    clearedAt: [{
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 }, {
     timestamps: true
 })
