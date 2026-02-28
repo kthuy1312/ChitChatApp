@@ -56,7 +56,7 @@ const ManageChatDialog = ({ open, setOpen }: ManageChatDialogProps) => {
                     }
                     className="w-full"
                 >
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="archived" className="flex items-center gap-1">
                             <Archive className="h-4 w-4" />
                             Lưu trữ
@@ -67,10 +67,6 @@ const ManageChatDialog = ({ open, setOpen }: ManageChatDialogProps) => {
                             Hạn chế
                         </TabsTrigger>
 
-                        <TabsTrigger value="blocked" className="flex items-center gap-1">
-                            <Ban className="h-4 w-4" />
-                            Chặn
-                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="archived" className="mt-4">

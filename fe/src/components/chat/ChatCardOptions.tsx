@@ -163,7 +163,7 @@ const ChatCardOptions = ({
                         <span>Rời nhóm</span>
                     </DropdownMenuItem>
                 )}
-
+                {/* 
                 {!isGroup && (
                     <DropdownMenuItem
                         className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
@@ -172,7 +172,7 @@ const ChatCardOptions = ({
                         <Ban className="h-4 w-4" />
                         <span>Chặn</span>
                     </DropdownMenuItem>
-                )}
+                )} */}
 
                 <DropdownMenuItem
                     className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
