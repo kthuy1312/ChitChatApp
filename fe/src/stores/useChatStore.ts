@@ -167,7 +167,6 @@ export const useChatStore = create<ChatState>()(
                     const exists = conversations.some(c => c._id === converId)
 
                     if (!exists) {
-                        await get().fetchConversations()
                         return
                     }
 

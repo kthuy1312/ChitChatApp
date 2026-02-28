@@ -556,6 +556,8 @@ export const clearConversation = async (req, res) => {
             return res.status(404).json({ message: "Không tìm thấy conversation" })
         }
 
+        const newClearedTimestamp = new Date()
+
         //coi đã clear trước đó chưa (tức là đã record clearAt chưa)
         const existing = conversation?.clearedAt.find(
             c => c.userId.toString() === userId.toString()
@@ -566,7 +568,7 @@ export const clearConversation = async (req, res) => {
             await Conversation.updateOne(
                 { _id: conversationId, "clearedAt.userId": userId },
                 {
-                    $set: { "clearedAt.$.timestamp": new Date() },
+                    $set: { "clearedAt.$.timestamp": newClearedTimestamp },
                     $addToSet: { hiddenFor: userId }
                 }
             )
@@ -580,10 +582,45 @@ export const clearConversation = async (req, res) => {
                     $push: {
                         clearedAt: {
                             userId,
-                            timestamp: new Date()
+                            timestamp: newClearedTimestamp
                         }
                     },
                     $addToSet: { hiddenFor: userId }
+                }
+            )
+        }
+
+        // Tìm message mới nhất sau thời điểm clear
+        const lastMessageAfterClear = await Message.findOne({
+            conversationId,
+            createdAt: { $gt: newClearedTimestamp }
+        }).sort({ createdAt: -1 }).populate('senderId', 'displayName avatarUrl')
+
+        // Update lastMessage của conversation
+        if (lastMessageAfterClear) {
+            await Conversation.updateOne(
+                { _id: conversationId },
+                {
+                    $set: {
+                        lastMessage: {
+                            _id: lastMessageAfterClear._id.toString(),
+                            content: lastMessageAfterClear.content || null,
+                            senderId: lastMessageAfterClear.senderId,
+                            createdAt: lastMessageAfterClear.createdAt
+                        },
+                        lastMessageAt: lastMessageAfterClear.createdAt
+                    }
+                }
+            )
+        } else {
+            // Nếu không có message nào, reset lastMessage
+            await Conversation.updateOne(
+                { _id: conversationId },
+                {
+                    $set: {
+                        lastMessage: null,
+                        lastMessageAt: null
+                    }
                 }
             )
         }
