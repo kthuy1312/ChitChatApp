@@ -12,4 +12,23 @@ export const userService = {
 
         return res.data;
     },
+
+    updateProfile: async (username: string, displayName: string, phone?: string, bio?: string) => {
+        try {
+            const updateData = {
+                username,
+                displayName,
+                //nếu phone rỗng thì gửi null để tránh lỗi trùng lặp ở db
+                phone: phone || null,
+                bio
+            };
+
+            const res = await api.patch("/users/profile", updateData);
+            return res.data;
+
+        } catch (error: any) {
+            console.error("Cập nhật thất bại:", error.response?.data?.message || error.message);
+            throw error;
+        }
+    }
 };

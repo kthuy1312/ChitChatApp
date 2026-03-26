@@ -119,4 +119,10 @@ export interface FriendState {
 
 export interface UserState {
     updateAvatarUrl: (formData: FormData) => Promise<void>;
+    updateProfile: (
+        username: string,
+        displayName: string,
+        phone?: string,
+        bio?: string,
+    ) => Promise<void>;
 }

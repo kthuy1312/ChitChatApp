@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { User } from "@/types/user";
+import { useUserStore } from "@/stores/useUserStore";
+import { useEffect, useState } from "react";
 
 type EditableField = {
   key: keyof Pick<User, "displayName" | "username" | "email" | "phone">;
@@ -28,8 +30,45 @@ const PERSONAL_FIELDS: EditableField[] = [
 type Props = {
   userInfo: User | null;
 };
-
 const PersonalInfoForm = ({ userInfo }: Props) => {
+  const [formData, setFormData] = useState({
+    displayName: "",
+    username: "",
+    phone: "",
+    bio: "",
+  });
+
+  const { updateProfile } = useUserStore();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        displayName: userInfo.displayName || "",
+        username: userInfo.username || "",
+        phone: userInfo.phone || "",
+        bio: userInfo.bio || "",
+      });
+    }
+  }, [userInfo]);
+
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async () => {
+    setIsUpdating(true);
+    await updateProfile(
+      formData.username,
+      formData.displayName,
+      formData.phone,
+      formData.bio
+    );
+    setIsUpdating(false);
+  };
+
   if (!userInfo) return null;
 
   return (
@@ -39,25 +78,23 @@ const PersonalInfoForm = ({ userInfo }: Props) => {
           <Heart className="size-5 text-primary" />
           Thông tin cá nhân
         </CardTitle>
-        <CardDescription>
-          Cập nhật chi tiết cá nhân và thông tin hồ sơ của bạn
-        </CardDescription>
+        <CardDescription>Cập nhật chi tiết cá nhân</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {PERSONAL_FIELDS.map(({ key, label, type }) => (
-            <div
-              key={key}
-              className="space-y-2"
-            >
+            <div key={key} className="space-y-2">
               <Label htmlFor={key}>{label}</Label>
               <Input
                 id={key}
                 type={type ?? "text"}
-                value={userInfo[key] ?? ""}
-                onChange={() => {}}
-                className="glass-light border-border/30"
+                disabled={key === "email" || isUpdating}
+                //nếu là email thì dùng từ userInfo vì k cho sửa
+                value={key === "email" ? (userInfo.email ?? "") : (formData[key as keyof typeof formData] ?? "")}
+                onChange={handleInputChange}
+                className={`glass-light border-border/30 ${key === "email" ? "bg-muted/50 cursor-not-allowed" : ""
+                  }`}
               />
             </div>
           ))}
@@ -68,14 +105,26 @@ const PersonalInfoForm = ({ userInfo }: Props) => {
           <Textarea
             id="bio"
             rows={3}
-            value={userInfo.bio ?? ""}
-            onChange={() => {}}
+            disabled={isUpdating}
+            value={formData.bio}
+            onChange={handleInputChange}
             className="glass-light border-border/30 resize-none"
           />
         </div>
 
-        <Button className="w-full md:w-auto bg-gradient-primary hover:opacity-90 transition-opacity">
-          Lưu thay đổi
+        <Button
+          onClick={handleSubmit}
+          disabled={isUpdating}
+          className="w-full md:w-auto bg-gradient-primary hover:opacity-90 transition-opacity"
+        >
+          {isUpdating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Đang lưu...
+            </>
+          ) : (
+            "Lưu thay đổi"
+          )}
         </Button>
       </CardContent>
     </Card>
