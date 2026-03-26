@@ -150,6 +150,28 @@ const updateProfile = async (req, res) => {
                 message: "Tên hiển thị không được để trống"
             });
         }
+        if (phone) {
+            //Regex cho số điện thoại Việt Nam (Bắt đầu bằng 0 theo sau là 9 chữ số)
+            const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
+
+            if (!phoneRegex.test(phone)) {
+                return res.status(400).json({
+                    message: "Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số (vd: 0912345678)"
+                });
+            }
+
+            //check xem số điện thoại này đã có ai khác dùng chưa
+            const isPhoneExist = await User.findOne({
+                phone,
+                _id: { $ne: userId }
+            });
+
+            if (isPhoneExist) {
+                return res.status(400).json({
+                    message: "Số điện thoại này đã được liên kết với tài khoản khác!"
+                });
+            }
+        }
 
         const isUsernameExist = await User.findOne({
             username,
