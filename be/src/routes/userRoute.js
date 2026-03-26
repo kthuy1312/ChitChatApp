@@ -1,5 +1,5 @@
 import express from 'express'
-import { authMe, getAllUser, searchUserByUsername, uploadAvatar, blockUser } from '../controllers/userController.js';
+import { authMe, getAllUser, searchUserByUsername, uploadAvatar, blockUser, updateProfile } from '../controllers/userController.js';
 import { upload } from '../middlewares/uploadMiddleware.js';
 
 
@@ -12,5 +12,7 @@ router.post('/uploadAvatar', upload.single("file"), uploadAvatar);
 
 //chặn
 router.patch('/:userId/block', blockUser)
+router.patch('/profile', updateProfile)
+
 
 export default router;

@@ -131,4 +131,57 @@ const blockUser = async (req, res) => {
 
 }
 
-export { authMe, getAllUser, searchUserByUsername, uploadAvatar, blockUser }
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user._id
+        let { username, displayName, phone, bio } = req.body
+
+        username = username?.trim();
+        displayName = displayName?.trim();
+
+        if (!username) {
+            return res.status(400).json({
+                message: "Tên người dùng không được để trống"
+            });
+        }
+
+        if (!displayName) {
+            return res.status(400).json({
+                message: "Tên hiển thị không được để trống"
+            });
+        }
+
+        const isUsernameExist = await User.findOne({
+            username,
+            _id: { $ne: userId } //tìm username có tồn tại không nhma bỏ qua mình
+        });
+
+        if (isUsernameExist) {
+            return res.status(400).json({
+                message: "Tên người dùng đã tồn tại. Vui lòng sử dụng tên khác!"
+            });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { username, displayName, phone, bio },
+            { new: true, runValidators: true }
+        ).select("-hashedPassword"); //kh trả về password
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "Không tìm thấy người dùng" });
+        }
+
+        return res.status(200).json({
+            message: "Cập nhật profile user thành công",
+            updatedUser
+        })
+
+    } catch (error) {
+        console.error("Lỗi xảy ra khi updateProfile", error)
+        res.status(500).json({ message: 'Server Error' });
+    }
+
+}
+
+export { authMe, getAllUser, searchUserByUsername, uploadAvatar, blockUser, updateProfile }
