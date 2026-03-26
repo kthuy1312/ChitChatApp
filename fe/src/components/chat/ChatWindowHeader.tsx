@@ -9,7 +9,16 @@ import GroupChatAvatar from "./GroupChatAvatar";
 import { useSocketStore } from "@/stores/useSocketStore";
 // Thay đổi import formatUserStatus thành useTimeAgo
 import { useTimeAgo } from "@/lib/utils";
-
+import { MoreVertical, Info, Image, Pin, Search, Palette, Trash2 } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"; // Import Modal từ shadcn
+import { Button } from "../ui/button";
+import ConversationInfo from "./ConversationInfo";
 const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
 
     const { conversations, activeConversationId } = useChatStore();
@@ -45,15 +54,13 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
     const statusText = useTimeAgo(isOnline, offlineTime ?? null);
 
     return (
-        <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background">
-            <div className="flex items-center gap-2 w-full">
-                <SidebarTrigger className="-ml-1 text-foreground" />
-                <Separator
-                    orientation="vertical"
-                    className="mr-2 data-[orientation=vertical]:h-4"
-                />
+        <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background justify-between">
+            <div className="flex items-center gap-2">
 
-                <div className="p-2 w-full flex items-center gap-3">
+                <SidebarTrigger className="-ml-1 text-foreground" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+
+                <div className="p-2 flex items-center gap-3">
                     <div className="relative">
                         {chat.type === "direct" ? (
                             <>
@@ -86,6 +93,17 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
                     </div>
                 </div>
             </div>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                        <MoreVertical className="size-5 text-muted-foreground" />
+                    </Button>
+                </DialogTrigger>
+
+                <DialogContent className="max-w-md p-0 overflow-hidden sm:rounded-2xl border-none shadow-2xl">
+                    <ConversationInfo chat={chat} otherUser={otherUser} isOnline={isOnline} statusText={statusText} />
+                </DialogContent>
+            </Dialog>
         </header>
     );
 };
