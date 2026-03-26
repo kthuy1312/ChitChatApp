@@ -221,72 +221,80 @@ export const useChatStore = create<ChatState>()(
                 const currentUserId = useAuthStore.getState().user?._id
                 if (!currentUserId) return
 
-                set((state) => ({
-                    conversations: sortConversations(
-                        state.conversations.map((c) => {
-                            if (c._id !== payload._id) return c
+                set((state) => {
+                    let found = false;
+                    const updatedConversations = state.conversations.map((c) => {
+                        if (c._id !== payload._id) return c
 
-                            let updated = { ...c }
+                        found = true;
+                        let updated = { ...c }
 
-                            //update pin
-                            if ("isPinned" in payload) {
-                                updated.participants = c.participants.map((p) =>
-                                    p._id === currentUserId
-                                        ? { ...p, isPinned: payload.isPinned }
-                                        : p
-                                )
-                            }
+                        //update pin
+                        if ("isPinned" in payload) {
+                            updated.participants = c.participants.map((p) =>
+                                p._id === currentUserId
+                                    ? { ...p, isPinned: payload.isPinned }
+                                    : p
+                            )
+                        }
 
-                            //update archive
-                            if ("isArchived" in payload) {
-                                updated.participants = c.participants.map((p) =>
-                                    p._id === currentUserId
-                                        ? { ...p, isArchived: payload.isArchived }
-                                        : p
-                                )
-                            }
+                        //update archive
+                        if ("isArchived" in payload) {
+                            updated.participants = c.participants.map((p) =>
+                                p._id === currentUserId
+                                    ? { ...p, isArchived: payload.isArchived }
+                                    : p
+                            )
+                        }
 
-                            //update restrict
-                            if ("isRestricted" in payload) {
-                                updated.participants = c.participants.map((p) =>
-                                    p._id === currentUserId
-                                        ? { ...p, isRestricted: payload.isRestricted }
-                                        : p
-                                )
-                            }
+                        //update restrict
+                        if ("isRestricted" in payload) {
+                            updated.participants = c.participants.map((p) =>
+                                p._id === currentUserId
+                                    ? { ...p, isRestricted: payload.isRestricted }
+                                    : p
+                            )
+                        }
 
-                            // update lastMessage
-                            if (payload.lastMessage) {
-                                updated.lastMessage = payload.lastMessage
-                            }
+                        // update lastMessage
+                        if (payload.lastMessage) {
+                            updated.lastMessage = payload.lastMessage
+                        }
 
-                            //update unreadCounts
-                            if (payload.unreadCounts) {
-                                updated.unreadCounts = payload.unreadCounts
-                            }
+                        //update unreadCounts
+                        if (payload.unreadCounts) {
+                            updated.unreadCounts = payload.unreadCounts
+                        }
 
-                            //update seenBy
-                            if (payload.seenBy) {
-                                updated.seenBy = payload.seenBy
-                            }
+                        //update seenBy
+                        if (payload.seenBy) {
+                            updated.seenBy = payload.seenBy
+                        }
 
-                            //update lastMessageAt
-                            if (payload.lastMessageAt) {
-                                updated.lastMessageAt = payload.lastMessageAt
-                            }
+                        //update lastMessageAt
+                        if (payload.lastMessageAt) {
+                            updated.lastMessageAt = payload.lastMessageAt
+                        }
 
-                            // remove member
-                            if (payload.removeMemberId) {
-                                updated.participants = c.participants.filter(
-                                    (p) => p._id !== payload.removeMemberId
-                                );
-                            }
+                        // remove member
+                        if (payload.removeMemberId) {
+                            updated.participants = c.participants.filter(
+                                (p) => p._id !== payload.removeMemberId
+                            );
+                        }
 
 
-                            return updated
-                        })
-                    ),
-                }))
+                        return updated
+                    })
+
+                    if (!found) {
+                        updatedConversations.push(payload);
+                    }
+
+                    return {
+                        conversations: sortConversations(updatedConversations)
+                    }
+                })
             },
 
             markAsSeen: async () => {

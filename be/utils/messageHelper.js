@@ -22,16 +22,37 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
     })
 }
 
-export const emitNewMessage = (io, conversation, message) => {
+export const emitNewMessage = async (io, conversation, message) => {
+    // Populate the conversation with necessary fields
+    await conversation.populate([
+        { path: 'participants.userID', select: 'displayName avatarUrl offlineAt' },
+        { path: 'lastMessage.senderId', select: 'displayName avatarUrl' },
+        { path: 'seenBy', select: 'displayName avatarUrl' },
+    ]);
+
+    // Format participants like in getConversations
+    const participants = (conversation.participants || []).map((p) => ({
+        _id: p.userID?._id,
+        displayName: p.userID?.displayName,
+        avatarUrl: p.userID?.avatarUrl ?? null,
+        offlineAt: p.userID?.offlineAt || null,
+        joinedAt: p.joinedAt,
+        isPinned: p.isPinned ?? false,
+        isArchived: p.isArchived ?? false,
+        isRestricted: p.isRestricted ?? false,
+    }));
+
+    const formattedConversation = {
+        ...conversation.toObject(),
+        participants,
+        unreadCounts: Object.fromEntries(conversation.unreadCounts || new Map()),
+    };
+
     //socket.to(room1).emit(...)
     //bên file index đã join user đúng room của họ theo conversationId
     io.to(conversation._id.toString()).emit("new-message", {
         message,
-        conversation: {
-            _id: conversation._id,
-            lastMessage: conversation.lastMessage,
-            lastMessageAt: conversation.lastMessageAt
-        },
+        conversation: formattedConversation,
         unreadCounts: conversation.unreadCounts
     })
 }

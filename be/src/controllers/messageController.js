@@ -51,7 +51,7 @@ export const sendDirectMessage = async (req, res) => {
         await conversation.save();
 
         //socket
-        emitNewMessage(io, conversation, message)
+        await emitNewMessage(io, conversation, message)
 
         return res.status(201).json({ message });
 
@@ -82,7 +82,7 @@ export const sendGroupMessage = async (req, res) => {
         await conversation.save();
 
         //socket
-        emitNewMessage(io, conversation, message)
+        await emitNewMessage(io, conversation, message)
 
         return res.status(201).json({ message });
 
