@@ -93,6 +93,7 @@ export interface ChatState {
 export interface SocketState {
     socket: Socket | null;
     onlineUsers: string[];
+    offlineRecords: Record<string, string | Date>;
     connectSocket: () => void;
     disconnectSocket: () => void;
 }

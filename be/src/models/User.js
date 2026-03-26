@@ -44,7 +44,12 @@ const userSchema = new mongoose.Schema(
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User"
             }
-        ]
+        ],
+        offlineAt:
+        {
+            type: Date,
+            default: null
+        },
     },
     {
         timestamps: true,

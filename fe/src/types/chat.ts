@@ -5,7 +5,8 @@ export interface Participant {
   joinedAt: string;
   isPinned?: boolean;
   isArchived?: boolean;
-  isRestricted?: boolean
+  isRestricted?: boolean;
+  offlineAt?: string | Date | null;
 }
 
 export interface SeenUser {

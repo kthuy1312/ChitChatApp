@@ -1,5 +1,5 @@
 import { useChatStore } from "@/stores/useChatStore";
-import type { Conversation } from "@/types/chat";
+import type { Conversation, Participant } from "@/types/chat";
 import { SidebarTrigger } from "../ui/sidebar";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Separator } from "../ui/separator";
@@ -7,32 +7,42 @@ import UserAvatar from "./UserAvatar";
 import StatusBadge from "./StatusBadge";
 import GroupChatAvatar from "./GroupChatAvatar";
 import { useSocketStore } from "@/stores/useSocketStore";
+// Thay đổi import formatUserStatus thành useTimeAgo
+import { useTimeAgo } from "@/lib/utils";
 
 const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
+
     const { conversations, activeConversationId } = useChatStore();
     const { user } = useAuthStore();
+    const { onlineUsers, offlineRecords } = useSocketStore();
 
-    const { onlineUsers } = useSocketStore();
-
-    let otherUser;
+    let otherUser: Participant | null = null;
+    let isOnline = false;
 
     chat = chat ?? conversations.find((c) => c._id === activeConversationId);
 
     if (!chat) {
         return (
             <header className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-4 py-2 w-full">
-                {/* nút icon đóng mở sidebar */}
                 <SidebarTrigger className="-ml-1 text-foreground" />
             </header>
         );
     }
 
     if (chat.type === "direct") {
-        const otherUsers = chat.participants.filter((p) => p._id !== user?._id); //loại bỏ user hiện tại để lấy user còn lại
+        const otherUsers = chat.participants.filter((p) => p._id !== user?._id);
         otherUser = otherUsers.length > 0 ? otherUsers[0] : null;
+
+        if (otherUser) {
+            isOnline = onlineUsers.includes(otherUser._id);
+        }
 
         if (!user || !otherUser) return;
     }
+
+    // Nó sẽ tự động quản lý setInterval và trả về chuỗi "Hoạt động... trước" tự cập nhật
+    const offlineTime = otherUser ? (offlineRecords[otherUser._id] || otherUser.offlineAt) : null;
+    const statusText = useTimeAgo(isOnline, offlineTime ?? null);
 
     return (
         <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background">
@@ -44,7 +54,6 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
                 />
 
                 <div className="p-2 w-full flex items-center gap-3">
-                    {/* avatar */}
                     <div className="relative">
                         {chat.type === "direct" ? (
                             <>
@@ -53,7 +62,6 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
                                     name={otherUser?.displayName || "ChitChat"}
                                     avatarUrl={otherUser?.avatarUrl || undefined}
                                 />
-                                {/* todo: socket io */}
                                 <StatusBadge
                                     status={onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"}
                                 />
@@ -66,10 +74,16 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
                         )}
                     </div>
 
-                    {/* name */}
-                    <h2 className="font-semibold text-foreground">
-                        {chat.type === "direct" ? otherUser?.displayName : chat.group?.name}
-                    </h2>
+                    <div className="flex flex-col">
+                        <h2 className="font-semibold text-foreground leading-tight">
+                            {chat.type === "direct" ? otherUser?.displayName : chat.group?.name}
+                        </h2>
+                        {chat.type === "direct" && (
+                            <span className={`text-[11px] ${isOnline ? "text-green-500 font-medium" : "text-muted-foreground"}`}>
+                                <span>{statusText}</span>
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>

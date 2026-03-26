@@ -66,7 +66,7 @@ export const createConversation = async (req, res) => {
 
         //có rồi thì populate
         await conversation.populate([
-            { path: 'participants.userID', select: 'displayName avatarUrl' },
+            { path: 'participants.userID', select: 'displayName avatarUrl offlineAt' },
             { path: 'seenBy', select: 'displayName avatarUrl' },
             { path: 'lastMessage.senderId', select: 'displayName avatarUrl' },
 
@@ -76,6 +76,7 @@ export const createConversation = async (req, res) => {
             _id: p.userID?._id,
             displayName: p.userID?.displayName,
             avatarUrl: p.userID?.avatarUrl ?? null,
+            offlineAt: p.userID?.offlineAt || null,
             joinAt: p.joinedAt
         }))
 
@@ -110,7 +111,7 @@ export const getConversations = async (req, res) => {
             .sort({ lastMessageAt: -1, updatedAt: -1 })
             .populate({
                 path: "participants.userID",
-                select: "displayName avatarUrl"
+                select: "displayName avatarUrl offlineAt"
             })
             .populate({
                 path: "lastMessage.senderId",
@@ -128,6 +129,7 @@ export const getConversations = async (req, res) => {
                 _id: p.userID?._id,
                 displayName: p.userID?.displayName,
                 avatarUrl: p.userID?.avatarUrl ?? null,
+                offlineAt: p.userID?.offlineAt || null,
                 joinedAt: p.joinedAt,
                 isPinned: p.isPinned ?? false,
                 isArchived: p.isArchived ?? false,

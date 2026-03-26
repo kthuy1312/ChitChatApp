@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -59,4 +60,38 @@ export const formatMessageTime = (date: Date) => {
     return `${date.getDate()}/${date.getMonth() + 1
       }/${date.getFullYear()} ${timeStr}`; // ví dụ: "15/12/2023 18:40"
   }
+};
+
+//để hiện thị trạng thái online của user
+export const formatUserStatus = (isOnline: boolean, offlineAt?: string | Date | null) => {
+  if (isOnline) return "Đang hoạt động";
+  if (!offlineAt) return "Ngoại tuyến";
+
+  const date = new Date(offlineAt);
+  if (isNaN(date.getTime())) return "Ngoại tuyến";
+
+  // Sử dụng lại hàm formatOnlineTime bạn đã viết ở trên để lấy "5m", "3h", "1d"...
+  const timeAgo = formatOnlineTime(date);
+
+  return `Hoạt động ${timeAgo} trước`;
+};
+
+//Tự update khi trạng thái online/offline thay đổi
+export const useTimeAgo = (isOnline: boolean, offlineAt: string | Date | null) => {
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    // Cập nhật ngay lập tức khi vào chat
+    setStatus(formatUserStatus(isOnline, offlineAt));
+
+    if (isOnline) return; // Nếu online thì không cần chạy timer
+
+    const timer = setInterval(() => {
+      setStatus(formatUserStatus(isOnline, offlineAt));
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, [isOnline, offlineAt]);
+
+  return status;
 };

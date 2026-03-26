@@ -12,6 +12,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     socket: null,
 
     onlineUsers: [],
+    offlineRecords: {},
 
     connectSocket: () => {
         const accessToken = useAuthStore.getState().accessToken
@@ -32,6 +33,13 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         socket.on("online-users", (userIds) => {
             set({ onlineUsers: userIds })
         })
+
+        //lắng nghe user offline để lấy ra đuoc tgian off
+        socket.on("user-offline-status", ({ userId, offlineAt }) => {
+            set((state) => ({
+                offlineRecords: { ...state.offlineRecords, [userId]: offlineAt }
+            }));
+        });
 
         //lắng nghe sự kiện new message
         socket.on("new-message", ({ message, conversation, unreadCounts }) => {

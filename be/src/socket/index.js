@@ -4,6 +4,7 @@ import express from 'express'
 import { socketAuthMiddleWare } from '../middlewares/socketMiddleware.js';
 import { getUserConversationForSocketIO } from '../controllers/conversationController.js';
 import Conversation from '../models/Conversation.js';
+import User from '../models/User.js';
 
 
 const app = express();
@@ -88,10 +89,28 @@ io.on('connection', async (socket) => {
         socket.leave(conversationId)
     })
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
+
+        const userId = user._id.toString();
+        const currentTime = new Date();
 
         //user offline
-        onlineUsers.delete(user._id.toString());
+        onlineUsers.delete(userId);
+
+        //lưu tgian off vô db
+        try {
+            await User.findByIdAndUpdate(userId, { offlineAt: currentTime })
+        } catch (error) {
+
+        }
+
+        //Thông báo cho những người khác
+        io.emit("user-offline-status", {
+            userId,
+            offlineAt: currentTime
+        });
+
+        //Cập nhật lại list online chung
         io.emit("online-users", Array.from(onlineUsers.keys())); // convert sang array
 
         console.log(`socket disconnected: ${socket.id}`);

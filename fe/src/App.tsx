@@ -8,6 +8,7 @@ import { useThemeStore } from "./stores/useThemeStore"
 import { useEffect } from "react"
 import { useAuthStore } from "./stores/useAuthStore"
 import { useSocketStore } from "./stores/useSocketStore"
+import { useChatStore } from "./stores/useChatStore"
 import AuthRoute from "./components/auth/AuthRoute"
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
   useEffect(() => {
     if (accessToken) {
       connectSocket();
+      useChatStore.getState().fetchConversations();
     }
     return () => disconnectSocket() //chạy truoc khi effect chạy lại
   }, [accessToken])

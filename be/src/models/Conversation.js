@@ -22,6 +22,10 @@ const participantSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    offlineAt: {
+        type: Date,
+        default: null
+    }
 }, {
     _id: false //kh tạo id riêng cho từng phần tử vì đây chri là 1 bảng phụ nên kh cần
 })
