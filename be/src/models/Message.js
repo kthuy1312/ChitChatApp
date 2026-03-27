@@ -19,6 +19,16 @@ const messageSchema = new mongoose.Schema({
     imgUrl: {
         type: String
     },
+    isForwarded: {
+        type: Boolean,
+        default: false
+    },
+    //để lấy nội dung tn gốc
+    originalMessageId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+        default: null
+    }
 }, {
     timestamps: true
 });
