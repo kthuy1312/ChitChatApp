@@ -3,6 +3,7 @@ import type { Conversation, Message, Participant } from "@/types/chat";
 import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { Forward } from "lucide-react";
 
 interface MessageItemProps {
     message: Message;
@@ -58,17 +59,36 @@ const MessageItem = ({
                 {/* tin nhắn */}
                 <div
                     className={cn(
-                        "max-w-xs lg:max-w-md space-y-1 flex flex-col",
+                        "flex flex-col max-w-[70%]",
                         message.isOwn ? "items-end" : "items-start"
                     )}
                 >
+                    {/* chuyển tiếp */}
+                    {message.isForwarded && (
+                        <div className={cn(
+                            "flex items-center gap-1 mb-1 px-1 text-muted-foreground/70",
+                            "flex-row"
+                        )}>
+                            <Forward className="size-3" strokeWidth={2.5} />
+                            {message.isOwn ?
+                                (<span className="text-[11px] font-medium italic">Bạn đã chuyển tiếp một tin nhắn</span>
+                                ) :
+                                (<span className="text-[11px] font-medium italic">Tin nhắn được chuyển tiếp </span>)
+                            }
+                        </div>
+                    )}
+
                     <Card
                         className={cn(
-                            "p-3",
-                            message.isOwn ? "chat-bubble-sent bg-gradient-chat border-0" : "chat-bubble-received"
+                            "p-3 transition-all duration-200",
+                            message.isOwn
+                                ? "chat-bubble-sent bg-gradient-chat border-none shadow-md text-white"
+                                : "chat-bubble-received border-none shadow-sm bg-secondary/50"
                         )}
                     >
-                        <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                        <p className="text-[15px] leading-relaxed break-words">
+                            {message.content}
+                        </p>
                     </Card>
 
                     {/* seen/ delivered */}
