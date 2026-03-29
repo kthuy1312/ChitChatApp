@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
+import ForwardMessageModal from "./ForwardMessageModal";
 import { useState } from "react";
 
 interface MessageOptionsProps {
@@ -30,19 +31,14 @@ const MessageOptions = ({
     isOwn,
     onForward,
     onPin,
-    onDelete,
     onRecall,
 }: MessageOptionsProps) => {
 
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    //modal chuyển tiêp tn
+    const [openForward, setOpenForward] = useState(false);
 
-    const handleForward = async () => {
-        try {
-            await onForward?.(messageId);
-            toast.success("Đã chuyển tiếp tin nhắn");
-        } catch {
-            toast.error("Không thể thực hiện");
-        }
+    const handleForward = () => {
+        setOpenForward(true);
     };
 
     const handlePin = async () => {
@@ -65,10 +61,11 @@ const MessageOptions = ({
 
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button
-                    className="
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button
+                        className="
                         rounded-md p-1
                         text-muted-foreground
                         opacity-0 group-hover:opacity-100
@@ -76,17 +73,17 @@ const MessageOptions = ({
                         hover:text-foreground
                         transition
                     "
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <MoreVertical className="h-4 w-4" />
-                </button>
-            </DropdownMenuTrigger>
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <MoreVertical className="h-4 w-4" />
+                    </button>
+                </DropdownMenuTrigger>
 
-            <DropdownMenuContent
-                side={isOwn ? "left" : "right"}
-                align="center"
-                sideOffset={6}
-                className="
+                <DropdownMenuContent
+                    side={isOwn ? "left" : "right"}
+                    align="center"
+                    sideOffset={6}
+                    className="
         min-w-40
         rounded-lg
         border
@@ -95,37 +92,47 @@ const MessageOptions = ({
         backdrop-blur-md
         bg-opacity-100
     "
-                onClick={(e) => e.stopPropagation()}
-            >
-                <DropdownMenuItem
-                    onClick={handleForward}
-                    className="flex items-center gap-2 cursor-pointer"
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    <CornerUpRight className="h-4 w-4" />
-                    Chuyển tiếp
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                    onClick={handlePin}
-                    className="flex items-center gap-2 cursor-pointer"
-                >
-                    <Pin className="h-4 w-4" />
-                    Ghim
-                </DropdownMenuItem>
-
-                {isOwn && (
                     <DropdownMenuItem
-                        onClick={handleRecall}
+                        onClick={handleForward}
                         className="flex items-center gap-2 cursor-pointer"
                     >
-                        <RotateCcw className="h-4 w-4" />
-                        Thu hồi
+                        <CornerUpRight className="h-4 w-4" />
+                        Chuyển tiếp
                     </DropdownMenuItem>
-                )}
 
-            </DropdownMenuContent>
+                    <DropdownMenuItem
+                        onClick={handlePin}
+                        className="flex items-center gap-2 cursor-pointer"
+                    >
+                        <Pin className="h-4 w-4" />
+                        Ghim
+                    </DropdownMenuItem>
 
-        </DropdownMenu>
+                    {isOwn && (
+                        <DropdownMenuItem
+                            onClick={handleRecall}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <RotateCcw className="h-4 w-4" />
+                            Thu hồi
+                        </DropdownMenuItem>
+                    )}
+
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <ForwardMessageModal
+                open={openForward}
+                onOpenChange={setOpenForward}
+                messageId={messageId}
+                onSend={async (ids) => {
+                    console.log("forward to:", ids);
+                    await new Promise(r => setTimeout(r, 1000)); // fake API
+                }}
+            />
+        </>
     );
 };
 

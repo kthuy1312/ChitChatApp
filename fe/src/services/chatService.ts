@@ -57,16 +57,26 @@ export const chatService = {
         const res = await api.patch(`/conversations/${conversationId}/archive`)
         return res.data
     },
+
     async toggleRestrictConversation(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/restrict`)
         return res.data
     },
+
     async leaveGroup(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/leaveGroup`)
         return res.data
     },
+
     async clearConversation(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/clearConversation`)
         return res.data
-    }
+    },
+
+    async forwardDirectMessage(recipientId: string, originalMessageId: string, targetConversationIds?: string[]): Promise<Message> {
+        const res = await api.post("/messages/forward-direct", {
+            recipientId, targetConversationIds, originalMessageId
+        })
+        return res.data
+    },
 };
