@@ -4,6 +4,7 @@ import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Forward } from "lucide-react";
+import MessageOptions from "./MessageOptions";
 
 interface MessageItemProps {
     message: Message;
@@ -20,14 +21,16 @@ const MessageItem = ({
     selectedConvo,
     lastMessageStatus,
 }: MessageItemProps) => {
+
     const prev = index + 1 < messages.length ? messages[index + 1] : undefined;
 
-    //qdinh xem có tách nhóm tn hay kh (hiển thị lại ava và tgian)
+    // show time + avatar
     const isShowTime =
         index === 0 ||
         new Date(message.createdAt).getTime() -
         new Date(prev?.createdAt || 0).getTime() >
-        300000; //5 phút
+        300000;
+
     const isGroupBreak = isShowTime || message.senderId !== prev?.senderId;
 
     const participant = selectedConvo.participants.find(
@@ -36,10 +39,9 @@ const MessageItem = ({
 
     return (
         <>
-
             <div
                 className={cn(
-                    "flex gap-2 message-bounce mt-1",
+                    "flex gap-2 mt-1 group",
                     message.isOwn ? "justify-end" : "justify-start"
                 )}
             >
@@ -56,55 +58,67 @@ const MessageItem = ({
                     </div>
                 )}
 
-                {/* tin nhắn */}
+                {/* content */}
                 <div
                     className={cn(
                         "flex flex-col max-w-[70%]",
                         message.isOwn ? "items-end" : "items-start"
                     )}
                 >
-                    {/* chuyển tiếp */}
+                    {/* forwarded */}
                     {message.isForwarded && (
-                        <div className={cn(
-                            "flex items-center gap-1 mb-1 px-1 text-muted-foreground/70",
-                            "flex-row"
-                        )}>
+                        <div className="flex items-center gap-1 mb-1 px-1 text-muted-foreground/70">
                             <Forward className="size-3" strokeWidth={2.5} />
-                            {message.isOwn ?
-                                (<span className="text-[11px] font-medium italic">Bạn đã chuyển tiếp một tin nhắn</span>
-                                ) :
-                                (<span className="text-[11px] font-medium italic">Tin nhắn được chuyển tiếp </span>)
-                            }
+                            <span className="text-[11px] italic">
+                                {message.isOwn
+                                    ? "Bạn đã chuyển tiếp một tin nhắn"
+                                    : "Tin nhắn được chuyển tiếp"}
+                            </span>
                         </div>
                     )}
 
-                    <Card
+                    <div
                         className={cn(
-                            "p-3 transition-all duration-200",
-                            message.isOwn
-                                ? "chat-bubble-sent bg-gradient-chat border-none shadow-md text-white"
-                                : "chat-bubble-received border-none shadow-sm bg-secondary/50"
+                            "flex items-center gap-1",
+                            message.isOwn ? "flex-row" : "flex-row-reverse"
                         )}
                     >
-                        <p className="text-[15px] leading-relaxed break-words">
-                            {message.content}
-                        </p>
-                    </Card>
+                        {/* options (3 chấm) */}
+                        <MessageOptions
+                            messageId={message._id}
+                            isOwn={message.isOwn}
+                        />
 
-                    {/* seen/ delivered */}
-                    {message.isOwn && message._id === selectedConvo.lastMessage?._id && (
-                        <Badge
-                            variant="outline"
+                        {/* bubble */}
+                        <Card
                             className={cn(
-                                "text-xs px-2 py-1.5 h-6 border-0",
-                                lastMessageStatus === "seen"
-                                    ? "bg-primary/20 text-primary"
-                                    : "bg-muted text-muted-foreground"
+                                "p-3 transition-all duration-200",
+                                message.isOwn
+                                    ? "bg-gradient-chat text-white border-none shadow-md"
+                                    : "bg-secondary/50 border-none shadow-sm"
                             )}
                         >
-                            {lastMessageStatus}
-                        </Badge>
-                    )}
+                            <p className="text-[15px] leading-relaxed break-words">
+                                {message.content}
+                            </p>
+                        </Card>
+                    </div>
+
+                    {/* seen / delivered */}
+                    {message.isOwn &&
+                        message._id === selectedConvo.lastMessage?._id && (
+                            <Badge
+                                variant="outline"
+                                className={cn(
+                                    "text-xs px-2 py-1.5 h-6 border-0 mt-1",
+                                    lastMessageStatus === "seen"
+                                        ? "bg-primary/20 text-primary"
+                                        : "bg-muted text-muted-foreground"
+                                )}
+                            >
+                                {lastMessageStatus}
+                            </Badge>
+                        )}
                 </div>
             </div>
 
@@ -114,7 +128,6 @@ const MessageItem = ({
                     {formatMessageTime(new Date(message.createdAt))}
                 </span>
             )}
-
         </>
     );
 };
