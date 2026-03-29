@@ -95,11 +95,15 @@ export const sendGroupMessage = async (req, res) => {
 
 export const forwardDirectMessage = async (req, res) => {
     try {
-        const { originalMessageId, targetConversationIds, recipientId } = req.body;
+        const { originalMessageId, recipientId } = req.body;
         const senderId = req.user._id;
 
         if (!originalMessageId || !recipientId) {
             return res.status(400).json({ message: "Thiếu dữ liệu chuyển tiếp" });
+        }
+
+        if (recipientId.toString() === senderId.toString()) {
+            return res.status(400).json({ message: "Không thể gửi cho chính mình" });
         }
 
         //tìm tn gốc
@@ -108,35 +112,24 @@ export const forwardDirectMessage = async (req, res) => {
             return res.status(404).json({ message: "Không tìm thấy tin nhắn gốc" });
         }
 
-        let conversation;
+        //tìm hoặc tạo conversation
+        let conversation = await Conversation.findOne({
+            type: "direct",
+            "participants.userID": { $all: [senderId, recipientId] }
+        });
 
-        //nếu đã có conversationId từ trước (2ng đã nt với nhau r)
-        if (Array.isArray(targetConversationIds) && targetConversationIds.length > 0) {
-            conversation = await Conversation.findById(targetConversationIds[0]);
-        } else if (typeof targetConversationIds === 'string') {
-            conversation = await Conversation.findById(targetConversationIds);
-        }
 
-        //nếu 2 ng chưa nt chưa có conversation
+        //thực sự chưa có thì tạo mới
         if (!conversation) {
-            //kiểm tra xem thực tế đã có hội thoại giữa 2 người này chưa (tránh tạo trùng)
-            conversation = await Conversation.findOne({
+            conversation = await Conversation.create({
                 type: "direct",
-                "participants.userID": { $all: [senderId, recipientId] }
+                participants: [
+                    { userID: senderId, joinedAt: new Date() },
+                    { userID: recipientId, joinedAt: new Date() }
+                ],
+                lastMessageAt: new Date(),
+                unreadCounts: new Map()
             });
-
-            //thực sự chưa có thì tạo mới
-            if (!conversation) {
-                conversation = await Conversation.create({
-                    type: "direct",
-                    participants: [
-                        { userID: senderId, joinedAt: new Date() },
-                        { userID: recipientId, joinedAt: new Date() }
-                    ],
-                    lastMessageAt: new Date(),
-                    unreadCounts: new Map()
-                });
-            }
         }
 
         //tạo tn chuyển tiếp
