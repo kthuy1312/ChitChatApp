@@ -533,8 +533,53 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi forwardDirectMessage:", error)
                 }
-            }
+            },
 
+            //unsend
+            markMessageUnsent: (conversationId: string, messageId: string) => {
+                set((state) => {
+                    const convo = state.messages[conversationId];
+                    if (!convo) return state;
+
+                    const updatedItems = convo.items.map(m =>
+                        m._id === messageId ? { ...m, isUnsent: true } : m
+                    );
+
+                    const conversations = state.conversations.map(c => {
+                        if (c._id !== conversationId) return c;
+
+                        //cập nhật lastMessage nếu message bị thu hồi là lastMessage
+                        const lastMessage = c.lastMessage?._id === messageId
+                            ? { ...c.lastMessage, content: "Tin nhắn đã thu hồi", isUnsent: true }
+                            : c.lastMessage;
+
+                        return { ...c, lastMessage };
+                    });
+
+                    return {
+                        messages: {
+                            ...state.messages,
+                            [conversationId]: { ...convo, items: updatedItems },
+                        },
+                        conversations
+                    };
+                });
+            },
+            unsendMessage: async (messageId: string, conversationId: string) => {
+                try {
+                    await chatService.unsendMessage(messageId);
+
+                    get().markMessageUnsent(conversationId, messageId);
+
+                    useSocketStore.getState().socket?.emit("message-unsent", {
+                        messageId,
+                        conversationId
+                    });
+
+                } catch (error) {
+                    console.error("Lỗi khi unsendMessage:", error);
+                }
+            }
 
         }),
         {

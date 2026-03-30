@@ -122,9 +122,11 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                 _id: conversationId,
                 removeMemberId: userId
             });
+        })
+
+        socket.on("message-unsent", ({ messageId, conversationId }) => {
+            useChatStore.getState().markMessageUnsent(conversationId, messageId);
         });
-
-
     },
 
     disconnectSocket: () => {

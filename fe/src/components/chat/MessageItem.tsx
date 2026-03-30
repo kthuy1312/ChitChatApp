@@ -87,20 +87,25 @@ const MessageItem = ({
                         <MessageOptions
                             messageId={message._id}
                             isOwn={message.isOwn}
+                            conversationId={message.conversationId}
                         />
 
                         {/* bubble */}
                         <Card
                             className={cn(
-                                "p-3 transition-all duration-200",
-                                message.isOwn
-                                    ? "bg-gradient-chat text-white border-none shadow-md"
-                                    : "bg-secondary/50 border-none shadow-sm"
+                                "p-3 transition-all duration-200 text-sm",
+                                message.isUnsent
+                                    ? "italic border border-gray-300/60 bg-white/20 backdrop-blur-sm text-muted-foreground shadow-none"
+                                    : message.isOwn
+                                        ? "bg-gradient-chat text-white border-none shadow-md"
+                                        : "bg-secondary/50 border-none shadow-sm"
                             )}
                         >
-                            <p className="text-[15px] leading-relaxed break-words">
-                                {message.content}
-                            </p>
+                            {message.isUnsent
+                                ? (message.isOwn
+                                    ? "Bạn đã thu hồi tin nhắn"
+                                    : "Tin nhắn đã được thu hồi")
+                                : message.content}
                         </Card>
                     </div>
 

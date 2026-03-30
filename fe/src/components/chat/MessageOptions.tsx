@@ -15,10 +15,12 @@ import {
 import { toast } from "sonner";
 import ForwardMessageModal from "./ForwardMessageModal";
 import { useState } from "react";
+import { useChatStore } from "@/stores/useChatStore";
 
 interface MessageOptionsProps {
     messageId: string;
     isOwn?: boolean;
+    conversationId: string;
 
     onForward?: (id: string) => void;
     onPin?: (id: string) => void;
@@ -28,14 +30,16 @@ interface MessageOptionsProps {
 
 const MessageOptions = ({
     messageId,
+    conversationId,
     isOwn,
-    onForward,
     onPin,
-    onRecall,
 }: MessageOptionsProps) => {
 
     //modal chuyển tiêp tn
     const [openForward, setOpenForward] = useState(false);
+
+    //thu hồi
+    const { unsendMessage } = useChatStore()
 
     const handleForward = () => {
         setOpenForward(true);
@@ -52,8 +56,7 @@ const MessageOptions = ({
 
     const handleRecall = async () => {
         try {
-            await onRecall?.(messageId);
-            toast.success("Đã thu hồi tin nhắn");
+            await unsendMessage?.(messageId, conversationId);
         } catch {
             toast.error("Không thể thực hiện");
         }

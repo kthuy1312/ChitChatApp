@@ -91,6 +91,10 @@ export interface ChatState {
     //forward message
     forwardDirectMessage: (recipientId: string, originalMessageId: string) => Promise<void>;
 
+    //unsed
+    markMessageUnsent: (conversationId: string, messageId: string) => void;
+    unsendMessage(messageId: string, conversationId: string): Promise<void>
+
 }
 
 export interface SocketState {

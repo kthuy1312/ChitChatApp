@@ -68,4 +68,5 @@ export interface Message {
   createdAt: string;
   isOwn?: boolean;
   isForwarded?: boolean;
+  isUnsent?: boolean;
 }

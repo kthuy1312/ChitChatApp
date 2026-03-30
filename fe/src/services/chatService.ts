@@ -79,4 +79,9 @@ export const chatService = {
         })
         return res.data.data
     },
+
+    async unsendMessage(messageId: string): Promise<Message> {
+        const res = await api.patch(`/messages/${messageId}/unsend`)
+        return res.data
+    },
 };

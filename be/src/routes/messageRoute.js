@@ -11,6 +11,6 @@ router.post('/group', checkGroupMembership, sendGroupMessage)
 //chuyển tiếp tn
 router.post('/forward-direct', checkFriendship, forwardDirectMessage)
 //thu hồi tin nhắn
-router.post('/:messageId/unsend', checkFriendship, unsendMessage)
+router.patch('/:messageId/unsend', unsendMessage)
 
 export default router
