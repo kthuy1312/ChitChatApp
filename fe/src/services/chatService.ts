@@ -73,10 +73,10 @@ export const chatService = {
         return res.data
     },
 
-    async forwardDirectMessage(recipientId: string, originalMessageId: string, targetConversationIds?: string[]): Promise<Message> {
+    async forwardDirectMessage(recipientId: string, originalMessageId: string): Promise<Message> {
         const res = await api.post("/messages/forward-direct", {
-            recipientId, targetConversationIds, originalMessageId
+            recipientId, originalMessageId
         })
-        return res.data
+        return res.data.data
     },
 };

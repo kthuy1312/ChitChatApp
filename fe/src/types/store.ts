@@ -88,6 +88,9 @@ export interface ChatState {
     //clear conversation
     clearConversation: (conversationId: string) => Promise<void>;
 
+    //forward message
+    forwardDirectMessage: (recipientId: string, originalMessageId: string) => Promise<void>;
+
 }
 
 export interface SocketState {

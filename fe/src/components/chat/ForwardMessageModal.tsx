@@ -32,13 +32,15 @@ const ForwardMessageModal = ({
     open,
     onOpenChange,
     messageId,
-    onSend,
 }: ForwardMessageModalProps) => {
 
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [sentIds, setSentIds] = useState<string[]>([]);
     const { onlineUsers } = useSocketStore();
     const { user } = useAuthStore()
+
+    //hàm chuyển tiếp
+    const { forwardDirectMessage } = useChatStore()
 
     //lấy group
     const { conversations } = useChatStore();
@@ -64,11 +66,10 @@ const ForwardMessageModal = ({
     }, [open]);
 
 
-    const handleSend = async (id: string) => {
+    const handleFowardDirect = async (id: string) => {
         try {
             setLoadingId(id);
-            await onSend([id]);
-
+            await forwardDirectMessage(id, messageId);
             setSentIds(prev => [...prev, id]);
         } catch {
             console.error("Send failed");
@@ -76,42 +77,6 @@ const ForwardMessageModal = ({
             setLoadingId(null);
         }
     };
-
-    const renderList = (list: User[]) => (
-        <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
-            {list.map(item => {
-                const isLoading = loadingId === item.id;
-                const isSent = sentIds.includes(item.id);
-
-                return (
-                    <div
-                        key={item.id}
-                        className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted"
-                    >
-                        <span>{item.name}</span>
-
-                        <Button
-                            size="sm"
-                            disabled={isLoading || isSent}
-                            onClick={() => handleSend(item.id)}
-                        >
-                            {isLoading
-                                ? <>
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    Đang gửi...
-                                </>
-                                : isSent
-                                    ? <>
-                                        <CheckCheck className="w-4 h-4" />
-                                        Đã gửi
-                                    </>
-                                    : "Gửi"}
-                        </Button>
-                    </div>
-                );
-            })}
-        </div>
-    );
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,7 +126,7 @@ const ForwardMessageModal = ({
                                         <Button
                                             size="sm"
                                             disabled={isLoading || isSent}
-                                            onClick={() => handleSend(item._id)}
+                                            onClick={() => handleFowardDirect(item._id)}
                                             className="flex items-center gap-1"
                                         >
                                             {isLoading
@@ -207,7 +172,7 @@ const ForwardMessageModal = ({
                                         <Button
                                             size="sm"
                                             disabled={isLoading || isSent}
-                                            onClick={() => handleSend(item._id)}
+                                            onClick={() => alert("ok")}
                                             className="flex items-center gap-1"
                                         >
                                             {isLoading

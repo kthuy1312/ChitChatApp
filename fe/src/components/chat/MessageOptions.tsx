@@ -127,10 +127,7 @@ const MessageOptions = ({
                 open={openForward}
                 onOpenChange={setOpenForward}
                 messageId={messageId}
-                onSend={async (ids) => {
-                    console.log("forward to:", ids);
-                    await new Promise(r => setTimeout(r, 1000)); // fake API
-                }}
+
             />
         </>
     );

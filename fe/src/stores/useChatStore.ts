@@ -519,7 +519,61 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi clearConversation:", error)
                 }
+            },
+
+            forwardDirectMessage: async (recipientId: string, originalMessageId: string) => {
+                try {
+                    const message = await chatService.forwardDirectMessage(recipientId, originalMessageId)
+                    const { user } = useAuthStore.getState();
+
+                    //đánh dấu tin nhắn của mình
+                    message.isOwn = message.senderId === user?._id
+
+                    set((state) => {
+                        const prev = state.messages[message.conversationId];
+
+                        return {
+                            messages: {
+                                ...state.messages,
+                                [message.conversationId]: {
+                                    items: prev?.items
+                                        ? [...prev.items, message]
+                                        : [message],
+                                    hasMore: prev?.hasMore ?? false,
+                                    nextCursor: prev?.nextCursor ?? null,
+                                }
+                            }
+                        }
+                    })
+                    //nhảy lên list
+                    set((state) => ({
+                        conversations: sortConversations(
+                            state.conversations.map((c) =>
+                                c._id === message.conversationId
+                                    ? {
+                                        ...c,
+                                        lastMessage: {
+                                            _id: message._id,
+                                            content: message.content,
+                                            createdAt: message.createdAt,
+                                            senderId: {
+                                                _id: message.senderId,
+                                                displayName: user?.displayName ?? "ChitChat",
+                                                avatarUrl: user?.avatarUrl ?? null
+                                            }
+                                        },
+                                        lastMessageAt: message.createdAt,
+                                    }
+                                    : c
+                            )
+                        )
+                    }))
+
+                } catch (error) {
+                    console.error("Lỗi forwardDirectMessage:", error)
+                }
             }
+
 
         }),
         {
