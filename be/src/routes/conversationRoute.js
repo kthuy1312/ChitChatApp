@@ -1,5 +1,5 @@
 import express from 'express'
-import { archiveConversation, createConversation, getConversations, getConversationsByUserId, getMessages, leaveGroup, markAsSeen, pinConversation, restrictConversation, clearConversation } from '../controllers/conversationController.js'
+import { archiveConversation, createConversation, getConversations, getConversationsByUserId, getMessages, leaveGroup, markAsSeen, pinConversation, restrictConversation, clearConversation, togglePinMessage } from '../controllers/conversationController.js'
 import { checkFriendship } from '../middlewares/friendMiddleware.js'
 
 const router = express.Router()
@@ -18,6 +18,7 @@ router.patch('/:conversationId/restrict', restrictConversation)
 router.patch('/:conversationId/leaveGroup', leaveGroup)
 
 router.patch('/:conversationId/clearConversation', clearConversation)
+router.patch('/:messageId/pin-message', togglePinMessage)
 
 
 export default router;

@@ -62,6 +62,37 @@ const lastMessageSchema = new mongoose.Schema({
     _id: false
 })
 
+//schema cho pin message
+const pinnedMessageSchema = new mongoose.Schema({
+    messageId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message"
+    },
+    content: {
+        type: String,
+        default: null
+    },
+    senderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    createdAt: {
+        type: Date
+    },
+    isUnsent: {
+        type: Boolean,
+        default: false
+    },
+    pinnedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    pinnedAt: {
+        type: Date,
+        default: Date.now
+    }
+}, { _id: false })
+
 const conversationScheme = new mongoose.Schema({
     type: {
         type: String,
@@ -98,6 +129,7 @@ const conversationScheme = new mongoose.Schema({
         ref: "User",
         default: []
     }],
+
     clearedAt: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -107,7 +139,12 @@ const conversationScheme = new mongoose.Schema({
             type: Date,
             default: Date.now
         }
-    }]
+    }],
+    //pin message
+    pinnedMessages: {
+        type: [pinnedMessageSchema],
+        default: []
+    }
 }, {
     timestamps: true
 })
