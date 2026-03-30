@@ -1,5 +1,5 @@
 import express from 'express'
-import { forwardDirectMessage, sendDirectMessage, sendGroupMessage } from '../controllers/messageController.js'
+import { forwardDirectMessage, sendDirectMessage, sendGroupMessage, unsendMessage } from '../controllers/messageController.js'
 import { checkFriendship, checkGroupMembership } from '../middlewares/friendMiddleware.js'
 
 const router = express.Router()
@@ -10,5 +10,7 @@ router.post('/group', checkGroupMembership, sendGroupMessage)
 
 //chuyển tiếp tn
 router.post('/forward-direct', checkFriendship, forwardDirectMessage)
+//thu hồi tin nhắn
+router.post('/:messageId/unsend', checkFriendship, unsendMessage)
 
 export default router

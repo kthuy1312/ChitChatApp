@@ -162,3 +162,39 @@ export const forwardDirectMessage = async (req, res) => {
         return res.status(500).json({ message: "Lỗi hệ thống" });
     }
 };
+
+export const unsendMessage = async (req, res) => {
+    try {
+        const messageId = req.params.messageId
+        const userId = req.user._id
+
+        const message = await Message.findById(messageId)
+
+        if (!message) {
+            return res.status(404).json({ message: "Không tìm thấy message" })
+        }
+
+        //chỉ cho ng gửi unsend
+        if (message.senderId.toString() !== userId.toString()) {
+            return res.status(403).json({ message: "Chỉ người gửi mới có quyền thu hồi tin nhắn" })
+        }
+
+        //cập nhật lại (kh query db lần 2)
+        message.isUnsent = true;
+        await message.save();
+
+        //socket 
+        io.to(message.conversationId.toString()).emit("message-unsent", {
+            messageId: message._id,
+            conversationId: message.conversationId
+        })
+
+        return res.status(200).json({
+            message: "Thu hồi tin nhắn thành công"
+        })
+
+    } catch (err) {
+        console.error("Lỗi khi thu hồi tin nhắn", err);
+        return res.status(500).json({ message: "Lỗi hệ thống" });
+    }
+};

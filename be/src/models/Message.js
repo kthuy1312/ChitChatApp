@@ -28,6 +28,11 @@ const messageSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Message",
         default: null
+    },
+    //thu hồi tn
+    isUnsent: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
