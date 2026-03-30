@@ -16,16 +16,11 @@ import { useChatStore } from "@/stores/useChatStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import GroupChatAvatar from "./GroupChatAvatar";
 
-interface User {
-    id: string;
-    name: string;
-}
 
 interface ForwardMessageModalProps {
     open: boolean;
     onOpenChange: (v: boolean) => void;
     messageId: string;
-    onSend: (ids: string[]) => Promise<void>;
 }
 
 const ForwardMessageModal = ({
@@ -65,6 +60,13 @@ const ForwardMessageModal = ({
         }
     }, [open]);
 
+    //khi đóng modal reset toàn bộ trạng thái
+    useEffect(() => {
+        if (!open) {
+            setSentIds([]);
+            setLoadingId(null);
+        }
+    }, [open]);
 
     const handleFowardDirect = async (id: string) => {
         try {
@@ -124,10 +126,10 @@ const ForwardMessageModal = ({
                                         </div>
 
                                         <Button
-                                            size="sm"
+                                            size="default"
                                             disabled={isLoading || isSent}
                                             onClick={() => handleFowardDirect(item._id)}
-                                            className="flex items-center gap-1"
+                                            className="flex items-center gap-1 text-white"
                                         >
                                             {isLoading
                                                 ? <>
@@ -170,10 +172,10 @@ const ForwardMessageModal = ({
                                         </div>
 
                                         <Button
-                                            size="sm"
+                                            size="default"
                                             disabled={isLoading || isSent}
                                             onClick={() => alert("ok")}
-                                            className="flex items-center gap-1"
+                                            className="flex items-center gap-1 text-white"
                                         >
                                             {isLoading
                                                 ? <>

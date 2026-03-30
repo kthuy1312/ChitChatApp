@@ -156,18 +156,23 @@ export const useChatStore = create<ChatState>()(
             addMessage: async (message) => {
                 try {
                     const { user } = useAuthStore.getState();
-                    const { fetchMessages, conversations } = get();
+                    const { fetchMessages, conversations, fetchConversations } = get();
 
                     //đánh dấu tin nhắn của mình
                     message.isOwn = message.senderId === user?._id
 
                     const converId = message.conversationId
 
-                    //Nếu conversation chưa tồn tại (do đã clear)
-                    const exists = conversations.some(c => c._id === converId)
+                    //Nếu conversation chưa tồn tại (do đã clear hoặc chuyển tiếp cho người mới)
+                    let exists = conversations.some(c => c._id === converId)
 
                     if (!exists) {
-                        return
+                        //fetch lại conversations để có conversation mới
+                        await fetchConversations()
+                        exists = get().conversations.some(c => c._id === converId)
+                        if (!exists) {
+                            return
+                        }
                     }
 
                     //lấy danh sách tin nhắn hiện tại (nếu có)
@@ -523,52 +528,8 @@ export const useChatStore = create<ChatState>()(
 
             forwardDirectMessage: async (recipientId: string, originalMessageId: string) => {
                 try {
-                    const message = await chatService.forwardDirectMessage(recipientId, originalMessageId)
-                    const { user } = useAuthStore.getState();
-
-                    //đánh dấu tin nhắn của mình
-                    message.isOwn = message.senderId === user?._id
-
-                    set((state) => {
-                        const prev = state.messages[message.conversationId];
-
-                        return {
-                            messages: {
-                                ...state.messages,
-                                [message.conversationId]: {
-                                    items: prev?.items
-                                        ? [...prev.items, message]
-                                        : [message],
-                                    hasMore: prev?.hasMore ?? false,
-                                    nextCursor: prev?.nextCursor ?? null,
-                                }
-                            }
-                        }
-                    })
-                    //nhảy lên list
-                    set((state) => ({
-                        conversations: sortConversations(
-                            state.conversations.map((c) =>
-                                c._id === message.conversationId
-                                    ? {
-                                        ...c,
-                                        lastMessage: {
-                                            _id: message._id,
-                                            content: message.content,
-                                            createdAt: message.createdAt,
-                                            senderId: {
-                                                _id: message.senderId,
-                                                displayName: user?.displayName ?? "ChitChat",
-                                                avatarUrl: user?.avatarUrl ?? null
-                                            }
-                                        },
-                                        lastMessageAt: message.createdAt,
-                                    }
-                                    : c
-                            )
-                        )
-                    }))
-
+                    await chatService.forwardDirectMessage(recipientId, originalMessageId)
+                    await get().fetchConversations()
                 } catch (error) {
                     console.error("Lỗi forwardDirectMessage:", error)
                 }

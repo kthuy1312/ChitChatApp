@@ -110,7 +110,7 @@ const MessageItem = ({
                             <Badge
                                 variant="outline"
                                 className={cn(
-                                    "text-xs px-2 py-1.5 h-6 border-0 mt-1",
+                                    "text-xs px-2 py-1.5 h-6 border-0 mt-2",
                                     lastMessageStatus === "seen"
                                         ? "bg-primary/20 text-primary"
                                         : "bg-muted text-muted-foreground"

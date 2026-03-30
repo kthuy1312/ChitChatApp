@@ -23,14 +23,13 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
 }
 
 export const emitNewMessage = async (io, conversation, message) => {
-    // Populate the conversation with necessary fields
+
     await conversation.populate([
         { path: 'participants.userID', select: 'displayName avatarUrl offlineAt' },
         { path: 'lastMessage.senderId', select: 'displayName avatarUrl' },
         { path: 'seenBy', select: 'displayName avatarUrl' },
     ]);
 
-    // Format participants like in getConversations
     const participants = (conversation.participants || []).map((p) => ({
         _id: p.userID?._id,
         displayName: p.userID?.displayName,
@@ -48,11 +47,18 @@ export const emitNewMessage = async (io, conversation, message) => {
         unreadCounts: Object.fromEntries(conversation.unreadCounts || new Map()),
     };
 
-    //socket.to(room1).emit(...)
-    //bên file index đã join user đúng room của họ theo conversationId
-    io.to(conversation._id.toString()).emit("new-message", {
+    const payload = {
         message,
         conversation: formattedConversation,
-        unreadCounts: conversation.unreadCounts
-    })
-}
+        unreadCounts: formattedConversation.unreadCounts
+    };
+
+    //emit vào room conversation (user đã join sẵn)
+    io.to(conversation._id.toString()).emit("new-message", payload);
+
+    //emit trực tiếp tới từng user 
+    conversation.participants.forEach((p) => {
+        const userId = p.userID._id.toString();
+        io.to(userId).emit("new-message", payload);
+    });
+};

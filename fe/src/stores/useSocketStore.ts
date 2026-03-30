@@ -43,6 +43,21 @@ export const useSocketStore = create<SocketState>((set, get) => ({
 
         //lắng nghe sự kiện new message
         socket.on("new-message", ({ message, conversation, unreadCounts }) => {
+            // check nếu conversation đã tồn tại trong store
+            const conversationExists = useChatStore.getState().conversations.some(c => c._id === conversation._id)
+
+            if (!conversationExists) {
+                //conversation mới (chuyển tiếp cho người chưa có conversation)
+                //thêm conversation vào danh sách luôn
+                const fullConversation = {
+                    ...conversation,
+                    unreadCounts
+                }
+                useChatStore.getState().addConver(fullConversation)
+                //join room cho conversation mới
+                socket.emit('join-conversation', conversation._id)
+            }
+
             useChatStore.getState().addMessage(message);
             const lastMessage = {
                 _id: conversation.lastMessage._id,
