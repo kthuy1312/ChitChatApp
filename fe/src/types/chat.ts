@@ -36,6 +36,16 @@ export interface ClearedAt {
   timestamp: string;
 }
 
+export interface PinnedMessage {
+  messageId: string
+  content: string | null
+  senderId: string
+  createdAt: string
+  isUnsent: boolean
+  pinnedBy: string
+  pinnedAt: string
+}
+
 export interface Conversation {
   _id: string;
   type: "direct" | "group";
@@ -48,6 +58,7 @@ export interface Conversation {
 
   hiddenFor?: string[];
   clearedAt?: ClearedAt[];
+  pinnedMessages?: PinnedMessage[]
 
   createdAt: string;
   updatedAt: string;

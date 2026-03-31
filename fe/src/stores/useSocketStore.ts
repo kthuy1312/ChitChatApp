@@ -127,6 +127,16 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         socket.on("message-unsent", ({ messageId, conversationId }) => {
             useChatStore.getState().markMessageUnsent(conversationId, messageId);
         });
+
+        socket.on("message-pin-toggled", ({ conversationId, messageId, action, pinnedMessage }) => {
+            const store = useChatStore.getState()
+
+            if (action === "pinned") {
+                store.addPinnedMessage(conversationId, pinnedMessage)
+            } else {
+                store.removePinnedMessage(conversationId, messageId)
+            }
+        })
     },
 
     disconnectSocket: () => {

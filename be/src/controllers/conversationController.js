@@ -665,11 +665,15 @@ export const togglePinMessage = async (req, res) => {
             return res.status(403).json({ message: "Bạn không có quyền ghim tin nhắn cho cuộc trò chuyện này" })
         }
 
+        //không cho pin tn đã thu hồi
+        if (message.isUnsent) {
+            return res.status(400).json({ message: "Không ghim tin nhắn đã thu hồi" })
+        }
+
         //xem đã pin chưa
         const isPinned = conversation.pinnedMessages.some(
             p => p.messageId.toString() === messageId.toString()
         )
-
 
         //nếu đã pin thì unpin
         if (isPinned) {
@@ -690,16 +694,25 @@ export const togglePinMessage = async (req, res) => {
 
             //đẩy vào mảng
             conversation.pinnedMessages.push(newPinned)
-
-            //socket
-            io.to(message.conversationId.toString()).emit("message-pin-toggled", {
-                messageId: message._id,
-                conversationId: message.conversationId,
-                action: isPinned ? "unpinned" : "pinned"
-            })
         }
 
         await conversation.save()
+
+        //socket
+        io.to(message.conversationId.toString()).emit("message-pin-toggled", {
+            messageId: message._id,
+            conversationId: message.conversationId,
+            action: isPinned ? "unpinned" : "pinned",
+            pinnedMessage: {
+                messageId: message._id,
+                content: message.isUnsent ? "Tin nhắn đã thu hồi" : message.content,
+                senderId: message.senderId,
+                createdAt: message.createdAt,
+                isUnsent: message.isUnsent,
+                pinnedBy: userId,
+                pinnedAt: new Date()
+            }
+        })
 
         return res.status(200).json({
             message: isPinned ? "Bỏ ghim tin nhắn thành công" : "Ghim tin nhắn thành công",

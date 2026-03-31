@@ -9,21 +9,21 @@ import GroupChatAvatar from "./GroupChatAvatar";
 import { useSocketStore } from "@/stores/useSocketStore";
 // Thay đổi import formatUserStatus thành useTimeAgo
 import { useTimeAgo } from "@/lib/utils";
-import { MoreVertical, Info, Image, Pin, Search, Palette, Trash2 } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"; // Import Modal từ shadcn
 import { Button } from "../ui/button";
 import ConversationInfo from "./ConversationInfo";
-const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
+import { useState } from "react";
+const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, scrollToPinnedRef?: React.MutableRefObject<any> }) => {
 
     const { conversations, activeConversationId } = useChatStore();
     const { user } = useAuthStore();
     const { onlineUsers, offlineRecords } = useSocketStore();
+    const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
 
     let otherUser: Participant | null = null;
     let isOnline = false;
@@ -93,15 +93,18 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
                     </div>
                 </div>
             </div>
-            <Dialog>
+            <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
                 <DialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
                         <MoreVertical className="size-5 text-muted-foreground" />
                     </Button>
                 </DialogTrigger>
 
-                <DialogContent className="max-w-md p-0 overflow-hidden sm:rounded-2xl border-none shadow-2xl">
-                    <ConversationInfo chat={chat} otherUser={otherUser} isOnline={isOnline} statusText={statusText} />
+                <DialogContent className="max-w-md h-[80vh] p-0 overflow-hidden sm:rounded-2xl border-none shadow-2xl">
+                    <ConversationInfo chat={chat} otherUser={otherUser} isOnline={isOnline} statusText={statusText} onPinnedMessageClick={(messageId: string) => {
+                        scrollToPinnedRef?.current?.(messageId);
+                        setIsInfoDialogOpen(false);
+                    }} />
                 </DialogContent>
             </Dialog>
         </header>

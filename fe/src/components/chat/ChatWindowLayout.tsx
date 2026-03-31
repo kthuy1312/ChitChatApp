@@ -4,13 +4,13 @@ import { SidebarInset } from "../ui/sidebar"
 import ChatWindowHeader from "./ChatWindowHeader"
 import ChatWindowBody from "./ChatWindowBody"
 import MessageInput from "./MessageInput"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import ChatWindowSkeleton from "../skeleton/ChatWindowSkeleton"
 
 const ChatWindowLayout = () => {
 
     const { activeConversationId, conversations, messageLoading: loading, messages, markAsSeen } = useChatStore()
-
+    const scrollToPinnedRef = useRef<((messageId: string) => void) | undefined>(undefined);
     const selectedConver = conversations.find((c) => c._id === activeConversationId) ?? null
 
     //seen
@@ -40,11 +40,11 @@ const ChatWindowLayout = () => {
     return (
         <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-sm shadow-md">
             {/* Header */}
-            <ChatWindowHeader chat={selectedConver} />
+            <ChatWindowHeader chat={selectedConver} scrollToPinnedRef={scrollToPinnedRef} />
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto bg-primary-foreground">
-                <ChatWindowBody />
+                <ChatWindowBody scrollToPinnedRef={scrollToPinnedRef} />
             </div>
 
             {/* Footer */}

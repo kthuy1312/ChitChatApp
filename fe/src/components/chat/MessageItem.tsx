@@ -3,7 +3,7 @@ import type { Conversation, Message, Participant } from "@/types/chat";
 import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Forward } from "lucide-react";
+import { Forward, Pin } from "lucide-react";
 import MessageOptions from "./MessageOptions";
 
 interface MessageItemProps {
@@ -37,9 +37,17 @@ const MessageItem = ({
         (p: Participant) => p._id.toString() === message.senderId.toString()
     );
 
+    //tìm tin nhắn đã pin
+    const isPinned = selectedConvo?.pinnedMessages?.some(
+        p => p.messageId === message._id
+    )
+
+
+
     return (
         <>
             <div
+                id={`msg-${message._id}`}
                 className={cn(
                     "flex gap-2 mt-1 group",
                     message.isOwn ? "justify-end" : "justify-start"
@@ -83,30 +91,51 @@ const MessageItem = ({
                             message.isOwn ? "flex-row" : "flex-row-reverse"
                         )}
                     >
-                        {/* options (3 chấm) */}
-                        <MessageOptions
-                            messageId={message._id}
-                            isOwn={message.isOwn}
-                            conversationId={message.conversationId}
-                        />
+
+                        {/* tn đã thu hồi thì kh hiện 3 chấm nữa */}
+                        {!message.isUnsent && (
+                            <>
+                                {/* options (3 chấm) */}
+                                < MessageOptions
+                                    messageId={message._id}
+                                    isOwn={message.isOwn}
+                                    conversationId={message.conversationId}
+                                    isPinned={isPinned}
+                                />
+                            </>
+                        )}
 
                         {/* bubble */}
-                        <Card
-                            className={cn(
-                                "p-3 transition-all duration-200 text-sm",
-                                message.isUnsent
-                                    ? "italic border border-gray-300/60 bg-white/20 backdrop-blur-sm text-muted-foreground shadow-none"
-                                    : message.isOwn
-                                        ? "bg-gradient-chat text-white border-none shadow-md"
-                                        : "bg-secondary/50 border-none shadow-sm"
+                        <div className="relative">
+                            {/* dấu ghim tn */}
+                            {isPinned && (
+                                <Pin
+                                    className={cn(
+                                        "absolute -top-2 size-3 text-pink-500 hover:rotate-12 z-50",
+                                        message.isOwn
+                                            ? "-left-2 -rotate-45"   //tin của mình 
+                                            : "-right-2 rotate-45" //người khác
+                                    )}
+                                />
                             )}
-                        >
-                            {message.isUnsent
-                                ? (message.isOwn
-                                    ? "Bạn đã thu hồi tin nhắn"
-                                    : "Tin nhắn đã được thu hồi")
-                                : message.content}
-                        </Card>
+                            <Card
+                                className={cn(
+                                    "p-3 transition-all duration-200 text-sm",
+                                    message.isUnsent
+                                        ? "italic border border-gray-300/60 bg-white/20 backdrop-blur-sm text-muted-foreground shadow-none"
+                                        : message.isOwn
+                                            ? "bg-gradient-chat text-white border-none shadow-md"
+                                            : "bg-secondary/50 border-none shadow-sm"
+                                )}
+                            >
+
+                                {message.isUnsent
+                                    ? (message.isOwn
+                                        ? "Bạn đã thu hồi tin nhắn"
+                                        : "Tin nhắn đã được thu hồi")
+                                    : message.content}
+                            </Card>
+                        </div>
                     </div>
 
                     {/* seen / delivered */}

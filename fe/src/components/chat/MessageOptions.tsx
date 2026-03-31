@@ -21,9 +21,9 @@ interface MessageOptionsProps {
     messageId: string;
     isOwn?: boolean;
     conversationId: string;
+    isPinned?: boolean;
 
     onForward?: (id: string) => void;
-    onPin?: (id: string) => void;
     onDelete?: (id: string) => void;
     onRecall?: (id: string) => void; // thu hồi
 }
@@ -32,14 +32,14 @@ const MessageOptions = ({
     messageId,
     conversationId,
     isOwn,
-    onPin,
+    isPinned
 }: MessageOptionsProps) => {
 
     //modal chuyển tiêp tn
     const [openForward, setOpenForward] = useState(false);
 
     //thu hồi
-    const { unsendMessage } = useChatStore()
+    const { unsendMessage, togglePinMessage } = useChatStore()
 
     const handleForward = () => {
         setOpenForward(true);
@@ -47,8 +47,14 @@ const MessageOptions = ({
 
     const handlePin = async () => {
         try {
-            await onPin?.(messageId);
-            toast.success("Đã ghim tin nhắn");
+            await togglePinMessage(messageId)
+            if (isPinned) {
+                toast.success("Đã bỏ ghim tin nhắn");
+            }
+            else {
+                toast.success("Đã ghim tin nhắn");
+            }
+
         } catch {
             toast.error("Không thể thực hiện");
         }
@@ -110,7 +116,7 @@ const MessageOptions = ({
                         className="flex items-center gap-2 cursor-pointer"
                     >
                         <Pin className="h-4 w-4" />
-                        Ghim
+                        {!isPinned ? "Ghim" : "Bỏ ghim"}
                     </DropdownMenuItem>
 
                     {isOwn && (

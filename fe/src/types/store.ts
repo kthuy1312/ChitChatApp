@@ -95,6 +95,11 @@ export interface ChatState {
     markMessageUnsent: (conversationId: string, messageId: string) => void;
     unsendMessage(messageId: string, conversationId: string): Promise<void>
 
+    //pin message
+    addPinnedMessage: (conversationId: string, pinnedMessage: any) => void;
+    removePinnedMessage: (conversationId: string, messageId: string) => void;
+    togglePinMessage(messageId: string): Promise<void>
+
 }
 
 export interface SocketState {

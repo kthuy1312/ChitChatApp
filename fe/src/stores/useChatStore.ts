@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
 import { useSocketStore } from "./useSocketStore";
+import type { Message } from "@/types/chat";
 
 
 //hàm sort conversation theo pinned lên đầu
@@ -580,8 +581,48 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi khi unsendMessage:", error);
                 }
-            }
+            },
 
+            //pin / unpin message
+            addPinnedMessage: (conversationId: string, pinnedMessage: any) => {
+                set((state) => ({
+                    conversations: state.conversations.map(c => {
+                        if (c._id !== conversationId) return c
+
+                        const exists = c.pinnedMessages?.some(
+                            (p: any) => p.messageId === pinnedMessage.messageId
+                        )
+
+                        if (exists) return c
+
+                        return {
+                            ...c,
+                            pinnedMessages: [pinnedMessage, ...(c.pinnedMessages || [])]
+                        }
+                    })
+                }))
+            },
+            removePinnedMessage: (conversationId: string, messageId: string) => {
+                set((state) => ({
+                    conversations: state.conversations.map(c => {
+                        if (c._id !== conversationId) return c
+
+                        return {
+                            ...c,
+                            pinnedMessages: (c.pinnedMessages || []).filter(
+                                (p: any) => p.messageId !== messageId
+                            )
+                        }
+                    })
+                }))
+            },
+            togglePinMessage: async (messageId: string) => {
+                try {
+                    await chatService.togglePinMessage(messageId)
+                } catch (error) {
+                    console.error("Lỗi togglePinMessage:", error)
+                }
+            }
         }),
         {
             name: "chat-storage",

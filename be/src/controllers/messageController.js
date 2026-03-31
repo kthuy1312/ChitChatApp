@@ -179,15 +179,45 @@ export const unsendMessage = async (req, res) => {
             return res.status(403).json({ message: "Chỉ người gửi mới có quyền thu hồi tin nhắn" })
         }
 
+        const conversation = await Conversation.findById(message.conversationId)
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy conversation" })
+        }
+
+        if (!conversation.pinnedMessages) {
+            conversation.pinnedMessages = []
+        }
+
+        //check trước khi xóa pin
+        const wasPinned = conversation.pinnedMessages.some(
+            p => p.messageId.toString() === messageId.toString()
+        )
+
         //cập nhật lại (kh query db lần 2)
         message.isUnsent = true;
-        await message.save();
 
-        //socket 
+        //thu hồi tn đã ghim thì bỏ ghim
+        conversation.pinnedMessages = conversation.pinnedMessages.filter(
+            p => p.messageId.toString() !== messageId.toString()
+        )
+
+        await message.save();
+        await conversation.save();
+
+        //socket unsend
         io.to(message.conversationId.toString()).emit("message-unsent", {
             messageId: message._id,
             conversationId: message.conversationId
         })
+
+        // socket unpin (nếu có)
+        if (wasPinned) {
+            io.to(message.conversationId.toString()).emit("message-pin-toggled", {
+                messageId: message._id,
+                conversationId: message.conversationId,
+                action: "unpinned"
+            })
+        }
 
         return res.status(200).json({
             message: "Thu hồi tin nhắn thành công"

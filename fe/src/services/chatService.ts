@@ -84,4 +84,11 @@ export const chatService = {
         const res = await api.patch(`/messages/${messageId}/unsend`)
         return res.data
     },
+
+    async togglePinMessage(messageId: string): Promise<Message> {
+        const res = await api.patch(`/conversations/${messageId}/pin-message`)
+        return res.data
+    },
+
+
 };
