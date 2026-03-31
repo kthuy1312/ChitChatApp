@@ -35,7 +35,7 @@ const ForwardMessageModal = ({
     const { user } = useAuthStore()
 
     //hàm chuyển tiếp
-    const { forwardDirectMessage } = useChatStore()
+    const { forwardDirectMessage, forwardGroupMessage } = useChatStore()
 
     //lấy group
     const { conversations } = useChatStore();
@@ -73,6 +73,18 @@ const ForwardMessageModal = ({
             setLoadingId(id);
             await forwardDirectMessage(id, messageId);
             setSentIds(prev => [...prev, id]);
+        } catch {
+            console.error("Send failed");
+        } finally {
+            setLoadingId(null);
+        }
+    };
+
+    const handleFowardGroup = async (conversationId: string) => {
+        try {
+            setLoadingId(conversationId);
+            await forwardGroupMessage(conversationId, messageId);
+            setSentIds(prev => [...prev, conversationId]);
         } catch {
             console.error("Send failed");
         } finally {
@@ -154,7 +166,7 @@ const ForwardMessageModal = ({
                             {groupChats.map((item) => {
                                 const isLoading = loadingId === item._id;
                                 const isSent = sentIds.includes(item._id);
-
+                                console.log(groupChats)
                                 return (
                                     <div
                                         key={item._id}
@@ -174,7 +186,7 @@ const ForwardMessageModal = ({
                                         <Button
                                             size="default"
                                             disabled={isLoading || isSent}
-                                            onClick={() => alert("ok")}
+                                            onClick={() => handleFowardGroup(item._id)}
                                             className="flex items-center gap-1 text-white"
                                         >
                                             {isLoading

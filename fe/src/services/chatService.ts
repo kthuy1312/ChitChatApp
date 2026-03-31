@@ -80,6 +80,13 @@ export const chatService = {
         return res.data.data
     },
 
+    async forwardGroupMessage(conversationId: string, originalMessageId: string): Promise<Message> {
+        const res = await api.post("/messages/forward-group", {
+            conversationId, originalMessageId
+        })
+        return res.data.data
+    },
+
     async unsendMessage(messageId: string): Promise<Message> {
         const res = await api.patch(`/messages/${messageId}/unsend`)
         return res.data

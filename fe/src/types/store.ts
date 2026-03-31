@@ -90,6 +90,7 @@ export interface ChatState {
 
     //forward message
     forwardDirectMessage: (recipientId: string, originalMessageId: string) => Promise<void>;
+    forwardGroupMessage: (conversationId: string, originalMessageId: string) => Promise<void>;
 
     //unsed
     markMessageUnsent: (conversationId: string, messageId: string) => void;

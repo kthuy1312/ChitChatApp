@@ -527,12 +527,22 @@ export const useChatStore = create<ChatState>()(
                 }
             },
 
+            //chuyển tiếp
             forwardDirectMessage: async (recipientId: string, originalMessageId: string) => {
                 try {
                     await chatService.forwardDirectMessage(recipientId, originalMessageId)
                     await get().fetchConversations()
                 } catch (error) {
                     console.error("Lỗi forwardDirectMessage:", error)
+                }
+            },
+
+            forwardGroupMessage: async (conversationId: string, originalMessageId: string) => {
+                try {
+                    await chatService.forwardGroupMessage(conversationId, originalMessageId)
+                    await get().fetchConversations()
+                } catch (error) {
+                    console.error("Lỗi forwardGroupMessage:", error)
                 }
             },
 
@@ -602,6 +612,7 @@ export const useChatStore = create<ChatState>()(
                     })
                 }))
             },
+
             removePinnedMessage: (conversationId: string, messageId: string) => {
                 set((state) => ({
                     conversations: state.conversations.map(c => {
@@ -616,6 +627,7 @@ export const useChatStore = create<ChatState>()(
                     })
                 }))
             },
+
             togglePinMessage: async (messageId: string) => {
                 try {
                     await chatService.togglePinMessage(messageId)
