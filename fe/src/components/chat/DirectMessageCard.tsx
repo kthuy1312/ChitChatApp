@@ -70,7 +70,11 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
                                 : "text-muted-foreground"
                         )}
                     >
-                        {conver?.lastMessage?.content ?? ""}
+                        {conver?.lastMessage?.content === null
+                            ? conver.lastMessage.senderId._id === user._id
+                                ? "Bạn đã thu hồi tin nhắn"
+                                : "Tin nhắn đã thu hồi"
+                            : conver?.lastMessage?.content ?? ""}
                     </p>
 
                     {timestamp && (

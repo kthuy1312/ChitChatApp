@@ -552,17 +552,26 @@ export const useChatStore = create<ChatState>()(
                     const convo = state.messages[conversationId];
                     if (!convo) return state;
 
+                    // update message list
                     const updatedItems = convo.items.map(m =>
-                        m._id === messageId ? { ...m, isUnsent: true } : m
+                        m._id === messageId
+                            ? { ...m, isUnsent: true, content: null }
+                            : m
                     );
 
+                    // update conversations (sidebar)
                     const conversations = state.conversations.map(c => {
                         if (c._id !== conversationId) return c;
 
-                        //cập nhật lastMessage nếu message bị thu hồi là lastMessage
-                        const lastMessage = c.lastMessage?._id === messageId
-                            ? { ...c.lastMessage, content: "Tin nhắn đã thu hồi", isUnsent: true }
-                            : c.lastMessage;
+                        let lastMessage = c.lastMessage;
+
+                        // nếu là lastMessage thì fake content
+                        if (c.lastMessage?._id === messageId) {
+                            lastMessage = {
+                                ...c.lastMessage,
+                                content: "Tin nhắn đã thu hồi"
+                            };
+                        }
 
                         return { ...c, lastMessage };
                     });
@@ -576,7 +585,6 @@ export const useChatStore = create<ChatState>()(
                     };
                 });
             },
-
             unsendMessage: async (messageId: string, conversationId: string) => {
                 try {
                     await chatService.unsendMessage(messageId);

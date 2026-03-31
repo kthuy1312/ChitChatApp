@@ -259,8 +259,21 @@ export const unsendMessage = async (req, res) => {
             p => p.messageId.toString() === messageId.toString()
         )
 
+        //nếu tn gỡ là lastMessage thì cho nó là null luôn
+        if (conversation?.lastMessage?._id === messageId.toString()) {
+            await Conversation.updateOne(
+                { _id: message.conversationId },
+                {
+                    $set: {
+                        "lastMessage.content": null
+                    }
+                }
+            );
+        }
+
         //cập nhật lại (kh query db lần 2)
         message.isUnsent = true;
+        message.content = null;
 
         //thu hồi tn đã ghim thì bỏ ghim
         conversation.pinnedMessages = conversation.pinnedMessages.filter(
