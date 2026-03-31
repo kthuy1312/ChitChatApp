@@ -62,7 +62,6 @@ export const sendDirectMessage = async (req, res) => {
 
 }
 
-
 export const sendGroupMessage = async (req, res) => {
     try {
         const senderId = req.user._id
@@ -159,6 +158,73 @@ export const forwardDirectMessage = async (req, res) => {
 
     } catch (err) {
         console.error("Lỗi khi chuyển tiếp tin nhắn", err);
+        return res.status(500).json({ message: "Lỗi hệ thống" });
+    }
+};
+
+export const forwardGroupMessage = async (req, res) => {
+    try {
+        const { originalMessageId, conversationId } = req.body;
+        const senderId = req.user._id;
+
+        if (!originalMessageId || !conversationId) {
+            return res.status(400).json({ message: "Thiếu dữ liệu chuyển tiếp" });
+        }
+
+        //tìm tn gốc
+        const originalMsg = await Message.findById(originalMessageId);
+        if (!originalMsg) {
+            return res.status(404).json({ message: "Không tìm thấy tin nhắn gốc" });
+        }
+
+        //tim conversation
+        const conversation = await Conversation.findById(conversationId)
+        if (!conversation || conversation.type !== "group") {
+            return res.status(404).json({ message: "Không tìm thấy nhóm" });
+        }
+
+        //ktra có trong nhóm kh
+        const isMember = conversation.participants.some(
+            (p) => p.userID.toString() === senderId.toString()
+        )
+
+        if (!isMember) {
+            return res.status(403).json({ message: "Bạn không thuộc nhóm này" });
+        }
+
+        //tạo tn chuyển tiếp
+        const newMessage = await Message.create({
+            conversationId: conversation._id,
+            senderId: senderId,
+            content: originalMsg.content,
+            // imgUrl: originalMsg.imgUrl || null,
+            isForwarded: true,
+            originalMessageId: originalMsg._id
+        });
+
+        //bỏ ẩn nếu ng dùng đã từng xóa hội thoại
+        await Conversation.updateOne(
+            { _id: conversation._id },
+            {
+                $pull: {
+                    hiddenFor: { $in: conversation.participants.map(p => p.userID) }
+                }
+            }
+        );
+
+        //cập nhật lại conver
+        updateConversationAfterCreateMessage(conversation, newMessage, senderId);
+        await conversation.save();
+
+        await emitNewMessage(io, conversation, newMessage);
+
+        return res.status(201).json({
+            message: "Chuyển tiếp vào nhóm thành công",
+            data: newMessage
+        });
+
+    } catch (err) {
+        console.error("Lỗi khi chuyển tiếp tin nhắn vào nhóm", err);
         return res.status(500).json({ message: "Lỗi hệ thống" });
     }
 };
