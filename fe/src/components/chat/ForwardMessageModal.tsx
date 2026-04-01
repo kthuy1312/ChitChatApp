@@ -166,7 +166,6 @@ const ForwardMessageModal = ({
                             {groupChats.map((item) => {
                                 const isLoading = loadingId === item._id;
                                 const isSent = sentIds.includes(item._id);
-                                console.log(groupChats)
                                 return (
                                     <div
                                         key={item._id}
