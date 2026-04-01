@@ -14,6 +14,7 @@ interface MessageItemProps {
     messages: Message[];
     selectedConvo: Conversation;
     lastMessageStatus: "delivered" | "seen";
+    isTyping?: boolean;
 }
 
 const MessageItem = ({
@@ -22,6 +23,7 @@ const MessageItem = ({
     messages,
     selectedConvo,
     lastMessageStatus,
+    isTyping = false,
 }: MessageItemProps) => {
 
     const prev = index + 1 < messages.length ? messages[index + 1] : undefined;
@@ -62,6 +64,36 @@ const MessageItem = ({
 
     const statusColor = statusColorRaw || "220 10% 50%";
 
+    //khi ng dùng nhập
+    if (isTyping) {
+        return (
+            <div className="flex gap-2 mt-1 mb-2 group justify-start">
+
+                {/* avatar */}
+                <div className="w-8">
+                    {isGroupBreak && (
+                        <UserAvatar
+                            type="chat"
+                            name={participant?.displayName ?? "ChitChat"}
+                            avatarUrl={participant?.avatarUrl ?? undefined}
+                        />
+                    )}
+                </div>
+
+                {/* content */}
+                <div className="flex flex-col max-w-[70%] items-start">
+                    <Card className="p-3 text-sm border-none shadow-md italic bg-gray-200/70 dark:bg-gray-700/60 text-muted-foreground">
+                        <div className="flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce"></span>
+                            <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                            <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                        </div>
+
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

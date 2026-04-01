@@ -89,6 +89,15 @@ io.on('connection', async (socket) => {
         socket.leave(conversationId)
     })
 
+    //khi ng dùng nhập tn
+    socket.on("user-typing", ({ conversationId, userId }) => {
+        socket.to(conversationId).emit("user-typing", { conversationId, userId });
+    });
+
+    socket.on("user-stop-typing", ({ conversationId, userId }) => {
+        socket.to(conversationId).emit("user-stop-typing", { conversationId, userId });
+    });
+
     socket.on("disconnect", async () => {
 
         const userId = user._id.toString();

@@ -375,7 +375,7 @@ export const themeInfo: Record<string, { label: string; color: string; preview: 
         preview: "linear-gradient(135deg, hsl(39 95% 85%), hsl(50 100% 90%))",
     },
     gradient_green_cyan: {
-        label: "Gió Biển",
+        label: "Cực Quang",
         color: "bg-green-500",
         preview: "linear-gradient(135deg, hsl(141 80% 90%), hsl(188 80% 85%))",
     },

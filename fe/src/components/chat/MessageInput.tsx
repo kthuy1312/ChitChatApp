@@ -9,6 +9,7 @@ import { useChatStore } from "@/stores/useChatStore";
 import { toast } from "sonner";
 import { chatThemes } from "@/chatThemes";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import { useSocketStore } from "@/stores/useSocketStore";
 
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     const { user } = useAuthStore();
@@ -20,6 +21,11 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     const [value, setValue] = useState("");
 
     if (!user) return;
+
+    //hiện ng dùng đang nhập tn real time
+    const socket = useSocketStore.getState().socket;
+    const { activeConversationId } = useChatStore.getState();
+    const [typingTimeout, setTypingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
     //hội thoại bị hạn chế
     const me = selectedConvo.participants.find(p => p._id === user?._id)
@@ -70,6 +76,25 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             sendMessage();
         }
     }
+
+    //ng dùng nhập 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(e.target.value);
+
+        if (socket && activeConversationId && user) {
+            socket.emit("user-typing", { conversationId: activeConversationId, userId: user._id });
+        }
+
+        if (typingTimeout) clearTimeout(typingTimeout);
+
+        const timeout = setTimeout(() => {
+            if (socket && activeConversationId && user) {
+                socket.emit("user-stop-typing", { conversationId: activeConversationId, userId: user._id });
+            }
+        }, 2000);
+
+        setTypingTimeout(timeout);
+    };
 
     //theme
     const isDark = useDarkMode();
@@ -147,7 +172,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
                         <Input
                             onKeyPress={handleKeyPress}
                             value={value}
-                            onChange={(e) => setValue(e.target.value)}
+                            onChange={handleInputChange}
                             placeholder="Soạn tin nhắn..."
                             className="pr-20 h-9"
                         />

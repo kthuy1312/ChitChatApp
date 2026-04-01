@@ -108,7 +108,10 @@ export interface SocketState {
     socket: Socket | null;
     onlineUsers: string[];
     offlineRecords: Record<string, string | Date>;
+    typingUsers: Record<string, string[]>;
     connectSocket: () => void;
+    setTyping: (conversationId: string, userId: string) => void;
+    removeTyping: (conversationId: string, userId: string) => void;
     disconnectSocket: () => void;
 }
 

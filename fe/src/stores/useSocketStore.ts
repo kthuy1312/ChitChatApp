@@ -14,6 +14,8 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     onlineUsers: [],
     offlineRecords: {},
 
+    typingUsers: {}, // { conversationId: [userId, ...] }
+
     connectSocket: () => {
         const accessToken = useAuthStore.getState().accessToken
         const existingSocket = get().socket;
@@ -146,6 +148,42 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                 store.removePinnedMessage(conversationId, messageId)
             }
         })
+
+        //phát sự kiện khi user nhập tin nhắn
+        socket.on("user-typing", ({ conversationId, userId }) => {
+            get().setTyping(conversationId, userId);
+        });
+
+        socket.on("user-stop-typing", ({ conversationId, userId }) => {
+            get().removeTyping(conversationId, userId);
+        });
+
+    },
+
+    //ng dùng nhập tn
+    setTyping: (conversationId: string, userId: string) => {
+        set((state) => {
+            const users = state.typingUsers[conversationId] || [];
+            if (!users.includes(userId)) {
+                return {
+                    typingUsers: {
+                        ...state.typingUsers,
+                        [conversationId]: [...users, userId]
+                    }
+                };
+            }
+            return state;
+        });
+    },
+
+    //ng kh nhập tn nua
+    removeTyping: (conversationId: string, userId: string) => {
+        set((state) => ({
+            typingUsers: {
+                ...state.typingUsers,
+                [conversationId]: (state.typingUsers[conversationId] || []).filter(u => u !== userId)
+            }
+        }));
     },
 
     disconnectSocket: () => {

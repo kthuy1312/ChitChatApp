@@ -1,4 +1,7 @@
 import { useChatStore } from "@/stores/useChatStore";
+import { useSocketStore } from "@/stores/useSocketStore";
+import { useAuthStore } from "@/stores/useAuthStore";
+import type { Message } from "@/types/chat";
 import ChatWelcomeScreen from "./ChatWelcomeScreen";
 import MessageItem from "./MessageItem";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -35,6 +38,26 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
 
     const hasMore = allMessages[activeConversationId!]?.hasMore ?? false;
     const reversedMessages = [...messages].reverse();
+
+    //khi ng dùng nhập tn
+    const currentUserId = useAuthStore().user?._id;
+    const typingUsers = useSocketStore((state) => state.typingUsers);
+    const activeTypingUsers = (typingUsers[activeConversationId!] || []).filter(
+        (userId: string) => userId !== currentUserId
+    );
+
+    const typingMessage: Message | null = activeTypingUsers.length > 0 && selectedConvo ? {
+        _id: `typing-${selectedConvo._id}`,
+        conversationId: selectedConvo._id,
+        senderId: activeTypingUsers[0],
+        content: "...",
+        createdAt: new Date().toISOString(),
+        isOwn: false,
+    } as Message : null;
+
+    const displayMessages = typingMessage
+        ? [typingMessage, ...reversedMessages]
+        : reversedMessages;
 
     //ref
     const messageEndRed = useRef<HTMLDivElement>(null)
@@ -213,7 +236,7 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
                 <div ref={messageEndRed}></div>
 
                 <InfiniteScroll
-                    dataLength={messages.length}
+                    dataLength={displayMessages.length}
                     next={fetchMoreMessages}
                     hasMore={hasMore}
                     scrollableTarget="scrollableDiv"
@@ -222,20 +245,20 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
                     style={{ display: "flex", flexDirection: "column-reverse", overflow: "visible" }}
                 >
                     {
-                        reversedMessages.map((message, index) => (
-                            <>
-                                <MessageItem
-                                    key={message._id ?? index}
-                                    message={message}
-                                    index={index}
-                                    messages={reversedMessages}
-                                    selectedConvo={selectedConvo}
-                                    lastMessageStatus={lastMessageStatus}
-                                />
-                            </>
+                        displayMessages.map((message, index) => (
+                            <MessageItem
+                                key={message._id ?? index}
+                                message={message}
+                                index={index}
+                                messages={displayMessages}
+                                selectedConvo={selectedConvo}
+                                lastMessageStatus={lastMessageStatus}
+                                isTyping={message._id.toString().startsWith("typing-")}
+                            />
                         ))
                     }
                 </InfiniteScroll>
+
             </div>
         </div>
     );
