@@ -140,11 +140,18 @@ const conversationScheme = new mongoose.Schema({
             default: Date.now
         }
     }],
+
     //pin message
     pinnedMessages: {
         type: [pinnedMessageSchema],
         default: []
-    }
+    },
+
+    //theme
+    theme: {
+        type: String,
+        default: "default"
+    },
 }, {
     timestamps: true
 })

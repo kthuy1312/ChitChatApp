@@ -231,6 +231,44 @@ export const getMessages = async (req, res) => {
     }
 }
 
+export const updateTheme = async (req, res) => {
+    try {
+        const userId = req.user?._id
+        const { conversationId } = req.params
+        const { theme } = req.body
+
+        if (!theme) {
+            return res.status(400).json({ message: "Thiếu thông tin theme" })
+        }
+
+        const conversation = await Conversation.findById(conversationId)
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" })
+        }
+
+        const isParticipant = conversation.participants.some(p => p.userID?.toString() === userId?.toString())
+
+        if (!isParticipant) {
+            return res.status(403).json({ message: "Bạn không có quyền thay đổi theme cho cuộc trò chuyện này" })
+        }
+
+        conversation.theme = theme
+        await conversation.save()
+
+        //socket theme
+        io.to(conversationId).emit("update-theme", {
+            conversationId,
+            theme
+        })
+
+        return res.status(200).json({ conversation })
+    } catch (error) {
+        console.error("Lỗi khi cập nhật theme", error)
+        return res.status(500).json({ message: "Lỗi hệ thống" })
+    }
+}
+
 export const getUserConversationForSocketIO = async (userId) => {
     try {
         const conversations = await Conversation.find(
