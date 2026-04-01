@@ -1,6 +1,6 @@
 
 import { create } from "zustand";
-import { connect, io, type Socket } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from "./useAuthStore";
 import type { SocketState } from "@/types/store";
 import { useChatStore } from "./useChatStore";
@@ -121,6 +121,13 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             useChatStore.getState().updateConversation({
                 _id: conversationId,
                 removeMemberId: userId
+            });
+        })
+
+        socket.on("update-theme", ({ conversationId, theme }) => {
+            useChatStore.getState().updateConversation({
+                _id: conversationId,
+                theme
             });
         })
 

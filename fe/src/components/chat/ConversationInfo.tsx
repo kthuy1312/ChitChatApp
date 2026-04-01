@@ -48,8 +48,14 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     };
 
     //theme
-    const handleTheme = (theme: string) => {
-        updateTheme(chat._id, theme);
+    const handleTheme = async (theme: string) => {
+        try {
+            await updateTheme(chat._id, theme);
+            toast.success(`Đã đổi thành chủ đề ${themeInfo[theme as keyof typeof themeInfo]?.label || theme}`);
+        } catch (error) {
+            console.error("Lỗi handleTheme:", error);
+            toast.error("Cập nhật chủ đề thất bại. Vui lòng thử lại.");
+        }
     };
 
     const getStyle = (value?: string) => {
@@ -285,7 +291,6 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                     onClick={() => {
                                         handleTheme(key);
                                         setSelectedTheme(key);
-                                        toast.success(`Đã đổi thành chủ đề ${info.label}`);
                                     }}
                                     className={`group relative flex items-center justify-between p-4 rounded-xl transition-all border-2 ${isSelectedTheme
                                         ? "border-primary bg-primary/10 shadow-md"

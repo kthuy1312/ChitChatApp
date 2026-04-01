@@ -4,7 +4,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
 import { useSocketStore } from "./useSocketStore";
-import type { Message } from "@/types/chat";
 
 
 //hàm sort conversation theo pinned lên đầu
@@ -275,6 +274,11 @@ export const useChatStore = create<ChatState>()(
                         //update seenBy
                         if (payload.seenBy) {
                             updated.seenBy = payload.seenBy
+                        }
+
+                        //update theme
+                        if (payload.theme) {
+                            updated.theme = payload.theme
                         }
 
                         //update lastMessageAt
@@ -644,14 +648,30 @@ export const useChatStore = create<ChatState>()(
                 }
             },
 
-            updateTheme: (conversationId: string, theme: string) => {
-                set((state) => ({
-                    conversations: state.conversations.map(c =>
-                        c._id === conversationId
-                            ? { ...c, theme }
-                            : c
-                    )
-                }))
+            updateTheme: async (conversationId: string, theme: string) => {
+                try {
+                    set((state) => ({
+                        conversations: state.conversations.map(c =>
+                            c._id === conversationId
+                                ? { ...c, theme }
+                                : c
+                        )
+                    }));
+
+                    const updatedConversation = await chatService.updateConversationTheme(conversationId, theme);
+
+                    set((state) => ({
+                        conversations: state.conversations.map(c =>
+                            c._id === conversationId
+                                ? { ...c, theme: updatedConversation.theme }
+                                : c
+                        )
+                    }));
+
+                } catch (error) {
+                    console.error("Lỗi updateTheme:", error);
+                    throw error;
+                }
             }
         }),
         {

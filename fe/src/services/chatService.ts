@@ -92,6 +92,11 @@ export const chatService = {
         return res.data
     },
 
+    async updateConversationTheme(conversationId: string, theme: string) {
+        const res = await api.patch(`/conversations/${conversationId}/theme`, { theme })
+        return res.data.conversation
+    },
+
     async togglePinMessage(messageId: string): Promise<Message> {
         const res = await api.patch(`/conversations/${messageId}/pin-message`)
         return res.data
