@@ -235,7 +235,7 @@ export const updateTheme = async (req, res) => {
     try {
         const userId = req.user?._id
         const { conversationId } = req.params
-        const { theme } = req.body
+        const { theme, themeLabel } = req.body
 
         if (!theme) {
             return res.status(400).json({ message: "Thiếu thông tin theme" })
@@ -256,10 +256,41 @@ export const updateTheme = async (req, res) => {
         conversation.theme = theme
         await conversation.save()
 
+        const systemText = `${req.user.displayName || "Một người dùng"} đã cập nhật chủ đề đoạn chat thành "${themeLabel}"`
+
+        //system message để hiện "... đã cập nhật chủ đề"
+        const systemMessage = await Message.create({
+            conversationId,
+            senderId: userId,
+            content: systemText,
+            isSystem: true
+        })
+
+        //cập nhật lastMessage và lastMessageAt của conversation 
+        conversation.set({
+            seenBy: [],
+            lastMessageAt: systemMessage.createdAt,
+            lastMessage: {
+                _id: systemMessage._id,
+                content: systemMessage.content,
+                senderId: userId,
+                createdAt: systemMessage.createdAt,
+            }
+        })
+        await conversation.save()
+
         //socket theme
         io.to(conversationId).emit("update-theme", {
             conversationId,
-            theme
+            theme,
+            updatedBy: userId
+        })
+
+        //socket message system
+        io.to(conversationId).emit("new-message", {
+            message: systemMessage,
+            conversation,
+            unreadCounts: conversation.unreadCounts || {}
         })
 
         return res.status(200).json({ conversation })

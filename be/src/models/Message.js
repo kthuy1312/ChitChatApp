@@ -29,6 +29,10 @@ const messageSchema = new mongoose.Schema({
         ref: "Message",
         default: null
     },
+    isSystem: {
+        type: Boolean,
+        default: false
+    },
     //thu hồi tn
     isUnsent: {
         type: Boolean,

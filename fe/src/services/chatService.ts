@@ -92,8 +92,8 @@ export const chatService = {
         return res.data
     },
 
-    async updateConversationTheme(conversationId: string, theme: string) {
-        const res = await api.patch(`/conversations/${conversationId}/theme`, { theme })
+    async updateConversationTheme(conversationId: string, theme: string, themeLabel: string) {
+        const res = await api.patch(`/conversations/${conversationId}/theme`, { theme, themeLabel })
         return res.data.conversation
     },
 

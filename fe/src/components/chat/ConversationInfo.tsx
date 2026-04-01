@@ -50,8 +50,9 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     //theme
     const handleTheme = async (theme: string) => {
         try {
-            await updateTheme(chat._id, theme);
-            toast.success(`Đã đổi thành chủ đề ${themeInfo[theme as keyof typeof themeInfo]?.label || theme}`);
+            const themeLabel = themeInfo[theme as keyof typeof themeInfo]?.label || theme;
+            await updateTheme(chat._id, theme, themeLabel);
+            toast.success(`Đã đổi thành chủ đề ${themeLabel}`);
         } catch (error) {
             console.error("Lỗi handleTheme:", error);
             toast.error("Cập nhật chủ đề thất bại. Vui lòng thử lại.");

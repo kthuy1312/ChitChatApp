@@ -125,12 +125,13 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         })
 
         socket.on("update-theme", ({ conversationId, theme }) => {
-            useChatStore.getState().updateConversation({
+            const chatStore = useChatStore.getState();
+
+            chatStore.updateConversation({
                 _id: conversationId,
                 theme
             });
-        })
-
+        });
         socket.on("message-unsent", ({ messageId, conversationId }) => {
             useChatStore.getState().markMessageUnsent(conversationId, messageId);
         });
