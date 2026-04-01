@@ -52,6 +52,34 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         updateTheme(chat._id, theme);
     };
 
+    const getStyle = (value?: string) => {
+        if (!value) return {};
+
+        if (value.includes("gradient")) {
+            return { background: value };
+        }
+
+        return { backgroundColor: `hsl(${value})` };
+    };
+
+    const currentTheme = chatThemes[selectedTheme as keyof typeof chatThemes];
+
+    const previewBg = isDark
+        ? currentTheme["--background-dark"]
+        : currentTheme["--background"];
+
+    const sentBg = isDark
+        ? currentTheme["--chat-bubble-sent-dark"]
+        : currentTheme["--chat-bubble-sent"];
+
+    const receivedBg = isDark
+        ? currentTheme["--chat-bubble-received-dark"]
+        : currentTheme["--chat-bubble-received"];
+
+    const receivedText = isDark
+        ? currentTheme["--msg-received-text-dark"]
+        : currentTheme["--msg-received-text"];
+
     return (
         <div className="h-full flex flex-col overflow-hidden">
             {view === "info" && (
@@ -269,23 +297,17 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                         <div className="flex gap-1 items-center">
                                             <div
                                                 className="w-6 h-6 rounded-md border border-border/50 shadow-sm"
-                                                style={{
-                                                    background: `hsl(${bgColor})`,
-                                                }}
+                                                style={getStyle(bgColor)}
                                                 title="Nền"
                                             />
                                             <div
                                                 className="w-6 h-6 rounded-md border border-border/50 shadow-sm"
-                                                style={{
-                                                    background: `hsl(${sentColor})`,
-                                                }}
+                                                style={getStyle(sentColor)}
                                                 title="Tin nhắn gửi"
                                             />
                                             <div
                                                 className="w-6 h-6 rounded-md border border-border/50 shadow-sm"
-                                                style={{
-                                                    background: `hsl(${receivedColor})`,
-                                                }}
+                                                style={getStyle(receivedColor)}
                                                 title="Tin nhắn nhận"
                                             />
                                         </div>
@@ -326,38 +348,20 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                         </h4>
                         <div
                             className="p-3 rounded-lg space-y-2"
-                            style={{
-                                backgroundColor: `hsl(${isDark
-                                    ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--background-dark"]
-                                    : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--background"]
-                                    || chatThemes.default["--background"]
-                                    })`,
-                            }}
+                            style={getStyle(previewBg)}
+
                         >
                             <div
                                 className="max-w-[70%] w-fit px-3 py-2 rounded-lg text-sm text-white ml-auto"
-                                style={{
-                                    backgroundColor: `hsl(${isDark
-                                        ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-sent-dark"]
-                                        : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-sent"]
-                                        || chatThemes.default["--chat-bubble-sent"]})`,
-                                }}
+                                style={getStyle(sentBg)}
                             >
                                 Tin nhắn của bạn
                             </div>
                             <div
                                 className="max-w-[70%] w-fit px-3 py-2 rounded-lg text-sm"
                                 style={{
-                                    backgroundColor: `hsl(${isDark
-                                        ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-received-dark"]
-                                        : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-received"]
-                                        || chatThemes.default["--chat-bubble-received"]
-                                        })`,
-                                    color: `hsl(${isDark
-                                        ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--msg-received-text-dark"]
-                                        : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--msg-received-text"]
-                                        || chatThemes.default["--msg-received-text"]
-                                        })`,
+                                    ...getStyle(receivedBg),
+                                    color: `hsl(${receivedText})`
                                 }}
                             >
                                 Tin nhắn bạn bè

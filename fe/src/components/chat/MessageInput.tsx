@@ -7,6 +7,8 @@ import { Input } from "../ui/input";
 import EmojiPicker from "./EmojiPicker";
 import { useChatStore } from "@/stores/useChatStore";
 import { toast } from "sonner";
+import { chatThemes } from "@/chatThemes";
+import { useDarkMode } from "@/hooks/useDarkMode";
 
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     const { user } = useAuthStore();
@@ -42,7 +44,6 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
         }
     }
 
-
     const sendMessage = async () => {
 
         if (!value.trim()) return;
@@ -69,8 +70,32 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             sendMessage();
         }
     }
+
+    //theme
+    const isDark = useDarkMode();
+
+    const themeKey = selectedConvo?.theme || "default";
+    const theme = chatThemes[themeKey as keyof typeof chatThemes];
+
+    const getColor = (key: string) => {
+        const t = theme as Record<string, string>;
+
+        return isDark
+            ? t[`${key}-dark`] || t[key]
+            : t[key];
+    };
+
+    const bg = getColor("--background");
+
     return (
-        <div className="p-3 min-h-[56px] bg-background">
+        <div
+            className="p-3 min-h-[56px]"
+            style={{
+                background: bg.includes("gradient")
+                    ? bg
+                    : `hsl(${bg})`
+            }}
+        >
             {/* khi người dùng bị hạn chế thì hiện ra nút bỏ hạn chế */}
             {isRestricted ? (
                 <div

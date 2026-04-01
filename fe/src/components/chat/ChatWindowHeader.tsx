@@ -18,6 +18,8 @@ import {
 import { Button } from "../ui/button";
 import ConversationInfo from "./ConversationInfo";
 import { useState } from "react";
+import { chatThemes } from "@/chatThemes";
+import { useDarkMode } from "@/hooks/useDarkMode";
 const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, scrollToPinnedRef?: React.MutableRefObject<any> }) => {
 
     const { conversations, activeConversationId } = useChatStore();
@@ -53,9 +55,28 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
     const offlineTime = otherUser ? (offlineRecords[otherUser._id] || otherUser.offlineAt) : null;
     const statusText = useTimeAgo(isOnline, offlineTime ?? null);
 
+    //theme
+    const isDark = useDarkMode();
+    const themeKey = chat?.theme || "default";
+    const theme = chatThemes[themeKey as keyof typeof chatThemes];
+
+    const getColor = (key: string) => {
+        return isDark
+            ? theme[`${key}-dark` as keyof typeof theme] || theme[key as keyof typeof theme]
+            : theme[key as keyof typeof theme];
+    };
+    const bg = getColor("--background");
+
     return (
-        <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background justify-between">
-            <div className="flex items-center gap-2">
+        <header
+            className="sticky top-0 z-10 px-4 py-2 flex items-center justify-between"
+            style={{
+                background: bg?.includes("gradient")
+                    ? bg
+                    : `hsl(${bg})`,
+                borderBottom: `1px solid hsl(${getColor("--chat-bubble-received")} / 0.3)`
+            }}
+        >            <div className="flex items-center gap-2">
 
                 <SidebarTrigger className="-ml-1 text-foreground" />
                 <Separator orientation="vertical" className="mr-2 h-4" />

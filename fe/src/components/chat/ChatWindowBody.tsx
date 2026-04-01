@@ -31,6 +31,8 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
         return theme[bgKey as keyof typeof theme];
     };
 
+    const bg = getBackgroundColor();
+
     const hasMore = allMessages[activeConversationId!]?.hasMore ?? false;
     const reversedMessages = [...messages].reverse();
 
@@ -88,7 +90,6 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
             scrollToPinnedRef.current = scrollToPinned;
         }
     }, [scrollToPinnedRef, activeConversationId, hasMore]);
-
 
     //chat status
     useEffect(() => {
@@ -151,16 +152,21 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
         }
     }, [messages.length])
 
+
     if (!selectedConvo) {
         return <ChatWelcomeScreen />;
     }
 
     if (!messages?.length) {
         return (
-            <div className="flex h-full items-center justify-center text-muted-foreground "
+            <div
+                className="flex h-full items-center justify-center text-muted-foreground"
                 style={{
-                    backgroundColor: `hsl(${getBackgroundColor()})`
-                }}>
+                    background: bg?.includes("gradient")
+                        ? bg
+                        : `hsl(${bg})`
+                }}
+            >
                 Chưa có tin nhắn nào trong cuộc trò chuyện này.
             </div>
         );
@@ -170,7 +176,9 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
         <div
             className="relative p-4 h-full flex flex-col overflow-hidden"
             style={{
-                backgroundColor: `hsl(${getBackgroundColor()})`
+                background: bg?.includes("gradient")
+                    ? bg
+                    : `hsl(${bg})`
             }}
         >
             {latestPinned && (

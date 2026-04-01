@@ -5,6 +5,8 @@ import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Forward, Pin } from "lucide-react";
 import MessageOptions from "./MessageOptions";
+import { useDarkMode } from "@/hooks/useDarkMode";
+import { chatThemes } from "@/chatThemes";
 
 interface MessageItemProps {
     message: Message;
@@ -39,6 +41,27 @@ const MessageItem = ({
     const isPinned = selectedConvo?.pinnedMessages?.some(
         p => p.messageId === message._id
     )
+
+    //theme
+    const isDark = useDarkMode();
+
+    const themeKey = selectedConvo?.theme || "default";
+    const theme = chatThemes[themeKey as keyof typeof chatThemes];
+
+    const getColor = (key: string) => {
+        const t = theme as Record<string, string>;
+
+        return isDark
+            ? t[`${key}-dark`] || t[key]
+            : t[key];
+    };
+
+    const statusColorRaw = lastMessageStatus === "seen"
+        ? getColor("--msg-status-seen")
+        : getColor("--msg-status-sent");
+
+    const statusColor = statusColorRaw || "220 10% 50%";
+
 
     return (
         <>
@@ -121,21 +144,28 @@ const MessageItem = ({
                                 className={cn(
                                     "p-3 transition-all duration-200 text-sm border-none shadow-md",
                                     message.isUnsent
-                                        ?
-                                        "italic bg-gray-200/60 dark:bg-gray-700/40 text-muted-foreground shadow-none border border-gray-300/60 dark:border-gray-600/40"
+                                        ? "italic bg-gray-200/60 dark:bg-gray-700/40 text-muted-foreground shadow-none border border-gray-300/60 dark:border-gray-600/40"
                                         : ""
                                 )}
                                 style={
                                     message.isUnsent
                                         ? undefined
-                                        : {
-                                            backgroundColor: message.isOwn
-                                                ? `hsl(var(--chat-bubble-sent))`
-                                                : `hsl(var(--chat-bubble-received))`,
-                                            color: message.isOwn
-                                                ? `hsl(var(--msg-sent-text))`
-                                                : `hsl(var(--msg-received-text))`,
-                                        }
+                                        : (() => {
+                                            const bg = message.isOwn
+                                                ? getColor("--chat-bubble-sent")
+                                                : getColor("--chat-bubble-received");
+
+                                            const text = message.isOwn
+                                                ? getColor("--msg-sent-text")
+                                                : getColor("--msg-received-text");
+
+                                            return {
+                                                background: bg.includes("gradient")
+                                                    ? bg
+                                                    : `hsl(${bg})`,
+                                                color: `hsl(${text})`,
+                                            };
+                                        })()
                                 }
                             >
 
@@ -152,16 +182,14 @@ const MessageItem = ({
                     {message.isOwn &&
                         message._id === selectedConvo.lastMessage?._id && (
                             <Badge
-                                className="text-xs px-2 py-1.5 h-6 border-0 mt-2 mb-1 "
+                                className="text-xs px-2 py-1.5 h-6 border-0 mt-2 mb-1"
                                 style={{
-                                    backgroundColor:
-                                        lastMessageStatus === "seen"
-                                            ? `hsl(var(--msg-status-seen) / 0.15)`
-                                            : `hsl(var(--msg-status-sent) / 0.15)`,
-                                    color:
-                                        lastMessageStatus === "seen"
-                                            ? `hsl(var(--msg-status-seen))`
-                                            : `hsl(var(--msg-status-sent))`,
+                                    background: statusColor.includes("gradient")
+                                        ? statusColor
+                                        : `hsl(${statusColor} / 0.15)`,
+                                    color: statusColor.includes("gradient")
+                                        ? "#fff"
+                                        : `hsl(${statusColor})`,
                                 }}
                             >
                                 {lastMessageStatus === "seen" ? "Đã xem" : "Đã gửi"}
