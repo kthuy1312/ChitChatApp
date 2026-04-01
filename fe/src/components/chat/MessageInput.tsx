@@ -134,9 +134,12 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
                     <Button
                         disabled={!value.trim()}
                         onClick={sendMessage}
-                        className="bg-gradient-chat"
+                        className="text-white border-0 transition-colors hover:brightness-90"
+                        style={{
+                            backgroundColor: `hsl(var(--send-btn-bg))`,
+                        }}
                     >
-                        <Send className="size-4 text-white" />
+                        <Send className="size-4" />
                     </Button>
                 </div>
             )}

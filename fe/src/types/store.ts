@@ -101,6 +101,7 @@ export interface ChatState {
     removePinnedMessage: (conversationId: string, messageId: string) => void;
     togglePinMessage(messageId: string): Promise<void>
 
+    updateTheme: (conversationId: string, theme: string) => void;
 }
 
 export interface SocketState {

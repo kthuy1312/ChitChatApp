@@ -642,6 +642,16 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi togglePinMessage:", error)
                 }
+            },
+
+            updateTheme: (conversationId: string, theme: string) => {
+                set((state) => ({
+                    conversations: state.conversations.map(c =>
+                        c._id === conversationId
+                            ? { ...c, theme }
+                            : c
+                    )
+                }))
             }
         }),
         {

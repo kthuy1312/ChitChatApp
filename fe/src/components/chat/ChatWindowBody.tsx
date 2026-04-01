@@ -3,12 +3,12 @@ import ChatWelcomeScreen from "./ChatWelcomeScreen";
 import MessageItem from "./MessageItem";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component'
-import { Pin, X } from "lucide-react";
+import { Pin } from "lucide-react";
 import { toast } from "sonner";
-import { useSocketStore } from "@/stores/useSocketStore";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { chatThemes } from "@/chatThemes";
+import { useDarkMode } from "@/hooks/useDarkMode";
 
-const ChatWindowBody = ({ scrollToPinnedRef, openPinnedModalRef }: { scrollToPinnedRef?: React.MutableRefObject<any>, openPinnedModalRef?: React.MutableRefObject<any> }) => {
+const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.MutableRefObject<any> }) => {
     const {
         activeConversationId,
         conversations,
@@ -16,11 +16,20 @@ const ChatWindowBody = ({ scrollToPinnedRef, openPinnedModalRef }: { scrollToPin
         fetchMessages,
     } = useChatStore();
 
-    const { socket } = useSocketStore();
-    const { user } = useAuthStore();
+    const isDark = useDarkMode();
 
     const messages = allMessages[activeConversationId!]?.items ?? []; //lấy messages của cuộc hội thoại đang active
     const selectedConvo = conversations.find((c) => c._id === activeConversationId);
+
+    //lấy theme cho nền 
+    const themeKey = selectedConvo?.theme || "default";
+    const theme = chatThemes[themeKey as keyof typeof chatThemes];
+
+    //dựa vào theme chính mà lấy màu cho theme chat
+    const getBackgroundColor = () => {
+        const bgKey = isDark ? "--background-dark" : "--background";
+        return theme[bgKey as keyof typeof theme];
+    };
 
     const hasMore = allMessages[activeConversationId!]?.hasMore ?? false;
     const reversedMessages = [...messages].reverse();
@@ -32,9 +41,6 @@ const ChatWindowBody = ({ scrollToPinnedRef, openPinnedModalRef }: { scrollToPin
 
     //ktr tn đã đọc hay chưa
     const [lastMessageStatus, setLastMessageStatus] = useState<"delivered" | "seen">("delivered")
-
-    //pin notification
-    const [pinNotification, setPinNotification] = useState<{ type: "pin" | "unpin", senderName?: string } | null>(null)
 
     //hiện cho banner phần ghim
     const latestPinned = selectedConvo?.pinnedMessages
@@ -151,23 +157,40 @@ const ChatWindowBody = ({ scrollToPinnedRef, openPinnedModalRef }: { scrollToPin
 
     if (!messages?.length) {
         return (
-            <div className="flex h-full items-center justify-center text-muted-foreground ">
+            <div className="flex h-full items-center justify-center text-muted-foreground "
+                style={{
+                    backgroundColor: `hsl(${getBackgroundColor()})`
+                }}>
                 Chưa có tin nhắn nào trong cuộc trò chuyện này.
             </div>
         );
     }
 
     return (
-        <div className="relative p-4 bg-primary-foreground h-full flex flex-col overflow-hidden">
+        <div
+            className="relative p-4 h-full flex flex-col overflow-hidden"
+            style={{
+                backgroundColor: `hsl(${getBackgroundColor()})`
+            }}
+        >
             {latestPinned && (
                 <div
-                    className="absolute top-0 left-0 right-0 bg-black/20 backdrop-blur-sm text-white p-2 mx-4 z-10 cursor-pointer flex items-center gap-2  rounded-sm"
                     onClick={() => scrollToPinned(latestPinned.messageId)}
+                    className="absolute top-0 left-0 right-0 p-2 mx-4 z-10 cursor-pointer flex items-center gap-2 rounded-sm backdrop-blur-sm border transition-all hover:shadow-md"
+                    style={{
+                        backgroundColor: `hsla(${isDark
+                            ? theme["--background-pinned-dark"]
+                            : theme["--background-pinned"]
+                            } / 0.6)`,
+                        borderColor: `hsl(${isDark ? theme["--chat-bubble-received-dark"] : theme["--chat-bubble-received"]}/ 0.6)`,
+                    }}
                 >
-                    <div className=" bg-black/20 rounded-full p-1.5 flex items-center justify-center">
+                    <div
+                        className=" bg-black/20 rounded-full p-1.5 flex items-center justify-center flex-shrink-0"
+                    >
                         <Pin className="size-4 text-white fill-white" />
                     </div>
-                    <span className="truncate">
+                    <span className="truncate text-white font-medium">
                         {latestPinned.isUnsent ? "Tin nhắn đã thu hồi" : latestPinned.content}
                     </span>
                 </div>

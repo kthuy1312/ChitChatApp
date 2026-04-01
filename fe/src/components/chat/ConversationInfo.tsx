@@ -12,16 +12,24 @@ import {
 } from "lucide-react"; import UserAvatar from "./UserAvatar";
 import GroupChatAvatar from "./GroupChatAvatar";
 import StatusBadge from "./StatusBadge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useChatStore } from "@/stores/useChatStore";
 import type { PinnedMessage } from "@/types/chat";
+import { chatThemes, themeInfo } from "@/chatThemes";
+import { useDarkMode } from "@/hooks/useDarkMode";
 
 const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessageClick }: any) => {
 
     //pin modal
-    const [view, setView] = useState<"info" | "pinned">("info")
-    const { togglePinMessage } = useChatStore()
+    const [view, setView] = useState<"info" | "pinned" | "theme">("info")
+    const { togglePinMessage, updateTheme } = useChatStore()
+    const isDark = useDarkMode();
+    const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
+
+    useEffect(() => {
+        setSelectedTheme(chat.theme || "default");
+    }, [chat.theme]);
 
     //pin 
     const handlePin = async (messageId: string) => {
@@ -37,6 +45,11 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         if (onPinnedMessageClick) {
             onPinnedMessageClick(messageId);
         }
+    };
+
+    //theme
+    const handleTheme = (theme: string) => {
+        updateTheme(chat._id, theme);
     };
 
     return (
@@ -89,7 +102,9 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                             <OptionItem
                                 icon={<Palette className="size-5 " />}
                                 label="Chủ đề"
+                                onClick={() => setView("theme")}
                             />
+
                             <OptionItem
                                 icon={<UserCog className="size-5 " />}
                                 label="Biệt danh"
@@ -212,6 +227,145 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                     </div>
                 </div>
             )}
+
+            {view === "theme" && (<div className="flex flex-col h-full overflow-hidden">
+                <div className="flex items-center gap-3 p-4 border-b shrink-0">
+                    <button onClick={() => setView("info")}>
+                        <ArrowLeft className="size-5" />
+                    </button>
+                    <h3 className="font-bold text-lg">Chủ đề cuộc trò chuyện</h3>
+                </div>
+
+                <div className="flex-1 overflow-y-auto beautiful-scrollbar p-4">
+                    <div className="grid grid-cols-1 gap-3">
+                        {Object.entries(chatThemes).map(([key]) => {
+                            //key chính là tên theme
+                            const info = themeInfo[key as keyof typeof themeInfo]; //info
+                            const theme = chatThemes[key as keyof typeof chatThemes]; //chứa màu
+                            const isSelectedTheme = chat.theme === key;
+
+                            //lấy màu từ css vars
+                            const bgColor = theme["--background"] as string;
+                            const sentColor = theme["--chat-bubble-sent"] as string;
+                            const receivedColor = theme["--chat-bubble-received"] as string;
+
+                            return (
+                                <button
+                                    key={key}
+                                    onMouseEnter={() => setSelectedTheme(key)}
+                                    onMouseLeave={() => setSelectedTheme(chat.theme || "default")}
+                                    onClick={() => {
+                                        handleTheme(key);
+                                        setSelectedTheme(key);
+                                        toast.success(`Đã đổi thành chủ đề ${info.label}`);
+                                    }}
+                                    className={`group relative flex items-center justify-between p-4 rounded-xl transition-all border-2 ${isSelectedTheme
+                                        ? "border-primary bg-primary/10 shadow-md"
+                                        : "border-border hover:border-primary/50 bg-muted/30 hover:bg-muted/50"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-4 flex-1">
+                                        {/* color preview (3 hình tròn)*/}
+                                        <div className="flex gap-1 items-center">
+                                            <div
+                                                className="w-6 h-6 rounded-md border border-border/50 shadow-sm"
+                                                style={{
+                                                    background: `hsl(${bgColor})`,
+                                                }}
+                                                title="Nền"
+                                            />
+                                            <div
+                                                className="w-6 h-6 rounded-md border border-border/50 shadow-sm"
+                                                style={{
+                                                    background: `hsl(${sentColor})`,
+                                                }}
+                                                title="Tin nhắn gửi"
+                                            />
+                                            <div
+                                                className="w-6 h-6 rounded-md border border-border/50 shadow-sm"
+                                                style={{
+                                                    background: `hsl(${receivedColor})`,
+                                                }}
+                                                title="Tin nhắn nhận"
+                                            />
+                                        </div>
+
+                                        {/* tên Theme */}
+                                        <span className="font-semibold text-foreground text-left">
+                                            {info.label}
+                                        </span>
+                                    </div>
+
+                                    {/* icon check cho theme đang được chọn */}
+                                    {isSelectedTheme && (
+                                        <div className="flex-shrink-0">
+                                            <div className="bg-primary rounded-full p-1">
+                                                <svg
+                                                    className="w-4 h-4 text-white"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Theme Preview */}
+                    <div className="mt-8 p-4 rounded-xl border border-border/50 bg-muted/20">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                            Xem trước hiệu ứng
+                        </h4>
+                        <div
+                            className="p-3 rounded-lg space-y-2"
+                            style={{
+                                backgroundColor: `hsl(${isDark
+                                    ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--background-dark"]
+                                    : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--background"]
+                                    || chatThemes.default["--background"]
+                                    })`,
+                            }}
+                        >
+                            <div
+                                className="max-w-[70%] w-fit px-3 py-2 rounded-lg text-sm text-white ml-auto"
+                                style={{
+                                    backgroundColor: `hsl(${isDark
+                                        ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-sent-dark"]
+                                        : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-sent"]
+                                        || chatThemes.default["--chat-bubble-sent"]})`,
+                                }}
+                            >
+                                Tin nhắn của bạn
+                            </div>
+                            <div
+                                className="max-w-[70%] w-fit px-3 py-2 rounded-lg text-sm"
+                                style={{
+                                    backgroundColor: `hsl(${isDark
+                                        ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-received-dark"]
+                                        : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--chat-bubble-received"]
+                                        || chatThemes.default["--chat-bubble-received"]
+                                        })`,
+                                    color: `hsl(${isDark
+                                        ? chatThemes[selectedTheme as keyof typeof chatThemes]?.["--msg-received-text-dark"]
+                                        : chatThemes[selectedTheme as keyof typeof chatThemes]?.["--msg-received-text"]
+                                        || chatThemes.default["--msg-received-text"]
+                                        })`,
+                                }}
+                            >
+                                Tin nhắn bạn bè
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>)}
         </div>
     );
 

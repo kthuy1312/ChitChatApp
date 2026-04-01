@@ -63,6 +63,7 @@ export interface Conversation {
   createdAt: string;
   updatedAt: string;
 
+  theme?: string;
 }
 
 export interface ConversationResponse {

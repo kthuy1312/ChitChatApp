@@ -23,14 +23,12 @@ const MessageItem = ({
 }: MessageItemProps) => {
 
     const prev = index + 1 < messages.length ? messages[index + 1] : undefined;
-
     // show time + avatar
     const isShowTime =
         index === 0 ||
         new Date(message.createdAt).getTime() -
         new Date(prev?.createdAt || 0).getTime() >
         300000;
-
     const isGroupBreak = isShowTime || message.senderId !== prev?.senderId;
 
     const participant = selectedConvo.participants.find(
@@ -41,8 +39,6 @@ const MessageItem = ({
     const isPinned = selectedConvo?.pinnedMessages?.some(
         p => p.messageId === message._id
     )
-
-
 
     return (
         <>
@@ -111,22 +107,36 @@ const MessageItem = ({
                             {isPinned && (
                                 <Pin
                                     className={cn(
-                                        "absolute -top-2 size-3 text-pink-500 hover:rotate-12 z-50",
+                                        "absolute -top-2 size-3 transition-all duration-200 hover:scale-110 hover:rotate-12 z-1",
                                         message.isOwn
                                             ? "-left-2 -rotate-45"   //tin của mình 
                                             : "-right-2 rotate-45" //người khác
                                     )}
+                                    style={{
+                                        color: `hsl(var(--pin-color))`,
+                                    }}
                                 />
                             )}
                             <Card
                                 className={cn(
-                                    "p-3 transition-all duration-200 text-sm",
+                                    "p-3 transition-all duration-200 text-sm border-none shadow-md",
                                     message.isUnsent
-                                        ? "italic border border-gray-300/60 bg-white/20 backdrop-blur-sm text-muted-foreground shadow-none"
-                                        : message.isOwn
-                                            ? "bg-gradient-chat text-white border-none shadow-md"
-                                            : "bg-secondary/50 border-none shadow-sm"
+                                        ?
+                                        "italic bg-gray-200/60 dark:bg-gray-700/40 text-muted-foreground shadow-none border border-gray-300/60 dark:border-gray-600/40"
+                                        : ""
                                 )}
+                                style={
+                                    message.isUnsent
+                                        ? undefined
+                                        : {
+                                            backgroundColor: message.isOwn
+                                                ? `hsl(var(--chat-bubble-sent))`
+                                                : `hsl(var(--chat-bubble-received))`,
+                                            color: message.isOwn
+                                                ? `hsl(var(--msg-sent-text))`
+                                                : `hsl(var(--msg-received-text))`,
+                                        }
+                                }
                             >
 
                                 {message.isUnsent
@@ -142,15 +152,19 @@ const MessageItem = ({
                     {message.isOwn &&
                         message._id === selectedConvo.lastMessage?._id && (
                             <Badge
-                                variant="outline"
-                                className={cn(
-                                    "text-xs px-2 py-1.5 h-6 border-0 mt-2",
-                                    lastMessageStatus === "seen"
-                                        ? "bg-primary/20 text-primary"
-                                        : "bg-muted text-muted-foreground"
-                                )}
+                                className="text-xs px-2 py-1.5 h-6 border-0 mt-2 mb-1 "
+                                style={{
+                                    backgroundColor:
+                                        lastMessageStatus === "seen"
+                                            ? `hsl(var(--msg-status-seen) / 0.15)`
+                                            : `hsl(var(--msg-status-sent) / 0.15)`,
+                                    color:
+                                        lastMessageStatus === "seen"
+                                            ? `hsl(var(--msg-status-seen))`
+                                            : `hsl(var(--msg-status-sent))`,
+                                }}
                             >
-                                {lastMessageStatus}
+                                {lastMessageStatus === "seen" ? "Đã xem" : "Đã gửi"}
                             </Badge>
                         )}
                 </div>
