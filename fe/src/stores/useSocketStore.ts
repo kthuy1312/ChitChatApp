@@ -132,6 +132,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                 theme
             });
         });
+
         socket.on("message-unsent", ({ messageId, conversationId }) => {
             useChatStore.getState().markMessageUnsent(conversationId, messageId);
         });

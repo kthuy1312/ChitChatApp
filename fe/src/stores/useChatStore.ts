@@ -207,46 +207,20 @@ export const useChatStore = create<ChatState>()(
                         };
                     });
 
-                    if (!message.isSystem && message.type !== "system") {
-                        set((state) => ({
-                            conversations: sortConversations(
-                                state.conversations.map((c) =>
-                                    c._id === converId
-                                        ? { ...c, lastMessage: message, lastMessageAt: message.createdAt }
-                                        : c
-                                )
-                            ),
-                        }));
-                    }
+
+                    set((state) => ({
+                        conversations: sortConversations(
+                            state.conversations.map((c) =>
+                                c._id === converId
+                                    ? { ...c, lastMessage: message, lastMessageAt: message.createdAt, }
+                                    : c
+                            )
+                        ),
+                    }));
 
                 } catch (error) {
                     console.error("Lỗi xảy ra khi addMessage:", error);
                 }
-            },
-
-            addSystemMessage: (conversationId, content) => {
-                const sysMessage: Message = {
-                    _id: `system-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                    conversationId,
-                    senderId: "system",
-                    content,
-                    createdAt: new Date().toISOString(),
-                    isSystem: true,
-                    type: "system",
-                };
-
-                set((state) => {
-                    const prevItems = state.messages[conversationId]?.items ?? [];
-                    return {
-                        messages: {
-                            ...state.messages,
-                            [conversationId]: {
-                                ...state.messages[conversationId],
-                                items: [...prevItems, sysMessage],
-                            },
-                        },
-                    };
-                });
             },
 
             updateConversation: (payload: any) => {
@@ -675,7 +649,7 @@ export const useChatStore = create<ChatState>()(
                 }
             },
 
-            updateTheme: async (conversationId: string, theme: string, themeLabel: string) => {
+            updateTheme: async (conversationId: string, theme: string) => {
                 try {
                     set((state) => ({
                         conversations: state.conversations.map(c =>
@@ -685,7 +659,7 @@ export const useChatStore = create<ChatState>()(
                         )
                     }));
 
-                    const updatedConversation = await chatService.updateConversationTheme(conversationId, theme, themeLabel);
+                    const updatedConversation = await chatService.updateConversationTheme(conversationId, theme);
 
                     set((state) => ({
                         conversations: state.conversations.map(c =>

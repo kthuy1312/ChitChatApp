@@ -42,17 +42,6 @@ const MessageItem = ({
         p => p.messageId === message._id
     )
 
-    //hệ thống: hiện thông báo nhỏ giữa
-    if (message.isSystem || message.type === "system") {
-        return (
-            <div className="flex justify-center py-2">
-                <span className="text-xs text-muted-foreground bg-white/10 dark:bg-black/20 px-2 py-1 rounded">
-                    {message.content}
-                </span>
-            </div>
-        );
-    }
-
     //theme
     const isDark = useDarkMode();
 
@@ -79,7 +68,7 @@ const MessageItem = ({
             <div
                 id={`msg-${message._id}`}
                 className={cn(
-                    "flex gap-2 mt-1 group",
+                    "flex gap-2 mt-1 mb-2 group",
                     message.isOwn ? "justify-end" : "justify-start"
                 )}
             >

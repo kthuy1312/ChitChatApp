@@ -81,6 +81,4 @@ export interface Message {
   isOwn?: boolean;
   isForwarded?: boolean;
   isUnsent?: boolean;
-  isSystem?: boolean;
-  type?: "text" | "system";
 }
