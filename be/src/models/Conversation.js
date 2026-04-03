@@ -152,6 +152,24 @@ const conversationScheme = new mongoose.Schema({
         type: String,
         default: "default"
     },
+
+    //nickname
+    nicknames: [
+        {
+            setterId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            },
+            targetId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            },
+            nickname: {
+                type: String,
+                trim: true
+            }
+        }
+    ]
 }, {
     timestamps: true
 })

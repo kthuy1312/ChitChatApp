@@ -679,3 +679,108 @@ export const clearConversation = async (req, res) => {
     }
 }
 
+export const setNickname = async (req, res) => {
+    try {
+
+        const setterId = req.user.id
+        const conversationId = req.params.conversationId
+        const { nickname, targetId } = req.body
+
+        const conversation = await Conversation.findById(conversationId)
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy conversation" })
+        }
+
+        if (!nickname) {
+            return res.status(404).json({ message: "Thiếu biệt danh" })
+        }
+
+        if (!targetId) {
+            return res.status(404).json({ message: "Thiếu thông tin người được đặt biệt danh" })
+        }
+
+        let isMember
+
+        //ktra ng đặt có thuộc hội thoại không
+        isMember = conversation.participants.some(
+            p => p.userID.toString() === setterId.toString()
+        )
+        if (!isMember) {
+            return res.status(403).json({ message: "Bạn không thuộc cuộc hội thoại này" })
+
+        }
+
+        //ktra ng được đặt có thuộc hội thoại không
+        isMember = conversation.participants.some(
+            p => p.userID.toString() === targetId.toString()
+        )
+
+        if (!isMember) {
+            return res.status(403).json({ message: "Người được đặt biệt danh không thuộc cuộc hội thoại này" })
+        }
+
+        if (nickname.length > 100) {
+            return res.status(400).json({ message: "Biệt danh không được quá 100 ký tự" })
+        }
+
+        //đã từng đặt biệt danh chưa
+        const existing = conversation.nicknames?.some(
+            n => n.setterId.toString() === setterId.toString() &&
+                n.targetId.toString() === targetId.toString()
+        )
+
+        let updatedConversation
+        let action
+
+        if (existing) {
+            //update
+            updatedConversation = await Conversation.findOneAndUpdate(
+                {
+                    _id: conversationId,
+                    "nicknames.setterId": setterId,
+                    "nicknames.targetId": targetId
+                },
+                {
+                    $set: {
+                        "nicknames.$.nickname": nickname
+                    }
+                },
+                { new: true }
+            )
+            action = "update"
+        } else {
+            //insert
+            updatedConversation = await Conversation.findByIdAndUpdate(conversationId,
+                {
+                    $push: {
+                        nicknames: {
+                            setterId,
+                            targetId,
+                            nickname
+                        }
+                    }
+                },
+                { new: true }
+            )
+            action = "insert"
+        }
+
+        //socket 
+        io.to(conversationId).emit("set-nickname", {
+            targetId,
+            setterId,
+            nickname
+        })
+
+        return res.status(200).json({
+            message: "Cập nhật biệt danh thành công",
+            action,
+            conversation: updatedConversation,
+        })
+
+    } catch (error) {
+        console.error("Đã có lỗi khi setNickname:", error)
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
