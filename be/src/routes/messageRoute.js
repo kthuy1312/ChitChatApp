@@ -1,5 +1,5 @@
 import express from 'express'
-import { forwardDirectMessage, forwardGroupMessage, sendDirectMessage, sendGroupMessage, unsendMessage } from '../controllers/messageController.js'
+import { forwardDirectMessage, forwardGroupMessage, sendDirectMessage, sendGroupMessage, togglePinMessage, unsendMessage } from '../controllers/messageController.js'
 import { checkFriendship, checkGroupMembership } from '../middlewares/friendMiddleware.js'
 
 const router = express.Router()
@@ -13,5 +13,7 @@ router.post('/forward-direct', checkFriendship, forwardDirectMessage)
 router.post('/forward-group', forwardGroupMessage)
 //thu hồi tin nhắn
 router.patch('/:messageId/unsend', unsendMessage)
+//ghim tn
+router.patch('/:messageId/pin-message', togglePinMessage)
 
 export default router
