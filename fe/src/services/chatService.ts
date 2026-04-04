@@ -102,5 +102,9 @@ export const chatService = {
         return res.data
     },
 
+    async setNickname(conversationId: string, nickname: string, targetId: string) {
+        const res = await api.patch(`/conversations/${conversationId}/nickname`, { nickname, targetId })
+        return res.data.conversation
+    },
 
 };

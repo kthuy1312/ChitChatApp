@@ -4,13 +4,27 @@ import { MessageCircleMore, Users } from "lucide-react";
 import { Card } from "../ui/card";
 import UserAvatar from "../chat/UserAvatar";
 import { useChatStore } from "@/stores/useChatStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const FriendListModal = () => {
   const { friends } = useFriendStore();
-  const { createConversation } = useChatStore();
+  const { createConversation, conversations } = useChatStore();
+  const { user } = useAuthStore();
 
   const handleAddConversation = async (friendId: string) => {
     await createConversation("direct", "", [friendId]);
+  };
+
+  const getNickname = (friendId: string) => {
+    if (!user?._id) return null;
+
+    const convo = conversations.find(c =>
+      c.type === "direct" &&
+      c.participants.some(p => p._id === user._id) &&
+      c.participants.some(p => p._id === friendId)
+    );
+
+    return convo?.participants.find(p => p._id === friendId)?.nickname || null;
   };
 
   return (
@@ -37,34 +51,45 @@ const FriendListModal = () => {
         </h1>
 
         <div className="space-y-2 max-h-60 overflow-y-auto">
-          {friends.map((friend) => (
-            <Card
-              onClick={() => handleAddConversation(friend._id)}
-              key={friend._id}
-              className="p-3 cursor-pointer transition-smooth hover:shadow-soft glass hover:bg-muted/30 group/friendCard"
-            >
-              <div className="flex items-center gap-3">
-                {/* avatar */}
-                <div className="relative">
-                  <UserAvatar
-                    type="sidebar"
-                    name={friend.displayName}
-                    avatarUrl={friend.avatarUrl}
-                  />
-                </div>
+          {friends.map((friend) => {
+            const nickname = getNickname(friend._id);
 
-                {/* info */}
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <h2 className="font-semibold text-sm truncate">
-                    {friend.displayName}
-                  </h2>
-                  <span className="text-sm text-muted-foreground">
-                    @{friend.username}
-                  </span>
+            return (
+              <Card
+                onClick={() => handleAddConversation(friend._id)}
+                key={friend._id}
+                className="p-3 cursor-pointer transition-smooth hover:shadow-soft glass hover:bg-muted/30 group/friendCard"
+              >
+                <div className="flex items-center gap-3">
+                  {/* avatar */}
+                  <div className="relative">
+                    <UserAvatar
+                      type="sidebar"
+                      name={friend.displayName}
+                      avatarUrl={friend.avatarUrl}
+                    />
+                  </div>
+
+                  {/* info */}
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <h2 className="font-semibold text-sm truncate">
+                      {nickname || friend.displayName}
+                    </h2>
+
+                    {nickname && (
+                      <span className="text-xs text-muted-foreground truncate">
+                        {friend.displayName}
+                      </span>
+                    )}
+
+                    <span className="text-xs text-muted-foreground truncate">
+                      @{friend.username}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
 
           {friends.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 text-center">

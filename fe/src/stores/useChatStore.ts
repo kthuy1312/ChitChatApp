@@ -294,6 +294,9 @@ export const useChatStore = create<ChatState>()(
                             );
                         }
 
+                        if (payload.participants) {
+                            updated.participants = payload.participants;
+                        }
 
                         return updated
                     })
@@ -672,6 +675,35 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi updateTheme:", error);
                     throw error;
+                }
+            },
+
+            setNickname: async (conversationId, nickname, targetId) => {
+                const { user } = useAuthStore.getState();
+                if (!user) return;
+
+                set((state) => ({
+                    conversations: state.conversations.map((c) => {
+                        if (c._id !== conversationId) return c;
+
+                        const updatedParticipants = c.participants.map((p) => {
+                            if (p._id === targetId) {
+                                return { ...p, nickname: nickname || null };
+                            }
+                            return p;
+                        });
+
+                        return {
+                            ...c,
+                            participants: updatedParticipants
+                        };
+                    })
+                }));
+
+                try {
+                    await chatService.setNickname(conversationId, nickname, targetId);
+                } catch (err) {
+                    console.error("Lỗi khi set nickname:", err);
                 }
             }
         }),

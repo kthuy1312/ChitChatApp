@@ -64,7 +64,27 @@ const ArchivedChatList = () => {
         }
     }
 
+    //nickname
+    const nicknameMap = useMemo(() => {
+        if (!user?._id) return {}
 
+        const map: Record<string, string> = {}
+
+        conversations.forEach(c => {
+            if (c.type !== "direct") return
+
+            const hasMe = c.participants.some(p => p._id === user._id)
+            if (!hasMe) return
+
+            c.participants.forEach(p => {
+                if (p._id !== user._id && p.nickname) {
+                    map[p._id] = p.nickname
+                }
+            })
+        })
+
+        return map
+    }, [conversations, user?._id])
 
     return (
         <div className="space-y-8">
@@ -175,6 +195,7 @@ const ArchivedChatList = () => {
 
                             const unreadCount = c.unreadCounts?.[user?._id ?? ""] ?? 0
                             const hasUnread = unreadCount > 0
+                            const nickname = other?._id ? nicknameMap[other._id] : null;
 
                             return (
                                 <div
@@ -199,18 +220,23 @@ const ArchivedChatList = () => {
                                     />
 
                                     <div className="flex-1 min-w-0">
-                                        <p
-                                            className={`text-sm font-medium truncate ${hasUnread ? "text-primary" : ""
-                                                }`}
-                                        >
-                                            {other?.displayName ?? "Người dùng"}
-                                        </p>
+
+                                        <div className="flex flex-col min-w-0 mb-0.5">
+                                            <p
+                                                title={other?.displayName}
+                                                className={`text-sm font-semibold truncate ${hasUnread ? "text-primary" : ""}`}
+                                            >
+                                                {nickname || other?.displayName || "Người dùng"}
+                                            </p>
+
+                                        </div>
 
                                         <p className="text-xs text-muted-foreground truncate">
                                             {c.lastMessage
                                                 ? c.lastMessage.content ?? "[Tin nhắn]"
                                                 : "Chưa có tin nhắn"}
                                         </p>
+
                                     </div>
 
                                     {/* BADGE UNREAD */}

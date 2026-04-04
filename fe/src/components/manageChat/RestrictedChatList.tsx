@@ -46,6 +46,27 @@ const RestrictedChatList = () => {
         }
     }
 
+    //nickname
+    const nicknameMap = useMemo(() => {
+        if (!user?._id) return {}
+
+        const map: Record<string, string> = {}
+
+        conversations.forEach(c => {
+            if (c.type !== "direct") return
+
+            const hasMe = c.participants.some(p => p._id === user._id)
+            if (!hasMe) return
+
+            c.participants.forEach(p => {
+                if (p._id !== user._id && p.nickname) {
+                    map[p._id] = p.nickname
+                }
+            })
+        })
+
+        return map
+    }, [conversations, user?._id])
 
     if (restrictedConversations.length === 0) {
         return (
@@ -62,6 +83,7 @@ const RestrictedChatList = () => {
                 const other = conver.participants.find(
                     p => p._id !== user?._id
                 )
+                const nickname = other?._id ? nicknameMap[other._id] : null;
 
                 return (
                     <div
@@ -88,8 +110,11 @@ const RestrictedChatList = () => {
                                 fetchMessages(conver._id)
                             }}
                         >
-                            <p className="font-medium truncate">
-                                {other?.displayName}
+                            <p
+                                title={other?.displayName}
+                                className="text-sm font-semibold truncate"
+                            >
+                                {nickname || other?.displayName}
                             </p>
 
                         </div>

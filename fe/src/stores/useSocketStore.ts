@@ -158,6 +158,19 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             get().removeTyping(conversationId, userId);
         });
 
+        socket.on("nickname-updated", ({ conversationId, targetId, setterId, nickname }) => {
+            const chatStore = useChatStore.getState();
+
+            chatStore.updateConversation({
+                _id: conversationId,
+                participants: (chatStore.conversations.find(c => c._id === conversationId)?.participants || []).map((p) => {
+                    if (p._id.toString() === targetId.toString()) {
+                        return { ...p, nickname: nickname || null };
+                    }
+                    return p;
+                })
+            });
+        });
     },
 
     //ng dùng nhập tn

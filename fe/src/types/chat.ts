@@ -7,6 +7,7 @@ export interface Participant {
   isArchived?: boolean;
   isRestricted?: boolean;
   offlineAt?: string | Date | null;
+  nickname: string | null;
 }
 
 export interface SeenUser {

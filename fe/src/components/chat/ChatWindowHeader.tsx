@@ -14,6 +14,7 @@ import {
     Dialog,
     DialogContent,
     DialogTrigger,
+    DialogTitle
 } from "@/components/ui/dialog"; // Import Modal từ shadcn
 import { Button } from "../ui/button";
 import ConversationInfo from "./ConversationInfo";
@@ -22,7 +23,7 @@ import { chatThemes } from "@/chatThemes";
 import { useDarkMode } from "@/hooks/useDarkMode";
 const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, scrollToPinnedRef?: React.MutableRefObject<any> }) => {
 
-    const { conversations, activeConversationId } = useChatStore();
+    const { activeConversationId } = useChatStore();
     const { user } = useAuthStore();
     const { onlineUsers, offlineRecords } = useSocketStore();
     const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
@@ -30,9 +31,12 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
     let otherUser: Participant | null = null;
     let isOnline = false;
 
-    chat = chat ?? conversations.find((c) => c._id === activeConversationId);
+    const currentChat = useChatStore((state) =>
+        state.conversations.find((c) => c._id === activeConversationId)
+    );
+    if (!currentChat) return null;
 
-    if (!chat) {
+    if (!currentChat) {
         return (
             <header className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-4 py-2 w-full">
                 <SidebarTrigger className="-ml-1 text-foreground" />
@@ -40,8 +44,8 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
         );
     }
 
-    if (chat.type === "direct") {
-        const otherUsers = chat.participants.filter((p) => p._id !== user?._id);
+    if (currentChat.type === "direct") {
+        const otherUsers = currentChat.participants.filter((p) => p._id !== user?._id);
         otherUser = otherUsers.length > 0 ? otherUsers[0] : null;
 
         if (otherUser) {
@@ -57,7 +61,7 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
 
     //theme
     const isDark = useDarkMode();
-    const themeKey = chat?.theme || "default";
+    const themeKey = currentChat?.theme || "default";
     const theme = chatThemes[themeKey as keyof typeof chatThemes];
 
     const getColor = (key: string) => {
@@ -66,6 +70,11 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
             : theme[key as keyof typeof theme];
     };
     const bg = getColor("--background");
+
+    //nickname
+    const nickname = currentChat.participants.find(
+        p => p._id === otherUser?._id
+    )?.nickname;
 
     return (
         <header
@@ -83,7 +92,7 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
 
                 <div className="p-2 flex items-center gap-3">
                     <div className="relative">
-                        {chat.type === "direct" ? (
+                        {currentChat.type === "direct" ? (
                             <>
                                 <UserAvatar
                                     type={"sidebar"}
@@ -96,7 +105,7 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
                             </>
                         ) : (
                             <GroupChatAvatar
-                                participants={chat.participants}
+                                participants={currentChat.participants}
                                 type="sidebar"
                             />
                         )}
@@ -104,9 +113,10 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
 
                     <div className="flex flex-col">
                         <h2 className="font-semibold text-foreground leading-tight">
-                            {chat.type === "direct" ? otherUser?.displayName : chat.group?.name}
-                        </h2>
-                        {chat.type === "direct" && (
+                            {currentChat.type === "direct"
+                                ? (nickname || otherUser?.displayName)
+                                : currentChat.group?.name}                        </h2>
+                        {currentChat.type === "direct" && (
                             <span className={`text-[11px] ${isOnline ? "text-green-500 font-medium" : "text-muted-foreground"}`}>
                                 <span>{statusText}</span>
                             </span>
@@ -122,7 +132,9 @@ const ChatWindowHeader = ({ chat, scrollToPinnedRef }: { chat?: Conversation, sc
                 </DialogTrigger>
 
                 <DialogContent className="max-w-md h-[80vh] p-0 overflow-hidden sm:rounded-2xl border-none shadow-2xl">
-                    <ConversationInfo chat={chat} otherUser={otherUser} isOnline={isOnline} statusText={statusText} onPinnedMessageClick={(messageId: string) => {
+                    <DialogTitle className="sr-only">
+                    </DialogTitle>
+                    <ConversationInfo chat={currentChat} otherUser={otherUser} isOnline={isOnline} statusText={statusText} onPinnedMessageClick={(messageId: string) => {
                         scrollToPinnedRef?.current?.(messageId);
                         setIsInfoDialogOpen(false);
                     }} />

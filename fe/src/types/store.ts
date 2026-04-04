@@ -102,6 +102,9 @@ export interface ChatState {
     togglePinMessage(messageId: string): Promise<void>
 
     updateTheme: (conversationId: string, theme: string) => Promise<void>;
+
+    setNickname: (conversationId: string, nickname: string, targetId: string) => Promise<void>;
+
 }
 
 export interface SocketState {

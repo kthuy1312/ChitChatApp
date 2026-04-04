@@ -92,6 +92,25 @@ const ForwardMessageModal = ({
         }
     };
 
+    //nickname
+    const nicknameMap = useMemo(() => {
+        if (!user?._id) return {};
+
+        const map: Record<string, string> = {};
+
+        conversations.forEach(c => {
+            if (c.type === "direct") {
+                const other = c.participants.find(p => p._id !== user._id);
+                if (other && other.nickname) {
+                    map[other._id] = other.nickname;
+                }
+            }
+        });
+
+        return map;
+    }, [conversations, user?._id]);
+
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
@@ -113,6 +132,7 @@ const ForwardMessageModal = ({
                                 const isLoading = loadingId === item._id;
                                 const isSent = sentIds.includes(item._id);
                                 const isOnline = onlineUsers.includes(item._id);
+                                const nickname = nicknameMap[item._id];
 
                                 return (
                                     <div
@@ -132,9 +152,17 @@ const ForwardMessageModal = ({
                                                 )}
                                             </div>
 
-                                            <span className="text-sm font-medium truncate max-w-[160px]">
-                                                {item.displayName}
-                                            </span>
+                                            <div className="flex flex-col max-w-[160px]">
+                                                <span className="text-sm font-medium truncate">
+                                                    {item.displayName}
+                                                </span>
+
+                                                {nickname && (
+                                                    <span className="text-xs text-muted-foreground truncate">
+                                                        {nickname}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <Button

@@ -35,11 +35,14 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
         }
     }
 
+    //nickname
+    const nickname = otherUser.nickname;
+
     return (
         <ChatCard
             converId={conver._id}
             isPinned={isPinned}
-            name={otherUser.displayName ?? ""}
+            name={nickname || otherUser.displayName || ""}
             isActive={activeConversationId === conver._id}
             onSelect={handleSelectConversation}
             unreadCounts={unreadCounts}

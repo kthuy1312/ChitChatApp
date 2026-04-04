@@ -22,14 +22,28 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessageClick }: any) => {
 
     //pin modal
-    const [view, setView] = useState<"info" | "pinned" | "theme">("info")
+    const [view, setView] = useState<"info" | "pinned" | "theme" | "nickname">("info")
     const { togglePinMessage, updateTheme } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
+    const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
 
     useEffect(() => {
         setSelectedTheme(chat.theme || "default");
     }, [chat.theme]);
+
+    useEffect(() => {
+        setNicknameMap((prev) => {
+            const updated = { ...prev };
+
+            chat.participants.forEach((p: any) => {
+                const user = p.userID || p;
+                updated[user._id] = p.nickname || "";
+            });
+
+            return updated;
+        });
+    }, [chat.participants]);
 
     //pin 
     const handlePin = async (messageId: string) => {
@@ -51,7 +65,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     const handleTheme = async (theme: string) => {
         try {
             const themeLabel = themeInfo[theme as keyof typeof themeInfo]?.label || theme;
-            await updateTheme(chat._id, theme, themeLabel);
+            await updateTheme(chat._id, theme);
             toast.success(`Đã đổi thành chủ đề ${themeLabel}`);
         } catch (error) {
             console.error("Lỗi handleTheme:", error);
@@ -86,6 +100,36 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     const receivedText = isDark
         ? currentTheme["--msg-received-text-dark"]
         : currentTheme["--msg-received-text"];
+
+    //nickname
+    const handleSetNickname = async (userId: string) => {
+        try {
+            const nickname = nicknameMap[userId]?.trim() || "";
+
+            // validate
+            if (nickname.length > 30) {
+                toast.error("Biệt danh tối đa 30 ký tự");
+                return;
+            }
+
+            if (!chat?._id) {
+                toast.error("Không tìm thấy cuộc trò chuyện");
+                return;
+            }
+
+            await useChatStore.getState().setNickname(
+                chat._id,
+                nickname,
+                userId
+            );
+
+            toast.success("Đã cập nhật biệt danh");
+        } catch (error) {
+            console.error("Lỗi set nickname:", error);
+            toast.error("Cập nhật thất bại");
+        }
+    };
+
 
     return (
         <div className="h-full flex flex-col overflow-hidden">
@@ -143,6 +187,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                             <OptionItem
                                 icon={<UserCog className="size-5 " />}
                                 label="Biệt danh"
+                                onClick={() => setView("nickname")}
                             />
                         </section>
 
@@ -263,6 +308,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                 </div>
             )}
 
+            {/* THEME */}
             {view === "theme" && (<div className="flex flex-col h-full overflow-hidden">
                 <div className="flex items-center gap-3 p-4 border-b shrink-0">
                     <button onClick={() => setView("info")}>
@@ -376,6 +422,56 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                     </div>
                 </div>
             </div>)}
+
+            {/* NICKNAME */}
+            {view === "nickname" && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {chat.participants.map((p: any) => {
+                        const user = p.userID || p
+                        return (
+                            <div
+                                key={user._id}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition"
+                            >
+                                <UserAvatar
+                                    type="sidebar"
+                                    name={user.displayName}
+                                    avatarUrl={user.avatarUrl}
+                                    className="w-10 h-10 shrink-0"
+                                />
+
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">
+                                        {user.displayName}
+                                        {p.nickname && <span className="text-xs text-muted-foreground ml-1">({p.nickname})</span>}
+                                    </p>
+
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <input
+                                            value={nicknameMap[user._id] || ""}
+                                            onChange={(e) =>
+                                                setNicknameMap({
+                                                    ...nicknameMap,
+                                                    [user._id]: e.target.value
+                                                })
+                                            }
+                                            placeholder="Nhập biệt danh..."
+                                            className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                                        />
+                                        <button
+                                            onClick={() => handleSetNickname(user._id)}
+                                            className="px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition bg-primary text-white hover:opacity-90"
+
+                                        >
+                                            Lưu
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
         </div>
     );
 
