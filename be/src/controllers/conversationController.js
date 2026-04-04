@@ -134,6 +134,7 @@ export const getConversations = async (req, res) => {
                 isPinned: p.isPinned ?? false,
                 isArchived: p.isArchived ?? false,
                 isRestricted: p.isRestricted ?? false,
+                nickname: p.nickname || null
             }))
 
             const {
@@ -691,91 +692,62 @@ export const setNickname = async (req, res) => {
             return res.status(404).json({ message: "Không tìm thấy conversation" })
         }
 
-        if (!nickname) {
-            return res.status(404).json({ message: "Thiếu biệt danh" })
-        }
-
         if (!targetId) {
             return res.status(404).json({ message: "Thiếu thông tin người được đặt biệt danh" })
         }
 
-        let isMember
-
-        //ktra ng đặt có thuộc hội thoại không
-        isMember = conversation.participants.some(
-            p => p.userID.toString() === setterId.toString()
-        )
-        if (!isMember) {
-            return res.status(403).json({ message: "Bạn không thuộc cuộc hội thoại này" })
-
+        if (nickname && nickname.length > 30) {
+            return res.status(400).json({ message: "Biệt danh không được quá 30 ký tự" });
         }
 
-        //ktra ng được đặt có thuộc hội thoại không
-        isMember = conversation.participants.some(
-            p => p.userID.toString() === targetId.toString()
-        )
+        const updatedConversation = await Conversation.findOneAndUpdate(
+            {
+                _id: conversationId,
+                "participants.userID": setterId
+            },
+            {
+                $set: {
+                    "participants.$[target].nickname": nickname || null
+                }
+            },
+            {
+                new: true,
+                arrayFilters: [{ "target.userID": targetId }]
+            }
+        ).populate("participants.userID", "displayName avatar");
 
-        if (!isMember) {
-            return res.status(403).json({ message: "Người được đặt biệt danh không thuộc cuộc hội thoại này" })
+        if (!updatedConversation) {
+            return res.status(404).json({
+                message: "Không tìm thấy hội thoại hoặc thành viên không hợp lệ"
+            });
         }
 
-        if (nickname.length > 100) {
-            return res.status(400).json({ message: "Biệt danh không được quá 100 ký tự" })
-        }
-
-        //đã từng đặt biệt danh chưa
-        const existing = conversation.nicknames?.some(
-            n => n.setterId.toString() === setterId.toString() &&
-                n.targetId.toString() === targetId.toString()
-        )
-
-        let updatedConversation
-        let action
-
-        if (existing) {
-            //update
-            updatedConversation = await Conversation.findOneAndUpdate(
-                {
-                    _id: conversationId,
-                    "nicknames.setterId": setterId,
-                    "nicknames.targetId": targetId
-                },
-                {
-                    $set: {
-                        "nicknames.$.nickname": nickname
-                    }
-                },
-                { new: true }
-            )
-            action = "update"
-        } else {
-            //insert
-            updatedConversation = await Conversation.findByIdAndUpdate(conversationId,
-                {
-                    $push: {
-                        nicknames: {
-                            setterId,
-                            targetId,
-                            nickname
-                        }
-                    }
-                },
-                { new: true }
-            )
-            action = "insert"
-        }
+        const formattedConversation = {
+            ...updatedConversation.toObject(),
+            participants: updatedConversation.participants.map(p => ({
+                _id: p.userID._id,
+                displayName: p.userID.displayName,
+                avatarUrl: p.userID.avatar,
+                nickname: p.nickname,
+                joinedAt: p.joinedAt,
+                isPinned: p.isPinned,
+                isArchived: p.isArchived,
+                isRestricted: p.isRestricted,
+                offlineAt: p.offlineAt
+            }))
+        };
 
         //socket 
-        io.to(conversationId).emit("set-nickname", {
+        io.to(conversationId).emit("nickname-updated", {
+            conversationId,
             targetId,
             setterId,
-            nickname
+            nickname: nickname || null
         })
 
         return res.status(200).json({
             message: "Cập nhật biệt danh thành công",
-            action,
-            conversation: updatedConversation,
+            conversation: formattedConversation,
         })
 
     } catch (error) {

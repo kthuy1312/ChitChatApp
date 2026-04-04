@@ -25,7 +25,12 @@ const participantSchema = new mongoose.Schema({
     offlineAt: {
         type: Date,
         default: null
-    }
+    },
+    nickname: {
+        type: String,
+        default: null,
+        trim: true
+    },
 }, {
     _id: false //kh tạo id riêng cho từng phần tử vì đây chri là 1 bảng phụ nên kh cần
 })
@@ -152,24 +157,6 @@ const conversationScheme = new mongoose.Schema({
         type: String,
         default: "default"
     },
-
-    //nickname
-    nicknames: [
-        {
-            setterId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User"
-            },
-            targetId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User"
-            },
-            nickname: {
-                type: String,
-                trim: true
-            }
-        }
-    ]
 }, {
     timestamps: true
 })
