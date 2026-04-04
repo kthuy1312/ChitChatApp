@@ -111,7 +111,7 @@ export const getConversations = async (req, res) => {
             .sort({ lastMessageAt: -1, updatedAt: -1 })
             .populate({
                 path: "participants.userID",
-                select: "displayName avatarUrl offlineAt"
+                select: "displayName avatarUrl offlineAt bio phone email username"
             })
             .populate({
                 path: "lastMessage.senderId",
@@ -134,7 +134,11 @@ export const getConversations = async (req, res) => {
                 isPinned: p.isPinned ?? false,
                 isArchived: p.isArchived ?? false,
                 isRestricted: p.isRestricted ?? false,
-                nickname: p.nickname || null
+                nickname: p.nickname || null,
+                bio: p.userID?.bio || null,
+                phone: p.userID?.phone || null,
+                email: p.userID?.email || null,
+                username: p.userID?.username || null,
             }))
 
             const {

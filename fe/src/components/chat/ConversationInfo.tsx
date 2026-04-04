@@ -8,7 +8,10 @@ import {
     Users,
     User,
     ArrowLeft,
-    PinOff
+    PinOff,
+    Mail,
+    Phone,
+    CalendarDays
 } from "lucide-react"; import UserAvatar from "./UserAvatar";
 import GroupChatAvatar from "./GroupChatAvatar";
 import StatusBadge from "./StatusBadge";
@@ -22,7 +25,7 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessageClick }: any) => {
 
     //pin modal
-    const [view, setView] = useState<"info" | "pinned" | "theme" | "nickname">("info")
+    const [view, setView] = useState<"info" | "pinned" | "theme" | "nickname" | "profile">("info")
     const { togglePinMessage, updateTheme } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
@@ -31,7 +34,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     useEffect(() => {
         setSelectedTheme(chat.theme || "default");
     }, [chat.theme]);
-
+    console.log(otherUser)
     useEffect(() => {
         setNicknameMap((prev) => {
             const updated = { ...prev };
@@ -199,7 +202,8 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
 
                                 <OptionItem
                                     icon={<User className="size-5" />}
-                                    label="Xem trang cá nhân"
+                                    label="Thông tin cá nhân"
+                                    onClick={() => setView("profile")}
                                 />
                             </section>
                         )}
@@ -314,7 +318,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                     <button onClick={() => setView("info")}>
                         <ArrowLeft className="size-5" />
                     </button>
-                    <h3 className="font-bold text-lg">Chủ đề cuộc trò chuyện</h3>
+                    <h3 className="font-bold text-lg">Chủ Đề Cuộc Trò Chuyện</h3>
                 </div>
 
                 <div className="flex-1 overflow-y-auto beautiful-scrollbar p-4">
@@ -425,51 +429,137 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
 
             {/* NICKNAME */}
             {view === "nickname" && (
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {chat.participants.map((p: any) => {
-                        const user = p.userID || p
-                        return (
-                            <div
-                                key={user._id}
-                                className="flex items-center gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition"
-                            >
-                                <UserAvatar
-                                    type="sidebar"
-                                    name={user.displayName}
-                                    avatarUrl={user.avatarUrl}
-                                    className="w-10 h-10 shrink-0"
-                                />
+                <div className="flex flex-col h-full">
 
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">
-                                        {user.displayName}
-                                        {p.nickname && <span className="text-xs text-muted-foreground ml-1">({p.nickname})</span>}
-                                    </p>
+                    <div className="flex items-center gap-3 p-4 border-b shrink-0">
+                        <button onClick={() => setView("info")}>
+                            <ArrowLeft className="size-5" />
+                        </button>
+                        <h3 className="font-bold text-lg">Biệt Danh</h3>
+                    </div>
 
-                                    <div className="mt-1 flex items-center gap-2">
-                                        <input
-                                            value={nicknameMap[user._id] || ""}
-                                            onChange={(e) =>
-                                                setNicknameMap({
-                                                    ...nicknameMap,
-                                                    [user._id]: e.target.value
-                                                })
-                                            }
-                                            placeholder="Nhập biệt danh..."
-                                            className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                                        />
-                                        <button
-                                            onClick={() => handleSetNickname(user._id)}
-                                            className="px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition bg-primary text-white hover:opacity-90"
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                        {chat.participants.map((p: any) => {
+                            const user = p.userID || p
 
-                                        >
-                                            Lưu
-                                        </button>
+                            return (
+                                <div
+                                    key={user._id}
+                                    className="flex items-center gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition"
+                                >
+                                    <UserAvatar
+                                        type="sidebar"
+                                        name={user.displayName}
+                                        avatarUrl={user.avatarUrl}
+                                        className="w-10 h-10 shrink-0"
+                                    />
+
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate">
+                                            {user.displayName}
+                                            {p.nickname && (
+                                                <span className="text-xs text-muted-foreground ml-1">
+                                                    ({p.nickname})
+                                                </span>
+                                            )}
+                                        </p>
+
+                                        <div className="mt-1 flex items-center gap-2">
+                                            <input
+                                                value={nicknameMap[user._id] || ""}
+                                                onChange={(e) =>
+                                                    setNicknameMap({
+                                                        ...nicknameMap,
+                                                        [user._id]: e.target.value
+                                                    })
+                                                }
+                                                placeholder="Nhập biệt danh..."
+                                                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                                            />
+
+                                            <button
+                                                onClick={() => handleSetNickname(user._id)}
+                                                className="px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition bg-primary text-white hover:opacity-90"
+                                            >
+                                                Lưu
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {view === "profile" && (
+                <div className="flex flex-col h-full bg-background">
+
+                    <div className="flex items-center gap-3 px-4 py-3 border-b backdrop-blur-sm bg-background/70">
+                        <button
+                            onClick={() => setView("info")}
+                            className="p-2 rounded-full hover:bg-muted transition"
+                        >
+                            <ArrowLeft className="size-5" />
+                        </button>
+                        <h3 className="font-bold text-lg">Thông Tin Cá Nhân</h3>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-5 space-y-6">
+
+                        <div className="relative rounded-2xl p-6 text-center shadow-lg border border-border/40 bg-gradient-to-b from-primary/10 via-background to-background">
+
+                            <div className="relative w-fit mx-auto">
+                                <UserAvatar
+                                    type="profile"
+                                    name={otherUser?.displayName}
+                                    avatarUrl={otherUser?.avatarUrl}
+                                    className="w-24 h-24 text-2xl ring-4 ring-background shadow-xl"
+                                />
+
                             </div>
-                        )
-                    })}
+
+                            <h2 className="mt-4 text-xl font-bold">
+                                {otherUser?.displayName}
+                            </h2>
+
+                            <p className="text-sm text-muted-foreground">
+                                @{otherUser?.username}
+                            </p>
+
+                        </div>
+
+                        <div className="space-y-3">
+
+                            <InfoItem
+                                icon={<Mail className="size-5" />}
+                                label="Email"
+                                value={otherUser?.email}
+                            />
+
+                            <InfoItem
+                                icon={<Phone className="size-5" />}
+                                label="Số điện thoại"
+                                value={otherUser?.phone}
+                            />
+
+                            <InfoItem
+                                icon={<User className="size-5" />}
+                                label="Bio"
+                                value={otherUser?.bio || "Chưa cập nhật"}
+                            />
+
+                            <InfoItem
+                                icon={<CalendarDays className="size-5" />}
+                                label="Ngày tham gia"
+                                value={
+                                    otherUser?.joinedAt
+                                        ? new Date(otherUser.joinedAt).toLocaleDateString("vi-VN")
+                                        : "Không rõ"
+                                }
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -486,5 +576,22 @@ const OptionItem = ({ icon, label, className = "", onClick }: any) => (
         {label}
     </button>
 )
+const InfoItem = ({ label, value, icon }: any) => (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 hover:bg-muted/70 transition border border-border/30">
 
+        <div className="p-2 rounded-lg bg-background border border-border/40 text-primary">
+            {icon}
+        </div>
+
+        <div className="flex flex-col min-w-0">
+            <span className="text-xs text-muted-foreground">
+                {label}
+            </span>
+
+            <span className="text-sm font-medium break-words">
+                {value || "Không có"}
+            </span>
+        </div>
+    </div>
+)
 export default ConversationInfo
