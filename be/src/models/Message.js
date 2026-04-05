@@ -1,5 +1,22 @@
 import mongoose from "mongoose"
 
+const allowedEmojis = ["👍", "❤️", "😂", "😢", "😡"];
+const reactionSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    emoji: {
+        type: String,
+        required: true,
+        enum: allowedEmojis
+    },
+    reactedAt: {
+        type: Date,
+        default: Date.now
+    }
+}, { _id: false })
+
 const messageSchema = new mongoose.Schema({
     conversationId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,6 +50,10 @@ const messageSchema = new mongoose.Schema({
     isUnsent: {
         type: Boolean,
         default: false
+    },
+    reactions: {
+        type: [reactionSchema],
+        default: []
     }
 }, {
     timestamps: true

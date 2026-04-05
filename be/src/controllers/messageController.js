@@ -392,3 +392,78 @@ export const togglePinMessage = async (req, res) => {
         res.status(500).json({ message: "Server error" })
     }
 }
+export const toggleReaction = async (req, res) => {
+    try {
+
+        const messageId = req.params.messageId
+        const userId = req.user._id
+        const { emoji } = req.body
+        const allowedEmojis = ["👍", "❤️", "😂", "😢", "😡"];
+
+        if (!emoji) {
+            return res.status(404).json({ message: "Thiếu emoji" })
+        }
+
+        if (!allowedEmojis.includes(emoji)) {
+            return res.status(400).json({ message: "Emoji không hợp lệ" });
+        }
+
+        const message = await Message.findById(messageId)
+        if (!message) {
+            return res.status(404).json({ message: "Không tìm thấy message" })
+        }
+        if (message.isUnsent) {
+            return res.status(400).json({ message: "Không thể react tin đã thu hồi" })
+        }
+
+        //check đã react tn đó chưa 
+        const existingReactionIndex = message.reactions.findIndex(
+            r => r.userId.toString() === userId.toString()
+        )
+
+        let action = "added"
+
+        //nếu có rồi thì update
+        if (existingReactionIndex !== -1) {
+            const existingReaction = message.reactions[existingReactionIndex]
+
+            //cùng emoji thì remove
+            if (existingReaction.emoji === emoji) {
+                message.reactions.splice(existingReactionIndex, 1)
+                action = "removed"
+            } else {
+                //emoji mới thì update
+                message.reactions[existingReactionIndex].emoji = emoji
+                action = "updated"
+            }
+
+        } else {
+            //chưa có thì thêm
+            message.reactions.push({
+                userId,
+                emoji
+            })
+        }
+
+        await message.save()
+
+        //socket
+        io.to(message.conversationId.toString()).emit("message-reaction", {
+            messageId,
+            userId,
+            emoji,
+            action
+        })
+
+        return res.status(200).json({
+            message: "Reaction updated",
+            allowedEmojis,
+            data: message.reactions
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi toggleReaction ", error)
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
