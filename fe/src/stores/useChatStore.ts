@@ -40,7 +40,9 @@ export const useChatStore = create<ChatState>()(
             converloading: false,
             messageLoading: false,
             loading: false,
-
+            searchResults: [],
+            searchLoading: false,
+            searchKeyword: "",
 
             setActiveConversation: (id) => set({ activeConversationId: id }),
             reset: () => {
@@ -50,6 +52,9 @@ export const useChatStore = create<ChatState>()(
                     activeConversationId: null,
                     converloading: false,
                     messageLoading: false,
+                    searchResults: [],
+                    searchLoading: false,
+                    searchKeyword: "",
                 })
             },
 
@@ -705,7 +710,44 @@ export const useChatStore = create<ChatState>()(
                 } catch (err) {
                     console.error("Lỗi khi set nickname:", err);
                 }
-            }
+            },
+
+            searchMessages: async (conversationId: string, q: string) => {
+                try {
+                    if (!q.trim()) {
+                        set({ searchResults: [], searchKeyword: "" })
+                        return
+                    }
+
+                    set({ searchLoading: true, searchKeyword: q })
+
+                    const results = await chatService.searchMessage(conversationId, q)
+
+                    const { user } = useAuthStore.getState()
+
+                    const processed = results
+                        .filter((m: Message) => !m.isUnsent)//loại tin nhắn đã thu hồi
+                        .map((m: Message) => ({
+                            ...m,
+                            isOwn: m.senderId === user?._id
+                        }))
+
+                    set({
+                        searchResults: processed,
+                        searchLoading: false
+                    })
+
+                } catch (error) {
+                    console.error("Lỗi searchMessages:", error)
+                    set({ searchLoading: false })
+                }
+            },
+            clearSearch: () => {
+                set({
+                    searchResults: [],
+                    searchKeyword: ""
+                })
+            },
         }),
         {
             name: "chat-storage",

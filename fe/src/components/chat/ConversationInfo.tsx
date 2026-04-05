@@ -25,8 +25,8 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessageClick }: any) => {
 
     //pin modal
-    const [view, setView] = useState<"info" | "pinned" | "theme" | "nickname" | "profile">("info")
-    const { togglePinMessage, updateTheme } = useChatStore()
+    const [view, setView] = useState<"info" | "pinned" | "theme" | "nickname" | "profile" | "search">("info")
+    const { togglePinMessage, updateTheme, clearSearch } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
     const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
@@ -133,6 +133,12 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         }
     };
 
+    //search
+    useEffect(() => {
+        return () => {
+            clearSearch()
+        }
+    }, [])
 
     return (
         <div className="h-full flex flex-col overflow-hidden">
@@ -224,11 +230,6 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                         <section className="pt-3 border-t border-border/40 space-y-1">
                             <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-2 mb-2">Kho lưu trữ</h4>
                             <OptionItem
-                                icon={<Images className="size-5 " />}
-                                label="Xem ảnh"
-                                badge="12"
-                            />
-                            <OptionItem
                                 icon={<Pin className="size-5 " />}
                                 label="Tin nhắn đã ghim"
                                 onClick={() => setView("pinned")}
@@ -236,6 +237,12 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                             <OptionItem
                                 icon={<Search className="size-5 " />}
                                 label="Tìm kiếm tin nhắn"
+                                onClick={() => setView("search")}
+                            />
+                            <OptionItem
+                                icon={<Images className="size-5 " />}
+                                label="Xem ảnh"
+                                badge="12"
                             />
                         </section>
 
@@ -492,6 +499,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                 </div>
             )}
 
+            {/* PROFILE */}
             {view === "profile" && (
                 <div className="flex flex-col h-full bg-background">
 
@@ -562,9 +570,26 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                     </div>
                 </div>
             )}
+
+            {/* SEARCH */}
+            {view === "search" && (
+                <div className="flex flex-col h-full">
+
+                    {/* header */}
+                    <div className="flex items-center gap-3 p-4 border-b shrink-0">
+                        <button onClick={() => setView("info")}>
+                            <ArrowLeft className="size-5" />
+                        </button>
+                        <h3 className="font-bold text-lg">Tìm Kiếm Tin Nhắn</h3>
+                    </div>
+
+                    {/* input */}
+                    <SearchBox chatId={chat._id} onResultClick={onPinnedMessageClick} />
+
+                </div>
+            )}
         </div>
     );
-
 };
 
 const OptionItem = ({ icon, label, className = "", onClick }: any) => (
@@ -594,4 +619,86 @@ const InfoItem = ({ label, value, icon }: any) => (
         </div>
     </div>
 )
+const SearchBox = ({ chatId, onResultClick }: any) => {
+    const {
+        searchMessages,
+        searchResults,
+        searchLoading,
+    } = useChatStore()
+
+    const [q, setQ] = useState("")
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            searchMessages(chatId, q)
+        }, 400) // debounce
+
+        return () => clearTimeout(delay)
+    }, [q])
+
+    return (
+        <div className="flex flex-col flex-1 overflow-hidden">
+
+            {/* input */}
+            <div className="p-3 border-b bg-background">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+
+                    <input
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                        placeholder="Tìm tin nhắn..."
+                        className="
+                            w-full pl-10 pr-4 py-2.5
+                            rounded-xl
+                            border border-border
+                            bg-muted/40
+                            text-sm
+                            outline-none
+                            transition-all duration-200
+
+                            focus:bg-background
+                            focus:border-primary
+                            focus:ring-2 focus:ring-primary/20
+
+                            placeholder:text-muted-foreground
+                        "
+                    />
+                </div>
+            </div>
+
+            {/* result */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+
+                {searchLoading && (
+                    <p className="text-sm text-muted-foreground text-center">
+                        Đang tìm kiếm...
+                    </p>
+                )}
+
+                {!searchLoading && searchResults.length === 0 && q && (
+                    <p className="text-sm text-muted-foreground text-center">
+                        Không tìm thấy kết quả
+                    </p>
+                )}
+
+                {searchResults.map((m: any) => (
+                    <div
+                        key={m._id}
+                        onClick={() => onResultClick?.(m._id)}
+                        className="p-3 rounded-xl bg-muted hover:bg-accent cursor-pointer transition"
+                    >
+                        <p className="text-sm font-medium truncate">
+                            {m.isUnsent ? "Tin nhắn đã thu hồi" : m.content}
+                        </p>
+
+                        <span className="text-xs text-muted-foreground">
+                            {new Date(m.createdAt).toLocaleString()}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
 export default ConversationInfo

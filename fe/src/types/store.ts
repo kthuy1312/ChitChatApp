@@ -37,7 +37,9 @@ export interface ChatState {
     converloading: boolean;
     messageLoading: boolean;
     loading: boolean,
-
+    searchResults: Message[];
+    searchLoading: boolean;
+    searchKeyword: string;
 
     reset: () => void;
     setActiveConversation: (id: string | null) => void;
@@ -105,6 +107,8 @@ export interface ChatState {
 
     setNickname: (conversationId: string, nickname: string, targetId: string) => Promise<void>;
 
+    searchMessages: (conversationId: string, query: string) => Promise<void>;
+    clearSearch: () => void;
 }
 
 export interface SocketState {

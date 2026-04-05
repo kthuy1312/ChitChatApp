@@ -107,4 +107,9 @@ export const chatService = {
         return res.data.conversation
     },
 
+    async searchMessage(conversationId: string, q: string) {
+        const res = await api.get(`/conversations/${conversationId}/messages/search?q=${q}`)
+        return res.data.messages
+    }
+
 };
