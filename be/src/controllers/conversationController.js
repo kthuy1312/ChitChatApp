@@ -149,10 +149,25 @@ export const getConversations = async (req, res) => {
                 ...safe
             } = conver.toObject()
 
+            //lọc tn ghim đối với ng đã xóa conver
+            const clearedRecord = conver.clearedAt.find(
+                c => c.userId.toString() === userId.toString()
+            );
+
+            let filteredPinned = conver.pinnedMessages;
+
+            //nếu user đã clear conver
+            if (clearedRecord) {
+                filteredPinned = conver.pinnedMessages.filter(p => {
+                    return new Date(p.createdAt) > new Date(clearedRecord.timestamp);
+                });
+            }
+
             return {
                 ...safe,
                 unreadCounts: conver.unreadCounts || {},
-                participants
+                participants,
+                pinnedMessages: filteredPinned
             }
         })
 
@@ -303,7 +318,6 @@ export const isRestrictedBetween = async (conversationId) => {
     //nếu có ít nhất 1 participant đang restrict
     return conversation.participants.some(p => p.isRestricted === true)
 }
-
 
 export const markAsSeen = async (req, res) => {
     try {
