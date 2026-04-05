@@ -63,6 +63,7 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
     const messageEndRed = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const key = `chat-scroll-${activeConversationId}`
+    const [showScrollDown, setShowScrollDown] = useState(false);
 
     //ktr tn đã đọc hay chưa
     const [lastMessageStatus, setLastMessageStatus] = useState<"delivered" | "seen">("delivered")
@@ -151,15 +152,20 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
     //lưu vị trí cuộn hiện tại 
     const handleScrollSave = () => {
         const container = containerRef.current;
-        if (!container || !activeConversationId) {
-            return;
-        }
+        if (!container || !activeConversationId) return;
+        const isAtBottom = Math.abs(container.scrollTop) < 100;
+        setShowScrollDown(!isAtBottom);
 
         sessionStorage.setItem(key, JSON.stringify({
-            scrollTop: container.scrollTop, //vị trí cuộn hiện tại
-            scrollHeight: container.scrollHeight //tổng chiều cao có thể cuộn được
-        }))
-    }
+            scrollTop: container.scrollTop,
+            scrollHeight: container.scrollHeight
+        }));
+    };
+
+    //hàm cuộn xuống đáy
+    const scrollToBottom = () => {
+        messageEndRed.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     //cuộn tới vị trí đã lưu
     useLayoutEffect(() => {
@@ -226,6 +232,29 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
                     </span>
                 </div>
             )}
+
+            {showScrollDown && (
+                <button
+                    onClick={scrollToBottom}
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 p-1.5 rounded-full shadow-md border transition-all animate-bounce active:scale-95 hover:scale-110 flex items-center justify-center"
+                    style={{
+                        backgroundColor: `hsl(${isDark ? theme["--chat-bubble-sent-dark"] : theme["--chat-bubble-sent"]})`,
+                        borderColor: `hsl(${isDark ? theme["--msg-status-seen-dark"] : theme["--msg-status-seen"]})`,
+                        color: "white"
+                    }}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14" height="14"
+                        viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="3"
+                        strokeLinecap="round" strokeLinejoin="round"
+                    >
+                        <path d="m7 13 5 5 5-5M7 6l5 5 5-5" />
+                    </svg>
+                </button>
+            )}
+
             <div
                 id="scrollableDiv"
                 ref={containerRef}
