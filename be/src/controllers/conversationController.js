@@ -774,3 +774,44 @@ export const setNickname = async (req, res) => {
     }
 }
 
+export const searchMessages = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const conversationId = req.params.conversationId
+        const { q } = req.query;
+
+        if (!q) {
+            return res.status(400).json({ message: "Thiếu từ khóa tìm kiếm" });
+        }
+
+        const conversation = await Conversation.findById(conversationId)
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy conversation" });
+        }
+
+        //filter theo clearedAt cho những ng đã xóa conver
+        const clearedRecord = conversation.clearedAt.find(
+            c => c.userId.toString() === userId.toString()
+        );
+
+        const query = {
+            conversationId,
+            content: { $regex: q, $options: "i" } // tìm gần đúng
+        };
+
+        //nếu đã từng xóa conver
+        if (clearedRecord) {
+            query.createdAt = { $gt: clearedRecord.timestamp };
+        }
+
+        const messages = await Message.find(query)
+            .sort({ createdAt: -1 })
+            .limit(30);
+
+        return res.json({ messages });
+
+    } catch (error) {
+        console.error("Lỗi khi searchMessages ", error)
+        res.status(500).json({ message: "Server error" })
+    }
+}
