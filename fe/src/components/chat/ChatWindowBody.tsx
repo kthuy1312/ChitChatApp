@@ -242,7 +242,7 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
                     scrollableTarget="scrollableDiv"
                     loader={<p>Đang tải...</p>}
                     inverse={true}
-                    style={{ display: "flex", flexDirection: "column-reverse", overflow: "visible" }}
+                    style={{ display: "flex", flexDirection: "column-reverse", overflow: "visible", marginBottom: "8px" }}
                 >
                     {
                         displayMessages.map((message, index) => (

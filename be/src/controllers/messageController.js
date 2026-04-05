@@ -449,6 +449,7 @@ export const toggleReaction = async (req, res) => {
 
         //socket
         io.to(message.conversationId.toString()).emit("message-reaction", {
+            conversationId: message.conversationId,
             messageId,
             userId,
             emoji,

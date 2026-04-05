@@ -19,6 +19,6 @@ router.patch('/:messageId/unsend', unsendMessage)
 router.patch('/:messageId/pin-message', togglePinMessage)
 
 //reation
-router.patch('/:messageId/reation', toggleReaction)
+router.patch('/:messageId/reaction', toggleReaction)
 
 export default router

@@ -4,6 +4,7 @@ import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from "./useAuthStore";
 import type { SocketState } from "@/types/store";
 import { useChatStore } from "./useChatStore";
+import type { Reaction } from "@/types/chat";
 
 
 const baseURL = import.meta.env.VITE_SOCKET_URL;
@@ -170,6 +171,17 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                     return p;
                 })
             });
+        });
+
+        socket.on("message-reaction", ({ conversationId, messageId, userId, emoji, action }) => {
+            const chatStore = useChatStore.getState();
+            const reaction: Reaction = { userId, emoji, reactedAt: new Date().toISOString() };
+
+            if (action === "added" || action === "updated") {
+                chatStore.addReaction(conversationId, messageId, reaction);
+            } else if (action === "removed") {
+                chatStore.removeReaction(conversationId, messageId, userId, emoji);
+            }
         });
     },
 

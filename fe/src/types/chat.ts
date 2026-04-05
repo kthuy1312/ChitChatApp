@@ -71,6 +71,12 @@ export interface ConversationResponse {
   conversations: Conversation[];
 }
 
+export interface Reaction {
+  userId: string;
+  emoji: string;
+  reactedAt: string;
+}
+
 export interface Message {
   _id: string;
   conversationId: string;
@@ -82,4 +88,5 @@ export interface Message {
   isOwn?: boolean;
   isForwarded?: boolean;
   isUnsent?: boolean;
+  reactions?: Reaction[];
 }

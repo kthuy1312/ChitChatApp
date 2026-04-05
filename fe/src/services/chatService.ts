@@ -110,6 +110,11 @@ export const chatService = {
     async searchMessage(conversationId: string, q: string) {
         const res = await api.get(`/conversations/${conversationId}/messages/search?q=${q}`)
         return res.data.messages
+    },
+
+    async toggleReaction(messageId: string, emoji: string) {
+        const res = await api.patch(`/messages/${messageId}/reaction`, { emoji })
+        return res.data.data
     }
 
 };

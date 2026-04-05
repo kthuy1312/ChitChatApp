@@ -1,6 +1,6 @@
 import { chatService } from "@/services/chatService";
 import type { ChatState } from "@/types/store";
-import type { Message } from "@/types/chat";
+import type { Message, Reaction } from "@/types/chat";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
@@ -712,6 +712,7 @@ export const useChatStore = create<ChatState>()(
                 }
             },
 
+            //search
             searchMessages: async (conversationId: string, q: string) => {
                 try {
                     if (!q.trim()) {
@@ -748,6 +749,87 @@ export const useChatStore = create<ChatState>()(
                     searchKeyword: ""
                 })
             },
+
+            //reation
+            addReaction: (conversationId, messageId, reaction) => {
+                set(state => {
+                    const items = state.messages[conversationId]?.items || [];
+                    const newItems = items.map(m => {
+                        if (m._id === messageId) {
+                            const filteredReactions = (m.reactions || []).filter(r => r.userId !== reaction.userId);
+                            return { ...m, reactions: [...filteredReactions, reaction] };
+                        }
+                        return m;
+                    });
+
+                    return {
+                        messages: {
+                            ...state.messages,
+                            [conversationId]: { ...state.messages[conversationId], items: newItems }
+                        }
+                    };
+                });
+            },
+
+            removeReaction: (conversationId, messageId, userId, emoji) => {
+                set(state => {
+                    const items = state.messages[conversationId]?.items || [];
+                    const newItems = items.map(m => {
+                        if (m._id === messageId) {
+                            return {
+                                ...m,
+                                reactions: (m.reactions || []).filter(r => !(r.userId === userId && r.emoji === emoji))
+                            };
+                        }
+                        return m;
+                    });
+
+                    return {
+                        messages: {
+                            ...state.messages,
+                            [conversationId]: { ...state.messages[conversationId], items: newItems }
+                        }
+                    };
+                });
+            },
+
+            toggleReaction: async (conversationId: string, messageId: string, emoji: string, userId: string) => {
+                const chatStore = useChatStore.getState();
+                const msgs = chatStore.messages[conversationId]?.items ?? [];
+                const msg = msgs.find(m => m._id === messageId);
+
+                if (!msg) return;
+                if (!msg.reactions) msg.reactions = [];
+
+                const existingIndex = msg.reactions?.findIndex(r => r.userId === userId);
+
+                if (existingIndex !== undefined && existingIndex !== -1) {
+                    //nếu user đã react trước đó
+                    msg.reactions[existingIndex].emoji = emoji; //thay emoji mới
+                    msg.reactions[existingIndex].reactedAt = new Date().toISOString();
+                } else {
+                    //chưa react thì thêm mới
+                    msg.reactions = [...(msg.reactions || []), { userId, emoji, reactedAt: new Date().toISOString() }];
+                }
+
+                set(state => ({ ...state })); //render ngay
+
+                try {
+                    const updatedReactions: Reaction[] = await chatService.toggleReaction(messageId, emoji);
+
+                    //cập nhật theo server để chắc chắn
+                    set(state => {
+                        const msgs = state.messages[conversationId]?.items ?? [];
+                        const msg = msgs.find(m => m._id === messageId);
+                        if (!msg) return state;
+
+                        msg.reactions = updatedReactions;
+                        return { ...state };
+                    });
+                } catch (error) {
+                    console.error("Lỗi toggleReaction:", error);
+                }
+            }
         }),
         {
             name: "chat-storage",
