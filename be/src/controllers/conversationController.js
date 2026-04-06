@@ -993,6 +993,12 @@ export const removeMember = async (req, res) => {
             userId, // ng bị kick
         });
 
+        // emit riêng cho người bị kick (tại đã bị kick nên kh nhận đuoc emit ở trên)
+        const kickSocketId = onlineUsers.get(userId.toString());
+        if (kickSocketId) {
+            io.to(kickSocketId).emit("you-were-removed", { conversationId });
+        }
+
         return res.status(200).json({
             message: "Đã mời thành viên ra khỏi nhóm",
             participants: convo.participants

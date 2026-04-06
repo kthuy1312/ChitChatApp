@@ -212,6 +212,31 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                 participants: [...convo.participants, ...newParticipants]
             });
         });
+
+        socket.on("member-removed", ({ conversationId, userId }) => {
+            const currentUserId = useAuthStore.getState().user?._id;
+            const chatStore = useChatStore.getState();
+
+            //nếu chính mình bị admin kick
+            if (currentUserId === userId) {
+                chatStore.leaveGroup(conversationId);
+                return;
+            }
+
+            //nếu người khác bị kick, chỉ update participants
+            chatStore.updateConversation({
+                _id: conversationId,
+                removeMemberId: userId
+            });
+        });
+
+        socket.on("you-were-removed", ({ conversationId }) => {
+            const currentUserId = useAuthStore.getState().user?._id;
+            useChatStore.getState().updateConversation({
+                _id: conversationId,
+                removeMemberId: currentUserId
+            });
+        });
     },
 
     //ng dùng nhập tn

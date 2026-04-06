@@ -233,6 +233,16 @@ export const useChatStore = create<ChatState>()(
                 if (!currentUserId) return
 
                 set((state) => {
+
+                    if (payload.removeMemberId && payload.removeMemberId === currentUserId.toString()) {
+                        const remainingConversations = state.conversations.filter(c => c._id !== payload._id)
+                        return {
+                            conversations: sortConversations(remainingConversations),
+                            //nếu đang mở đúng cái group vừa bị kick, thì đóng nó lại luôn
+                            activeConversationId: state.activeConversationId === payload._id ? null : state.activeConversationId
+                        };
+                    }
+
                     let found = false;
                     const updatedConversations = state.conversations.map((c) => {
                         if (c._id !== payload._id) return c
@@ -862,6 +872,45 @@ export const useChatStore = create<ChatState>()(
                     console.error("Lỗi addGroupMember:", error);
                 }
             },
+
+            removeMember: async (conversationId: string, userId: string) => {
+                try {
+                    const { user } = useAuthStore.getState();
+                    if (!user) return;
+
+                    await chatService.removeMember(conversationId, userId);
+
+                    set((state) => ({
+                        conversations: state.conversations.map((c) => {
+                            if (c._id !== conversationId) return c;
+
+                            //giữ info cũ, chỉ loại bỏ user bị kick
+                            const updatedParticipants = c.participants.filter(p => p._id !== userId);
+
+                            return {
+                                ...c,
+                                participants: updatedParticipants,
+                            };
+                        })
+                    }));
+
+                    //nếu chính mình bị admin kick
+                    if (userId === user._id) {
+                        useSocketStore.getState().socket?.emit("leave-conversation", conversationId);
+                        set((state) => ({
+                            conversations: state.conversations.filter(c => c._id !== conversationId),
+                            messages: Object.fromEntries(
+                                Object.entries(state.messages).filter(([key]) => key !== conversationId)
+                            ),
+                            activeConversationId: state.activeConversationId === conversationId ? null : state.activeConversationId
+                        }));
+                    }
+
+                } catch (error) {
+                    console.error("Lỗi removeGroupMember:", error);
+                    throw error;
+                }
+            }
         }),
         {
             name: "chat-storage",

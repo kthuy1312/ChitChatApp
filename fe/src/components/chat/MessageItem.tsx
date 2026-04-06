@@ -39,7 +39,7 @@ const MessageItem = ({
     const isGroupBreak = isShowTime || message.senderId !== prev?.senderId;
 
     const participant = selectedConvo.participants.find(
-        (p: Participant) => p._id.toString() === message.senderId.toString()
+        p => String(p._id) === String(message.senderId)
     );
 
     //tìm tin nhắn đã pin
@@ -133,11 +133,8 @@ const MessageItem = ({
     const orderedReactions = [...mineReactions, ...othersReactions];
 
     //fallback nếu không còn trong group
-    const displayName =
-        participant?.displayName || message.sender?.displayName || "Người dùng";
-
-    const avatarUrl =
-        participant?.avatarUrl || message.sender?.avatarUrl;
+    const displayName = participant?.displayName || message.sender?.displayName || "Người dùng đã rời";
+    const avatarUrl = participant?.avatarUrl || message.sender?.avatarUrl || undefined;
 
     return (
         <>

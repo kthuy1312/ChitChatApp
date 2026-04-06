@@ -32,7 +32,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     const [view, setView] = useState<
         "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo" | "addMember"
     >("info")
-    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember } = useChatStore()
+    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember, removeMember } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
     const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
@@ -234,15 +234,17 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     }
 
     const confirmKick = async () => {
-        try {
-            // await useChatStore.getState().removeMember(chat._id, kickUser._id)
+        if (!kickUser) return;
 
-            toast.success(`Đã xóa ${kickUser.displayName}`)
-            setKickUser(null)
+        try {
+            await removeMember(chat._id, kickUser._id);
+            toast.success(`Đã xóa ${kickUser.displayName}`);
+            setKickUser(null);
         } catch (err) {
-            toast.error("Không thể xóa thành viên")
+            toast.error("Không thể xóa thành viên");
+            console.error(err);
         }
-    }
+    };
 
     return (
         <>
