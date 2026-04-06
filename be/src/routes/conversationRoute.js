@@ -1,5 +1,5 @@
 import express from 'express'
-import { archiveConversation, createConversation, getConversations, getConversationsByUserId, getMessages, leaveGroup, markAsSeen, pinConversation, restrictConversation, clearConversation, updateTheme, setNickname, searchMessages } from '../controllers/conversationController.js'
+import { archiveConversation, createConversation, getConversations, getConversationsByUserId, getMessages, leaveGroup, markAsSeen, pinConversation, restrictConversation, clearConversation, updateTheme, setNickname, searchMessages, addGroupMember } from '../controllers/conversationController.js'
 import { checkFriendship } from '../middlewares/friendMiddleware.js'
 
 const router = express.Router()
@@ -25,4 +25,5 @@ router.patch('/:conversationId/nickname', setNickname)
 //tìm kiếm tn
 router.get("/:conversationId/messages/search", searchMessages);
 
+router.patch("/:conversationId/members", addGroupMember);
 export default router;

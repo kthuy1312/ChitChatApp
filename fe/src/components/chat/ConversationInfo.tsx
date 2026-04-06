@@ -11,7 +11,8 @@ import {
     PinOff,
     Mail,
     Phone,
-    CalendarDays
+    CalendarDays,
+    UserPlus
 } from "lucide-react"; import UserAvatar from "./UserAvatar";
 import GroupChatAvatar from "./GroupChatAvatar";
 import StatusBadge from "./StatusBadge";
@@ -21,21 +22,25 @@ import { useChatStore } from "@/stores/useChatStore";
 import type { PinnedMessage } from "@/types/chat";
 import { chatThemes, themeInfo } from "@/chatThemes";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessageClick }: any) => {
 
     //pin modal
-    const [view, setView] = useState<"info" | "pinned" | "theme" | "nickname" | "profile" | "search">("info")
+    const [view, setView] = useState<
+        "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo"
+    >("info")
     const { togglePinMessage, updateTheme, clearSearch, clearConversation } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
     const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+    const { user } = useAuthStore()
 
     useEffect(() => {
         setSelectedTheme(chat.theme || "default");
     }, [chat.theme]);
-    console.log(otherUser)
+
     useEffect(() => {
         setNicknameMap((prev) => {
             const updated = { ...prev };
@@ -156,6 +161,9 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         }
     }
 
+    const otherParticipant = chat.participants.find((p: any) => p.userID?._id !== user?._id);
+    const isOtherRestricted = otherParticipant?.isRestricted || false;
+
     return (
         <>
             <div className="h-full flex flex-col overflow-hidden">
@@ -200,22 +208,25 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
 
                         <div className="p-4 space-y-6 overflow-y-auto beautiful-scrollbar max-h-[60vh]">
 
-
                             {/* Tùy chỉnh */}
-                            <section className="space-y-1">
-                                <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-2 mb-2">Tùy chỉnh</h4>
-                                <OptionItem
-                                    icon={<Palette className="size-5 " />}
-                                    label="Chủ đề"
-                                    onClick={() => setView("theme")}
-                                />
+                            {((chat.type === "group") || (chat.type === "direct" && !isOtherRestricted)) && (
+                                <section className="space-y-1">
+                                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-2 mb-2">
+                                        Tùy chỉnh
+                                    </h4>
+                                    <OptionItem
+                                        icon={<Palette className="size-5 " />}
+                                        label="Chủ đề"
+                                        onClick={() => setView("theme")}
+                                    />
 
-                                <OptionItem
-                                    icon={<UserCog className="size-5 " />}
-                                    label="Biệt danh"
-                                    onClick={() => setView("nickname")}
-                                />
-                            </section>
+                                    <OptionItem
+                                        icon={<UserCog className="size-5 " />}
+                                        label="Biệt danh"
+                                        onClick={() => setView("nickname")}
+                                    />
+                                </section>
+                            )}
 
                             {chat.type === "direct" && (
                                 <section className="pt-3 border-t border-border/40 space-y-1">
@@ -230,14 +241,19 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                     />
                                 </section>
                             )}
+
                             {chat.type === "group" && (
                                 <section className="pt-3 border-t border-border/40 space-y-1">
                                     <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-2 mb-2">
-                                        Thông tin đoạn chat
+                                        Thông tin nhóm
                                     </h4>
                                     <OptionItem
                                         icon={<Users className="size-5" />}
                                         label="Thành viên trong nhóm"
+                                        onClick={() => setView("groupInfo")} />
+                                    <OptionItem
+                                        icon={<UserPlus className="size-5" />}
+                                        label="Thêm thành viên"
                                         badge={chat.participants.length.toString()}
                                     />
                                 </section>
@@ -608,6 +624,49 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                     </div>
                 )}
 
+                {/* GROUP IN4 */}
+                {view === "groupInfo" && (
+                    <div className="flex flex-col h-full">
+
+                        <div className="flex items-center gap-3 p-4 border-b shrink-0">
+                            <button onClick={() => setView("info")}>
+                                <ArrowLeft className="size-5" />
+                            </button>
+                            <h3 className="font-bold text-lg">
+                                Thành viên ({chat.participants.length})
+                            </h3>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                            {chat.participants.map((p: any) => {
+                                const u = p.userID || p;
+
+                                return (
+                                    <div
+                                        key={u._id}
+                                        className="flex items-center gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition"
+                                    >
+                                        <UserAvatar
+                                            type="sidebar"
+                                            name={u.displayName}
+                                            avatarUrl={u.avatarUrl}
+                                            className="w-10 h-10"
+                                        />
+
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">
+                                                {u.displayName}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                @{u.username}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* pop up xóa tn */}

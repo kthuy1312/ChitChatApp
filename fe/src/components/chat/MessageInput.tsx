@@ -124,20 +124,23 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             {/* khi người dùng bị hạn chế thì hiện ra nút bỏ hạn chế */}
             {isRestricted ? (
                 <div
-                    className="
-                           flex flex-col items-center gap-1
-                           px-4 py-3
-                           rounded-xl
-                           bg-muted
-                           border border-border
-                           text-center
-                       "
+                    className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border text-center transition-all shadow-sm"
+                    style={{
+                        backgroundColor: `hsl(${getColor(isDark ? "--chat-bubble-received-dark" : "--chat-bubble-received")} / 0.2)`,
+                        borderColor: `hsl(${getColor(isDark ? "--msg-status-seen-dark" : "--msg-status-seen")} / 0.3)`,
+                    }}
                 >
-                    <span className="text-sm font-medium text-foreground">
+                    <span
+                        className="text-sm font-bold"
+                        style={{ color: `hsl(${getColor(isDark ? "--msg-received-text-dark" : "--msg-received-text")})` }}
+                    >
                         Bạn đã hạn chế {otherUser.displayName}
                     </span>
 
-                    <span className="text-xs text-muted-foreground">
+                    <span
+                        className="text-xs opacity-80"
+                        style={{ color: `hsl(${getColor(isDark ? "--msg-received-text-dark" : "--msg-received-text")})` }}
+                    >
                         Họ sẽ không biết khi nào bạn online hoặc đọc tin nhắn của họ
                     </span>
 
@@ -146,13 +149,13 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
                         disabled={unrestricting}
                         size="lg"
                         variant="outline"
-                        className="
-                               mt-1
-                               h-8
-                               px-9
-                               rounded-full
-                               text-xs
-                           "
+                        className="mt-2 h-8 px-9 rounded-full text-xs font-bold border-none transition-all hover:scale-105 active:scale-95"
+                        style={{
+                            background: getColor(isDark ? "--send-btn-bg-dark" : "--send-btn-bg").includes("gradient")
+                                ? getColor(isDark ? "--send-btn-bg-dark" : "--send-btn-bg")
+                                : `hsl(${getColor(isDark ? "--send-btn-bg-dark" : "--send-btn-bg")})`,
+                            color: `hsl(${getColor(isDark ? "--msg-sent-text-dark" : "--msg-sent-text")})`
+                        }}
                     >
                         {unrestricting ? "Đang xử lý..." : "Bỏ hạn chế"}
                     </Button>

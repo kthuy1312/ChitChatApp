@@ -1,6 +1,8 @@
 
 import Conversation from "../models/Conversation.js"
+import Friend from "../models/Friend.js";
 import Message from "../models/Message.js"
+import User from "../models/User.js";
 import { io, onlineUsers, getVisibleOnlineUsers } from "../socket/index.js";
 
 
@@ -815,3 +817,124 @@ export const searchMessages = async (req, res) => {
         res.status(500).json({ message: "Server error" })
     }
 }
+
+export const addGroupMember = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+        const { userIds } = req.body;
+
+        if (!userIds || userIds.length === 0) {
+            return res.status(400).json({ message: "Thiếu thông tin người cần thêm" });
+        }
+
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy cuộc hội thoại" });
+        }
+
+        if (conversation.type !== "group") {
+            return res.status(400).json({ message: "Đây không phải là nhóm" });
+        }
+
+        const isMember = conversation.participants.some(
+            p => p.userID.toString() === userId
+        );
+
+        if (!isMember) {
+            return res.status(403).json({ message: "Bạn không thuộc nhóm này" });
+        }
+
+        //check user tồn tại
+        const foundUsers = await User.find({ _id: { $in: userIds } });
+        const foundUserIds = new Set(foundUsers.map(u => u._id.toString()));
+
+        const invalidUserIds = userIds.filter(id => !foundUserIds.has(id));
+        if (invalidUserIds.length > 0) {
+            return res.status(400).json({
+                message: "Một số user không tồn tại",
+                invalidUserIds
+            });
+        }
+
+        //lấy user đã có trong group
+        const existingSet = new Set(
+            conversation.participants.map(p => p.userID.toString())
+        );
+
+        const newUsers = userIds.filter(id => !existingSet.has(id));
+        const skippedUsers = userIds.filter(id => existingSet.has(id));
+
+        if (newUsers.length === 0) {
+            return res.json({
+                message: "Không có thành viên nào được thêm",
+                added: [],
+                skipped: skippedUsers
+            });
+        }
+
+        const friendDocs = await Friend.find({
+            $or: [
+                { userA: userId, userB: { $in: newUsers } },
+                { userB: userId, userA: { $in: newUsers } }
+            ]
+        });
+
+        const friendSet = new Set(
+            friendDocs.map(f =>
+                f.userA.toString() === userId
+                    ? f.userB.toString()
+                    : f.userA.toString()
+            )
+        );
+
+        const validUsers = newUsers.filter(id => friendSet.has(id));
+        const notFriends = newUsers.filter(id => !friendSet.has(id));
+
+        if (validUsers.length === 0) {
+            return res.json({
+                message: "Không có ai là bạn bè để thêm",
+                added: [],
+                skipped: skippedUsers,
+                notFriends
+            });
+        }
+
+        //tạo participant
+        const newParticipants = validUsers.map(id => ({
+            userID: id,
+            joinedAt: new Date(),
+            isPinned: false,
+            isArchived: false,
+            isRestricted: false,
+            nickname: null
+        }));
+
+        conversation.participants.push(...newParticipants);
+
+        //reset unread
+        validUsers.forEach(id => {
+            conversation.unreadCounts.set(id, 0);
+        });
+
+        await conversation.save();
+
+        //socket
+        io.to(conversationId).emit("member-added", {
+            conversationId,
+            addedBy: userId,
+            newMembers: validUsers
+        });
+
+        return res.status(200).json({
+            message: "Add member successfully",
+            added: validUsers,
+            skipped: skippedUsers,
+            notFriends
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi addGroupMember ", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
