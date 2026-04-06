@@ -89,4 +89,8 @@ export interface Message {
   isForwarded?: boolean;
   isUnsent?: boolean;
   reactions?: Reaction[];
+  sender?: {
+    displayName: string;
+    avatarUrl?: string | null;
+  };
 }

@@ -1,6 +1,7 @@
 import { emitNewMessage, updateConversationAfterCreateMessage } from "../../utils/messageHelper.js";
 import Conversation from "../models/Conversation.js"
 import Message from "../models/Message.js";
+import User from "../models/User.js";
 import { io } from "../socket/index.js";
 
 
@@ -8,6 +9,7 @@ export const sendDirectMessage = async (req, res) => {
     try {
         const { conversationId, content, recipientId } = req.body
         const senderId = req.user._id
+        const user = req.user
 
         let conversation;
 
@@ -37,7 +39,12 @@ export const sendDirectMessage = async (req, res) => {
         const message = await Message.create({
             conversationId: conversation._id,
             senderId,
-            content
+            content,
+            sender: {
+                _id: user._id,
+                displayName: user.displayName,
+                avatarUrl: user.avatarUrl
+            },
         })
 
         // khi gửi message mới thì bỏ id ng nhận khỏi hiddenFor nếu có - để hiển thị lại conver đó
@@ -67,13 +74,21 @@ export const sendGroupMessage = async (req, res) => {
         const senderId = req.user._id
         const { conversationId, content } = req.body
         const conversation = req.conversation
+        const user = req.user
 
         if (!content) {
             return res.status(404).json("Thiếu nội dung tin nhắn");
         }
 
         const message = await Message.create({
-            conversationId, content, senderId
+            conversationId,
+            senderId,
+            sender: {
+                _id: user._id,
+                displayName: user.displayName,
+                avatarUrl: user.avatarUrl
+            },
+            content
         })
 
         //mỗi lần có tn mới thì phải cần update lại 

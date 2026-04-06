@@ -120,6 +120,11 @@ export const chatService = {
     async addGroupMember(conversationId: string, userIds: string[]) {
         const res = await api.patch(`/conversations/${conversationId}/members`, { userIds })
         return res.data
+    },
+
+    async removeMember(conversationId: string, userId: string) {
+        const res = await api.delete(`/conversations/${conversationId}/members/${userId}`)
+        return res.data
     }
 
 };

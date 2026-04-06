@@ -54,7 +54,16 @@ const messageSchema = new mongoose.Schema({
     reactions: {
         type: [reactionSchema],
         default: []
-    }
+    },
+    //dùng fallback khi user bị xoa khỏi nhóm bị mất ava
+    sender: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        },
+        displayName: String,
+        avatarUrl: String
+    },
 }, {
     timestamps: true
 });

@@ -132,6 +132,13 @@ const MessageItem = ({
 
     const orderedReactions = [...mineReactions, ...othersReactions];
 
+    //fallback nếu không còn trong group
+    const displayName =
+        participant?.displayName || message.sender?.displayName || "Người dùng";
+
+    const avatarUrl =
+        participant?.avatarUrl || message.sender?.avatarUrl;
+
     return (
         <>
             <div
@@ -150,8 +157,8 @@ const MessageItem = ({
                         {isGroupBreak && (
                             <UserAvatar
                                 type="chat"
-                                name={participant?.displayName ?? "ChitChat"}
-                                avatarUrl={participant?.avatarUrl ?? undefined}
+                                name={displayName}
+                                avatarUrl={avatarUrl || undefined}
                             />
                         )}
                     </div>
