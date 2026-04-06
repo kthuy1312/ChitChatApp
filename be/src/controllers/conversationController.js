@@ -101,7 +101,6 @@ export const createConversation = async (req, res) => {
     }
 }
 
-
 export const getConversations = async (req, res) => {
     try {
         const userId = req.user?._id
@@ -950,5 +949,57 @@ export const addGroupMember = async (req, res) => {
     } catch (error) {
         console.error("Lỗi khi addGroupMember ", error);
         res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const removeMember = async (req, res) => {
+    try {
+        const { conversationId, userId } = req.params;
+        const currentUserId = req.user._id;
+
+        const convo = await Conversation.findById(conversationId);
+
+        if (!convo) {
+            return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" });
+        }
+
+        if (convo.type !== "group") {
+            return res.status(400).json({ message: "Không phải nhóm" });
+        }
+
+        //admin = người đầu tiên
+        const adminId = (convo.participants[0].userID || convo.participants[0]).toString();
+
+        if (adminId !== currentUserId.toString()) {
+            return res.status(403).json({ message: "Bạn không có quyền" });
+        }
+
+        //không cho admin tự kick chính mình
+        if (adminId === userId) {
+            return res.status(400).json({ message: "Bạn không thể tự gỡ chính mình" });
+        }
+
+        //remove member
+        convo.participants = convo.participants.filter((p) => {
+            const id = (p.userID || p).toString();
+            return id !== userId;
+        });
+
+        await convo.save();
+
+        //socket
+        io.to(conversationId).emit("member-removed", {
+            conversationId,
+            userId, // ng bị kick
+        });
+
+        return res.status(200).json({
+            message: "Đã mời thành viên ra khỏi nhóm",
+            participants: convo.participants
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Lỗi server" });
     }
 };

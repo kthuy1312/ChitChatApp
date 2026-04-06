@@ -12,7 +12,8 @@ import {
     Mail,
     Phone,
     CalendarDays,
-    UserPlus
+    UserPlus,
+    Crown
 } from "lucide-react"; import UserAvatar from "./UserAvatar";
 import GroupChatAvatar from "./GroupChatAvatar";
 import StatusBadge from "./StatusBadge";
@@ -217,6 +218,29 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         } catch (err) {
             console.error(err)
             toast.error("Thêm thất bại")
+        }
+    }
+
+    //tìm quản trị viên và ng thường
+    const admin = chat.participants[0];
+    const normalMembers = chat.participants.slice(1);
+    const isMeAdmin = (admin.userID?._id || admin._id) === user?._id;
+
+    //kick user
+    const [kickUser, setKickUser] = useState<any>(null)
+
+    const handleKick = (user: any) => {
+        setKickUser(user)
+    }
+
+    const confirmKick = async () => {
+        try {
+            // await useChatStore.getState().removeMember(chat._id, kickUser._id)
+
+            toast.success(`Đã xóa ${kickUser.displayName}`)
+            setKickUser(null)
+        } catch (err) {
+            toast.error("Không thể xóa thành viên")
         }
     }
 
@@ -695,32 +719,81 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                            {chat.participants.map((p: any) => {
+
+                            {/* ADMIN */}
+                            {admin && (() => {
+                                const u = admin.userID || admin;
+                                return (
+                                    <div className=" border-b pb-4">
+                                        <p className="text-xs text-muted-foreground mb-2">
+                                            Quản trị viên
+                                        </p>
+
+                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/30">
+                                            <UserAvatar
+                                                type="sidebar"
+                                                name={u.displayName}
+                                                avatarUrl={u.avatarUrl}
+                                                className="w-10 h-10"
+                                            />
+
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold truncate flex items-center gap-2">
+                                                    {u.displayName}
+                                                    <span className="flex items-center gap-1 text-xs bg-primary text-white px-3 py-1 rounded-full">
+                                                        <Crown className="w-3 h-3" />
+                                                        Quản trị viên
+                                                    </span>
+                                                </p>
+
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    @{u.username}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* MEMBER THƯỜNG */}
+                            {normalMembers.map((p: any) => {
                                 const u = p.userID || p;
 
                                 return (
                                     <div
                                         key={u._id}
-                                        className="flex items-center gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition"
+                                        className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition"
                                     >
-                                        <UserAvatar
-                                            type="sidebar"
-                                            name={u.displayName}
-                                            avatarUrl={u.avatarUrl}
-                                            className="w-10 h-10"
-                                        />
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <UserAvatar
+                                                type="sidebar"
+                                                name={u.displayName}
+                                                avatarUrl={u.avatarUrl}
+                                                className="w-10 h-10"
+                                            />
 
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium truncate">
-                                                {u.displayName}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground truncate">
-                                                @{u.username}
-                                            </p>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">
+                                                    {u.displayName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    @{u.username}
+                                                </p>
+                                            </div>
                                         </div>
+
+                                        {isMeAdmin && (
+                                            <button
+                                                onClick={() => handleKick(u)}
+                                                className="text-xs px-3 py-1 rounded-lg bg-primary text-white hover:opacity-70 transition"
+                                            >
+                                                Xóa
+                                            </button>
+                                        )}
                                     </div>
                                 );
                             })}
+
                         </div>
                     </div>
                 )}
@@ -828,6 +901,42 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                             <button
                                 onClick={() => handleDelete(chat._id)}
                                 className="px-4 py-2 text-sm rounded-lg bg-destructive text-white hover:opacity-90 transition"
+                            >
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* popup kick user */}
+            {kickUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="bg-background rounded-2xl p-6 w-[320px] shadow-xl border border-border space-y-4">
+
+                        <h3 className="text-lg font-bold">
+                            Xóa thành viên?
+                        </h3>
+
+                        <p className="text-sm text-muted-foreground">
+                            Bạn có chắc chắn muốn xóa{" "}
+                            <span className="font-semibold">
+                                {kickUser.displayName}
+                            </span>{" "}
+                            ra khỏi nhóm?
+                        </p>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button
+                                onClick={() => setKickUser(null)}
+                                className="px-4 py-2 text-sm rounded-lg bg-muted hover:bg-accent"
+                            >
+                                Hủy
+                            </button>
+
+                            <button
+                                onClick={confirmKick}
+                                className="px-4 py-2 text-sm rounded-lg bg-destructive text-white"
                             >
                                 Xóa
                             </button>
