@@ -23,19 +23,22 @@ import type { PinnedMessage } from "@/types/chat";
 import { chatThemes, themeInfo } from "@/chatThemes";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useFriendStore } from "@/stores/useFriendStore";
 
 const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessageClick }: any) => {
 
     //pin modal
     const [view, setView] = useState<
-        "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo"
+        "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo" | "addMember"
     >("info")
-    const { togglePinMessage, updateTheme, clearSearch, clearConversation } = useChatStore()
+    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
     const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
     const { user } = useAuthStore()
+    const { friends, getFriends } = useFriendStore()
+
 
     useEffect(() => {
         setSelectedTheme(chat.theme || "default");
@@ -161,8 +164,61 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         }
     }
 
+    //lấy để ẩn đối với ng bị hạn chế
     const otherParticipant = chat.participants.find((p: any) => p.userID?._id !== user?._id);
     const isOtherRestricted = otherParticipant?.isRestricted || false;
+
+    //add member
+    const [searchUser, setSearchUser] = useState("")
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+
+    useEffect(() => {
+        getFriends()
+    }, [])
+
+    //bỏ member đã có trong group
+    const existingIds = chat.participants.map(
+        (p: any) => (p.userID || p)._id
+    )
+
+    const userResults = friends.filter(
+        (f: any) => !existingIds.includes(f._id)
+    )
+
+    //search member
+    const keyword = searchUser.trim().toLowerCase()
+
+    const filteredUsers = userResults.filter((f: any) =>
+        (f.displayName || f.username || "")
+            .toLowerCase()
+            .includes(keyword)
+    )
+
+    const toggleSelectUser = (userId: string) => {
+        setSelectedUsers((prev) =>
+            prev.includes(userId)
+                ? prev.filter(id => id !== userId)
+                : [...prev, userId]
+        )
+    }
+
+    const handleAddMembers = async () => {
+        if (selectedUsers.length === 0) {
+            toast.error("Chọn ít nhất 1 người")
+            return
+        }
+
+        try {
+            await addGroupMember(chat._id, selectedUsers)
+            toast.success("Đã thêm thành viên")
+
+            setSelectedUsers([])
+            setView("groupInfo")
+        } catch (err) {
+            console.error(err)
+            toast.error("Thêm thất bại")
+        }
+    }
 
     return (
         <>
@@ -255,6 +311,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                         icon={<UserPlus className="size-5" />}
                                         label="Thêm thành viên"
                                         badge={chat.participants.length.toString()}
+                                        onClick={() => setView("addMember")}
                                     />
                                 </section>
                             )}
@@ -667,6 +724,84 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                         </div>
                     </div>
                 )}
+
+                {/* ADD MEMBER */}
+                {view === "addMember" && (
+                    <div className="flex flex-col h-full">
+
+                        <div className="flex items-center gap-3 p-4 border-b shrink-0">
+                            <button onClick={() => setView("info")}>
+                                <ArrowLeft className="size-5" />
+                            </button>
+                            <h3 className="font-bold text-lg">Thêm Thành Viên</h3>
+                        </div>
+
+                        {/* search */}
+                        <div className="p-3 border-b">
+                            <input
+                                value={searchUser}
+                                onChange={(e) => setSearchUser(e.target.value)}
+                                placeholder="Tìm bạn bè..."
+                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                            />
+                        </div>
+
+                        {/* list */}
+                        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                            {filteredUsers.map((u: any) => {
+                                const isSelected = selectedUsers.includes(u._id)
+
+                                return (
+                                    <div
+                                        key={u._id}
+                                        onClick={() => toggleSelectUser(u._id)}
+                                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition 
+                            ${isSelected ? "bg-primary/10 border border-primary" : "bg-muted hover:bg-accent"}
+                        `}
+                                    >
+                                        <UserAvatar
+                                            type="sidebar"
+                                            name={u.displayName}
+                                            avatarUrl={u.avatarUrl}
+                                            className="w-10 h-10"
+                                        />
+
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium">
+                                                {u.displayName}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                @{u.username}
+                                            </p>
+                                        </div>
+
+                                        {isSelected && (
+                                            <div className="text-primary text-xs font-semibold">
+                                                ✓
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+
+                            {filteredUsers.length === 0 && (
+                                <p className="text-sm text-center text-muted-foreground">
+                                    Không có bạn bè phù hợp
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="p-3 border-t">
+                            <button
+                                onClick={handleAddMembers}
+                                className="w-full py-2 rounded-xl bg-primary text-white font-medium hover:opacity-90 transition"
+                            >
+                                Thêm ({selectedUsers.length})
+                            </button>
+                        </div>
+                    </div>
+                )}
+
             </div>
 
             {/* pop up xóa tn */}

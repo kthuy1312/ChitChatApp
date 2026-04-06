@@ -115,6 +115,11 @@ export const chatService = {
     async toggleReaction(messageId: string, emoji: string) {
         const res = await api.patch(`/messages/${messageId}/reaction`, { emoji })
         return res.data.data
+    },
+
+    async addGroupMember(conversationId: string, userIds: string[]) {
+        const res = await api.patch(`/conversations/${conversationId}/members`, { userIds })
+        return res.data
     }
 
 };

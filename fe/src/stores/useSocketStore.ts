@@ -183,6 +183,35 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                 chatStore.removeReaction(conversationId, messageId, userId, emoji);
             }
         });
+
+        socket.on("member-added", ({ conversationId, addedBy, newMembers }) => {
+            const chatStore = useChatStore.getState();
+            const convo = chatStore.conversations.find(c => c._id === conversationId);
+            if (!convo) {
+                chatStore.fetchConversations();
+                return;
+            }
+            const existingIds = new Set(convo.participants.map(p => p._id.toString()));
+
+            const newParticipants = newMembers
+                .filter((u: any) => !existingIds.has(u._id.toString()))
+                .map((u: any) => ({
+                    _id: u._id,
+                    username: u.username,
+                    displayName: u.displayName,
+                    avatarUrl: u.avatarUrl ?? null,
+                    joinedAt: new Date().toISOString(),
+                    isPinned: false,
+                    isArchived: false,
+                    isRestricted: false,
+                    nickname: null
+                }));
+
+            chatStore.updateConversation({
+                _id: conversationId,
+                participants: [...convo.participants, ...newParticipants]
+            });
+        });
     },
 
     //ng dùng nhập tn

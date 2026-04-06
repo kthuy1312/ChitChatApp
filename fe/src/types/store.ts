@@ -113,6 +113,7 @@ export interface ChatState {
     addReaction: (conversationId: string, messageId: string, reaction: Reaction) => void;
     removeReaction: (conversationId: string, messageId: string, userId: string, emoji: string) => void;
     toggleReaction: (conversationId: string, messageId: string, emoji: string, userId: string) => void;
+    addGroupMember: (conversationId: string, userIds: string[]) => Promise<void>;
 }
 
 export interface SocketState {

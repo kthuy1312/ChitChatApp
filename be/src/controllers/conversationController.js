@@ -68,7 +68,7 @@ export const createConversation = async (req, res) => {
 
         //có rồi thì populate
         await conversation.populate([
-            { path: 'participants.userID', select: 'displayName avatarUrl offlineAt' },
+            { path: 'participants.userID', select: 'displayName avatarUrl offlineAt username' },
             { path: 'seenBy', select: 'displayName avatarUrl' },
             { path: 'lastMessage.senderId', select: 'displayName avatarUrl' },
 
@@ -77,6 +77,7 @@ export const createConversation = async (req, res) => {
         const participants = (conversation.participants || []).map((p) => ({
             _id: p.userID?._id,
             displayName: p.userID?.displayName,
+            username: p.userID?.username,
             avatarUrl: p.userID?.avatarUrl ?? null,
             offlineAt: p.userID?.offlineAt || null,
             joinAt: p.joinedAt
@@ -919,11 +920,24 @@ export const addGroupMember = async (req, res) => {
 
         await conversation.save();
 
-        //socket
+        //populate thêm 
+        const populatedUsers = await User.find({ _id: { $in: validUsers } })
+            .select("displayName avatarUrl username");
+
+        //socker gửi cho user mới được thêm
+        validUsers.forEach(uid => {
+            io.to(uid).emit("member-added", {
+                conversationId,
+                addedBy: userId,
+                newMembers: populatedUsers
+            });
+        });
+
+        //socket cho các bthanfh viên còn lại
         io.to(conversationId).emit("member-added", {
             conversationId,
             addedBy: userId,
-            newMembers: validUsers
+            newMembers: populatedUsers
         });
 
         return res.status(200).json({

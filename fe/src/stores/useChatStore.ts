@@ -829,7 +829,39 @@ export const useChatStore = create<ChatState>()(
                 } catch (error) {
                     console.error("Lỗi toggleReaction:", error);
                 }
-            }
+            },
+
+            addGroupMember: async (conversationId: string, userIds: string[]) => {
+                try {
+                    const updatedConversation = await chatService.addGroupMember(conversationId, userIds);
+
+                    set((state) => ({
+                        conversations: sortConversations(
+                            state.conversations.map((c) => {
+                                if (c._id !== conversationId) return c;
+
+                                const existingIds = new Set(
+                                    c.participants.map((p: any) => p._id.toString())
+                                );
+
+                                const mergedParticipants = [
+                                    ...c.participants,
+                                    ...updatedConversation.participants.filter(
+                                        (p: any) => !existingIds.has(p._id.toString())
+                                    )
+                                ];
+
+                                return {
+                                    ...c,
+                                    participants: mergedParticipants
+                                };
+                            })
+                        )
+                    }));
+                } catch (error) {
+                    console.error("Lỗi addGroupMember:", error);
+                }
+            },
         }),
         {
             name: "chat-storage",
