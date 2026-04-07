@@ -35,5 +35,14 @@ export const authService = {
     refresh: async () => {
         const res = await api.post('auth/refresh', { withCredentials: true })
         return res.data.accessToken
+    },
+
+    changePassword: async (oldPwd: string, newPwd: string, confirmNewPwd: string) => {
+        const res = await api.patch(
+            'auth/changePassword',
+            { oldPwd, newPwd, confirmNewPwd },
+            { withCredentials: true }
+        );
+        return res.data;
     }
 }

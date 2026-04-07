@@ -150,7 +150,47 @@ const refreshToken = async (req, res) => {
     }
 }
 
+const changePassword = async (req, res) => {
+    try {
+        const { oldPwd, newPwd, confirmNewPwd } = req.body;
+        const userId = req.user._id;
+
+        if (!oldPwd || !newPwd || !confirmNewPwd) {
+            return res.status(400).json({ message: "Vui lòng nhập đủ thông tin mật khẩu cũ và mới" });
+        }
+
+        if (newPwd.length < 6) {
+            return res.status(400).json({ message: "Mật khẩu mới phải ít nhất 6 ký tự" });
+        }
+
+        if (newPwd !== confirmNewPwd) {
+            return res.status(400).json({ message: "Mật khẩu mới và xác nhận mật khẩu không khớp" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "Người dùng không tồn tại" });
+        }
+
+        //so sánh mật khẩu cũ
+        const match = await bcrypt.compare(oldPwd, user.hashedPassword);
+        if (!match) {
+            return res.status(401).json({ message: "Mật khẩu cũ không chính xác" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPwd, 10);
+
+        user.hashedPassword = hashedPassword;
+        await user.save();
+
+        return res.status(200).json({ message: "Đổi mật khẩu thành công!" });
+
+    } catch (error) {
+        console.error("Lỗi khi đổi mật khẩu:", error);
+        return res.status(500).json({ message: "Lỗi hệ thống" });
+    }
+}
 
 export {
-    signUp, signIn, signOut, refreshToken
+    signUp, signIn, signOut, refreshToken, changePassword
 }

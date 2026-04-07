@@ -11,6 +11,7 @@ export const useAuthStore = create<AuthState>()(
             accessToken: null,
             user: null,
             loading: false,
+            changePasswordLoading: false,
 
             setUser: (user) => set({ user }),
 
@@ -95,6 +96,17 @@ export const useAuthStore = create<AuthState>()(
                     set({ loading: false });
                 }
             },
+            changePassword: async (oldPwd, newPwd, confirmNewPwd) => {
+                set({ changePasswordLoading: true });
+                try {
+                    const res = await authService.changePassword(oldPwd, newPwd, confirmNewPwd);
+                    return { success: true, message: res.message || "Đổi mật khẩu thành công!" };
+                } catch (err: any) {
+                    return { success: false, message: err.response?.data?.message || err.message || "Đổi mật khẩu thất bại" };
+                } finally {
+                    set({ changePasswordLoading: false });
+                }
+            }
         }),
         {
             name: "auth-storage",
