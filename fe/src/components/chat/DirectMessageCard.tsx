@@ -66,15 +66,11 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
 
             subtitle={
                 <div className="flex items-center gap-1 min-w-0">
-                    <p
-                        className={cn(
-                            "flex-1 truncate text-sm leading-snug flex items-center gap-1",
-                            unreadCounts > 0
-                                ? "font-medium text-foreground"
-                                : "text-muted-foreground"
-                        )}
-                    >
-                        {conver?.lastMessage?.imgUrl ? (
+                    <p className={cn(
+                        "flex-1 truncate text-sm leading-snug flex items-center gap-1",
+                        unreadCounts > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+                    )}>
+                        {conver?.lastMessage?.isImage || conver?.lastMessage?.imgUrl ? (
                             <>
                                 <ImageIcon className="w-4 h-4 shrink-0" />
                                 <span className="truncate">Đã gửi một ảnh</span>

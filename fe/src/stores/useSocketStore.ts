@@ -66,6 +66,8 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             const lastMessage = {
                 _id: conversation.lastMessage._id,
                 content: conversation.lastMessage.content,
+                imgUrl: conversation.lastMessage.imgUrl || null,
+                isImage: conversation.lastMessage.isImage || false,
                 createdAt: conversation.lastMessage.createdAt,
                 senderId: {
                     _id: conversation.lastMessage.senderId,

@@ -66,6 +66,10 @@ const lastMessageSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: null
+    },
+    isImage: {
+        type: Boolean,
+        default: false
     }
 }, {
     _id: false

@@ -31,6 +31,7 @@ export interface LastMessage {
     displayName: string;
     avatarUrl?: string | null;
   };
+  isImage: boolean;
 }
 
 export interface ClearedAt {
