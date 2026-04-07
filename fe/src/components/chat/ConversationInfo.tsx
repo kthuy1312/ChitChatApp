@@ -32,7 +32,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     const [view, setView] = useState<
         "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo" | "addMember" | "images"
     >("info")
-    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember, removeMember, messages } = useChatStore()
+    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember, removeMember, messages, conversations } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
     const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
@@ -252,6 +252,15 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         m => m.imgUrl && !m.isUnsent
     )
 
+
+    // nếu message là của người bị hạn chế thì không hiện nút ghim
+    const shouldShowPin = (() => {
+        const me = chat.participants.find((p: any) => p._id === user?._id);
+        const sender = chat.participants.find((p: any) => p._id !== me?._id);
+        if (!sender) return true;
+        return !me?.isRestricted;
+    })();
+
     return (
         <>
             <div className="h-full flex flex-col overflow-hidden">
@@ -427,16 +436,18 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                                     {new Date(p.createdAt).toLocaleString()}
                                                 </span>
                                             </div>
+                                            {shouldShowPin && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handlePin(p.messageId)
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition p-2 rounded-full hover:bg-destructive/10"
+                                                >
+                                                    <PinOff className="size-4 text-primary" />
+                                                </button>
+                                            )}
 
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handlePin(p.messageId)
-                                                }}
-                                                className="opacity-0 group-hover:opacity-100 transition p-2 rounded-full hover:bg-destructive/10"
-                                            >
-                                                <PinOff className="size-4 text-primary" />
-                                            </button>
                                         </div>
                                     ))
                             ) : (

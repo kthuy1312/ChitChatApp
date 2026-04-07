@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import ForwardMessageModal from "./ForwardMessageModal";
 import { useState } from "react";
 import { useChatStore } from "@/stores/useChatStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface MessageOptionsProps {
     messageId: string;
@@ -39,7 +40,8 @@ const MessageOptions = ({
     const [openForward, setOpenForward] = useState(false);
 
     //thu hồi
-    const { unsendMessage, togglePinMessage } = useChatStore()
+    const { unsendMessage, togglePinMessage, conversations } = useChatStore()
+    const { user } = useAuthStore()
 
     const handleForward = () => {
         setOpenForward(true);
@@ -68,6 +70,16 @@ const MessageOptions = ({
         }
     };
 
+    // nếu message là của người bị hạn chế thì không hiện nút ghim
+    const conversation = conversations.find(c => c._id === conversationId);
+
+    const shouldShowPin = (() => {
+        if (!conversation) return true;
+        const me = conversation.participants.find(p => p._id === user?._id);
+        const sender = conversation.participants.find(p => p._id !== me?._id);
+        if (!sender) return true;
+        return !me?.isRestricted;
+    })();
 
     return (
         <>
@@ -111,13 +123,15 @@ const MessageOptions = ({
                         Chuyển tiếp
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                        onClick={handlePin}
-                        className="flex items-center gap-2 cursor-pointer"
-                    >
-                        <Pin className="h-4 w-4" />
-                        {!isPinned ? "Ghim" : "Bỏ ghim"}
-                    </DropdownMenuItem>
+                    {shouldShowPin && (
+                        <DropdownMenuItem
+                            onClick={handlePin}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <Pin className="h-4 w-4" />
+                            {!isPinned ? "Ghim" : "Bỏ ghim"}
+                        </DropdownMenuItem>
+                    )}
 
                     {isOwn && (
                         <DropdownMenuItem

@@ -5,6 +5,7 @@ import { Card } from "../ui/card";
 import UserAvatar from "../chat/UserAvatar";
 import { useChatStore } from "@/stores/useChatStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useMemo } from "react";
 
 const FriendListModal = () => {
   const { friends } = useFriendStore();
@@ -26,6 +27,24 @@ const FriendListModal = () => {
 
     return convo?.participants.find(p => p._id === friendId)?.nickname || null;
   };
+
+  const filteredFriends = useMemo(() => {
+    if (!user?._id) return [];
+
+    return friends.filter(friend => {
+      // tìm conversation direct giữa mình và friend
+      const convo = conversations.find(c =>
+        c.type === "direct" &&
+        c.participants.some(p => p._id === user._id) &&
+        c.participants.some(p => p._id === friend._id)
+      );
+
+      if (!convo) return false;
+
+      const me = convo.participants.find(p => p._id === user._id);
+      return me && !me.isRestricted; //nếu mình đã hạn chế ng đó thì bỏ
+    });
+  }, [friends, conversations, user?._id]);
 
   return (
     <DialogContent className="glass max-w-md">
@@ -51,7 +70,7 @@ const FriendListModal = () => {
         </h1>
 
         <div className="space-y-2 max-h-60 overflow-y-auto">
-          {friends.map((friend) => {
+          {filteredFriends.map((friend) => {
             const nickname = getNickname(friend._id);
 
             return (

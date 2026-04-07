@@ -99,7 +99,7 @@ const MessageItem = ({
     }
 
     //reation
-    const { toggleReaction } = useChatStore();
+    const { toggleReaction, conversations } = useChatStore();
     const currentUserId = useAuthStore().user?._id;
     const [showReactionsMenu, setShowReactionsMenu] = useState(false);
     const reactionBtnRef = useRef<HTMLDivElement>(null);
@@ -135,6 +135,20 @@ const MessageItem = ({
     //fallback nếu không còn trong group
     const displayName = participant?.displayName || message.sender?.displayName || "Người dùng đã rời";
     const avatarUrl = participant?.avatarUrl || message.sender?.avatarUrl || undefined;
+
+
+    // nếu message là của người bị hạn chế thì không hiện nút ghim
+    const { user } = useAuthStore()
+
+    const conversation = conversations.find(c => c._id === message.conversationId);
+
+    const shouldShowPin = (() => {
+        if (!conversation) return true;
+        const me = conversation.participants.find(p => p._id === user?._id);
+        const sender = conversation.participants.find(p => p._id !== me?._id);
+        if (!sender) return true;
+        return !me?.isRestricted;
+    })();
 
     return (
         <>
@@ -201,12 +215,14 @@ const MessageItem = ({
                                 />
 
                                 {/* nút reaction*/}
-                                <button
-                                    className="ml-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                    onClick={() => setShowReactionsMenu(prev => !prev)}
-                                >
-                                    <Smile className="size-4" />
-                                </button>
+                                {shouldShowPin && (
+                                    <button
+                                        className="ml-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                        onClick={() => setShowReactionsMenu(prev => !prev)}
+                                    >
+                                        <Smile className="size-4" />
+                                    </button>
+                                )}
 
                                 {/* menu reaction */}
                                 {showReactionsMenu && (

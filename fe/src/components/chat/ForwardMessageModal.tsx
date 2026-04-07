@@ -110,6 +110,24 @@ const ForwardMessageModal = ({
         return map;
     }, [conversations, user?._id]);
 
+    //kh chuyển tiếp cho ng đã hạn chế 
+    const filteredFriends = useMemo(() => {
+        if (!user?._id) return [];
+
+        return friends.filter(friend => {
+            //tìm conversation direct giữa mình và friend
+            const convo = conversations.find(c =>
+                c.type === "direct" &&
+                c.participants.some(p => p._id === user._id) &&
+                c.participants.some(p => p._id === friend._id)
+            );
+
+            if (!convo) return false;
+
+            const me = convo.participants.find(p => p._id === user._id);
+            return me && !me.isRestricted; //nếu mình đã hạn chế ng đó thì bỏ
+        });
+    }, [friends, conversations, user?._id]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -128,7 +146,7 @@ const ForwardMessageModal = ({
 
                     <TabsContent value="friends">
                         <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-                            {friends.map((item: any) => {
+                            {filteredFriends.map((item: any) => {
                                 const isLoading = loadingId === item._id;
                                 const isSent = sentIds.includes(item._id);
                                 const isOnline = onlineUsers.includes(item._id);
