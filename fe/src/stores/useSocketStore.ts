@@ -5,6 +5,7 @@ import { useAuthStore } from "./useAuthStore";
 import type { SocketState } from "@/types/store";
 import { useChatStore } from "./useChatStore";
 import type { Reaction } from "@/types/chat";
+import { useFriendStore } from "./useFriendStore";
 
 
 const baseURL = import.meta.env.VITE_SOCKET_URL;
@@ -236,6 +237,38 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                 _id: conversationId,
                 removeMemberId: currentUserId
             });
+        });
+
+        //ket ban
+        socket.on("friend-request-received", (request) => {
+            useFriendStore.setState((state) => {
+                const exists = state.receivedList.some(r => r._id === request._id);
+                if (exists) return state;
+
+                return {
+                    receivedList: [request, ...state.receivedList]
+                };
+            });
+        });
+
+        socket.on("friend-request-accepted", ({ user, requestId }) => {
+            useFriendStore.setState((state) => {
+                const exists = state.friends.some(f => f._id.toString() === user._id.toString());
+                const newFriends = exists ? state.friends : [user, ...state.friends];
+                return {
+                    ...state,
+                    friends: newFriends,
+                    receivedList: state.receivedList.filter(r => r._id !== requestId),
+                    sentList: state.sentList.filter(r => r._id !== requestId),
+                };
+            });
+        });
+
+        socket.on("friend-request-declined", ({ requestId }) => {
+            useFriendStore.setState((state) => ({
+                receivedList: state.receivedList.filter(r => r._id !== requestId),
+                sentList: state.sentList.filter(r => r._id !== requestId),
+            }));
         });
     },
 

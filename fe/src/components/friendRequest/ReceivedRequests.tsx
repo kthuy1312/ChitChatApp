@@ -38,8 +38,6 @@ const ReceivedRequests = () => {
     }
   };
 
-  console.log(receivedList)
-
   return (
     <div className="space-y-3 mt-4">
       {receivedList.map((req) => (

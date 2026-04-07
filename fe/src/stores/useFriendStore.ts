@@ -25,10 +25,15 @@ export const useFriendStore = create<FriendState>((set, get) => ({
     addFriend: async (to, message) => {
         try {
             set({ loading: true });
-            const resultMessage = await friendService.sendFriendRequest(to, message);
-            //refresh lại danh sách sent / received
-            await get().getAllFriendRequests();
-            return { success: true, message: resultMessage };
+
+            const res = await friendService.sendFriendRequest(to, message);
+
+            set((state) => ({
+                sentList: [res.request, ...state.sentList]
+            }));
+
+            return { success: true, message: res.message };
+
         } catch (error: any) {
             return {
                 success: false,
@@ -58,6 +63,8 @@ export const useFriendStore = create<FriendState>((set, get) => ({
             set({ loading: false });
         }
     },
+
+
     acceptRequest: async (requestId) => {
         try {
             set({ loading: true });
