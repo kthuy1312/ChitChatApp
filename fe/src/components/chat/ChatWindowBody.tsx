@@ -219,17 +219,36 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
                             ? theme["--background-pinned-dark"]
                             : theme["--background-pinned"]
                             } / 0.6)`,
-                        borderColor: `hsl(${isDark ? theme["--chat-bubble-received-dark"] : theme["--chat-bubble-received"]}/ 0.6)`,
+                        borderColor: `hsl(${isDark
+                            ? theme["--chat-bubble-received-dark"]
+                            : theme["--chat-bubble-received"]
+                            } / 0.6)`,
                     }}
                 >
-                    <div
-                        className=" bg-black/20 rounded-full p-1.5 flex items-center justify-center flex-shrink-0"
-                    >
+                    <div className="bg-black/20 rounded-full p-1.5 flex items-center justify-center flex-shrink-0">
                         <Pin className="size-4 text-white fill-white" />
                     </div>
-                    <span className="truncate text-white font-medium">
-                        {latestPinned.isUnsent ? "Tin nhắn đã thu hồi" : latestPinned.content}
-                    </span>
+
+                    {latestPinned.isUnsent ? (
+                        <span className="truncate text-white italic">
+                            Tin nhắn đã thu hồi
+                        </span>
+                    ) : latestPinned.imgUrl ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                            <img
+                                src={latestPinned.imgUrl}
+                                alt="pinned-img"
+                                className="w-8 h-8 rounded object-cover flex-shrink-0"
+                            />
+                            <span className="truncate text-white font-medium">
+                                Ảnh
+                            </span>
+                        </div>
+                    ) : (
+                        <span className="truncate text-white font-medium">
+                            {latestPinned.content}
+                        </span>
+                    )}
                 </div>
             )}
 

@@ -34,7 +34,8 @@ const messageSchema = new mongoose.Schema({
         trim: true
     },
     imgUrl: {
-        type: String
+        type: String,
+        default: null
     },
     isForwarded: {
         type: Boolean,

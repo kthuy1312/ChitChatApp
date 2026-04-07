@@ -55,6 +55,10 @@ const lastMessageSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    imgUrl: {
+        type: String,
+        default: null
+    },
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
@@ -74,6 +78,10 @@ const pinnedMessageSchema = new mongoose.Schema({
         ref: "Message"
     },
     content: {
+        type: String,
+        default: null
+    },
+    imgUrl: {
         type: String,
         default: null
     },

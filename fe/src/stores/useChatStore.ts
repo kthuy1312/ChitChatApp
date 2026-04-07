@@ -910,7 +910,15 @@ export const useChatStore = create<ChatState>()(
                     console.error("Lỗi removeGroupMember:", error);
                     throw error;
                 }
-            }
+            },
+
+            uploadImageMessage: async (formData: FormData) => {
+                try {
+                    await chatService.uploadImage(formData);
+                } catch (error) {
+                    console.error("Upload image lỗi:", error);
+                }
+            },
         }),
         {
             name: "chat-storage",

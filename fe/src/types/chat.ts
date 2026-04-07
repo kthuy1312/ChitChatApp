@@ -24,6 +24,7 @@ export interface Group {
 export interface LastMessage {
   _id: string;
   content: string;
+  imgUrl: string;
   createdAt: string;
   senderId: {
     _id: string;
@@ -40,6 +41,7 @@ export interface ClearedAt {
 export interface PinnedMessage {
   messageId: string
   content: string | null
+  imgUrl: string | null
   senderId: string
   createdAt: string
   isUnsent: boolean

@@ -263,10 +263,13 @@ const MessageItem = ({
                             <div className="relative">
                                 <Card
                                     className={cn(
-                                        "p-3 transition-all duration-200 text-sm border-none shadow-md",
+                                        "transition-all duration-200 text-sm border-none",
+
                                         message.isUnsent
-                                            ? "italic bg-gray-200/60 dark:bg-gray-700/40 text-muted-foreground shadow-none border border-gray-300/60 dark:border-gray-600/40"
-                                            : ""
+                                            ? "italic bg-gray-200/60 dark:bg-gray-700/40 text-muted-foreground shadow-none border border-gray-300/60 dark:border-gray-600/40 p-3"
+                                            : message.imgUrl
+                                                ? "p-0 bg-transparent shadow-none"
+                                                : "p-3 shadow-md"
                                     )}
                                     style={
                                         message.isUnsent
@@ -290,11 +293,29 @@ const MessageItem = ({
                                     }
                                 >
 
-                                    {message.isUnsent
-                                        ? (message.isOwn
+                                    {message.isUnsent ? (
+                                        message.isOwn
                                             ? "Bạn đã thu hồi tin nhắn"
-                                            : "Tin nhắn đã được thu hồi")
-                                        : message.content}
+                                            : "Tin nhắn đã được thu hồi"
+                                    ) : message.imgUrl ? (
+                                        <img
+                                            src={message.imgUrl}
+                                            alt="chat-img"
+                                            className="
+                                                    max-w-[220px]
+                                                    object-conver
+                                                    cursor-pointer
+                                                    hover:scale-[1.02]
+                                                    transition
+                                                    rounded-xl
+                                                    shadow-sm
+                                                    block
+                                                "
+                                            onClick={() => message.imgUrl && window.open(message.imgUrl, "_blank")}
+                                        />
+                                    ) : (
+                                        message.content
+                                    )}
                                 </Card>
                             </div>
 

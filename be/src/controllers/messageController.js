@@ -3,6 +3,7 @@ import Conversation from "../models/Conversation.js"
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import { io } from "../socket/index.js";
+import { uploadImageFromBuffer } from '../middlewares/uploadMiddleware.js';
 
 
 export const sendDirectMessage = async (req, res) => {
@@ -151,6 +152,7 @@ export const forwardDirectMessage = async (req, res) => {
             conversationId: conversation._id,
             senderId: senderId,
             content: originalMsg.content,
+            imgUrl: originalMsg.imgUrl || null,
             isForwarded: true,
             originalMessageId: originalMsg._id
         });
@@ -212,7 +214,7 @@ export const forwardGroupMessage = async (req, res) => {
             conversationId: conversation._id,
             senderId: senderId,
             content: originalMsg.content,
-            // imgUrl: originalMsg.imgUrl || null,
+            imgUrl: originalMsg.imgUrl || null,
             isForwarded: true,
             originalMessageId: originalMsg._id
         });
@@ -369,6 +371,7 @@ export const togglePinMessage = async (req, res) => {
             const newPinned = {
                 messageId: message._id,
                 content: message.isUnsent ? "Tin nhắn đã thu hồi" : message.content,
+                imgUrl: message.imgUrl || null,
                 senderId: message.senderId,
                 createdAt: message.createdAt,
                 isUnsent: message.isUnsent,
@@ -390,6 +393,7 @@ export const togglePinMessage = async (req, res) => {
             pinnedMessage: {
                 messageId: message._id,
                 content: message.isUnsent ? "Tin nhắn đã thu hồi" : message.content,
+                imgUrl: message.imgUrl,
                 senderId: message.senderId,
                 createdAt: message.createdAt,
                 isUnsent: message.isUnsent,
@@ -407,6 +411,7 @@ export const togglePinMessage = async (req, res) => {
         res.status(500).json({ message: "Server error" })
     }
 }
+
 export const toggleReaction = async (req, res) => {
     try {
 
@@ -483,3 +488,63 @@ export const toggleReaction = async (req, res) => {
     }
 }
 
+export const uploadChatImage = async (req, res) => {
+    try {
+        const file = req.file;
+        const user = req.user;
+        const userId = user._id;
+        const { conversationId } = req.body;
+
+        if (!file) {
+            return res.status(400).json({ message: "Không có file" });
+        }
+
+        const conversation = await Conversation.findById(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" });
+        }
+
+        const isMember = conversation.participants.some(
+            p => p.userID.toString() === userId.toString()
+        );
+
+        if (!isMember) {
+            return res.status(403).json({ message: "Bạn không thuộc cuộc trò chuyện này" });
+        }
+
+        // upload cloudinary
+        const result = await uploadImageFromBuffer(file.buffer, {
+            folder: "chit_chat/messages",
+        });
+
+        // tạo message
+        const message = await Message.create({
+            conversationId,
+            senderId: userId,
+            sender: {
+                _id: user._id,
+                displayName: user.displayName,
+                avatarUrl: user.avatarUrl
+            },
+            content: "",
+            imgUrl: result.secure_url,
+        });
+
+        //update conversation
+        updateConversationAfterCreateMessage(conversation, message, userId);
+        await conversation.save();
+
+        //emit realtime
+        await emitNewMessage(io, conversation, message);
+
+        return res.status(200).json({
+            message: "Upload ảnh thành công",
+            data: message
+        });
+
+    } catch (err) {
+        console.error("UPLOAD IMAGE ERROR:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};

@@ -125,6 +125,13 @@ export const chatService = {
     async removeMember(conversationId: string, userId: string) {
         const res = await api.delete(`/conversations/${conversationId}/members/${userId}`)
         return res.data
-    }
+    },
 
+    async uploadImage(formData: FormData) {
+        const res = await api.post("/messages/upload-image", formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        return res.data;
+    }
 };

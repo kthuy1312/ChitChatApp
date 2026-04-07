@@ -30,9 +30,9 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
 
     //pin modal
     const [view, setView] = useState<
-        "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo" | "addMember"
+        "info" | "pinned" | "theme" | "nickname" | "profile" | "search" | "groupInfo" | "addMember" | "images"
     >("info")
-    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember, removeMember } = useChatStore()
+    const { togglePinMessage, updateTheme, clearSearch, clearConversation, addGroupMember, removeMember, messages } = useChatStore()
     const isDark = useDarkMode();
     const [selectedTheme, setSelectedTheme] = useState(chat.theme || "default");
     const [nicknameMap, setNicknameMap] = useState<Record<string, string>>({})
@@ -44,6 +44,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     useEffect(() => {
         setSelectedTheme(chat.theme || "default");
     }, [chat.theme]);
+    console.log(chat)
 
     useEffect(() => {
         setNicknameMap((prev) => {
@@ -246,6 +247,11 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
         }
     };
 
+    //ảnh
+    const images = messages[chat._id]?.items.filter(
+        m => m.imgUrl && !m.isUnsent
+    )
+
     return (
         <>
             <div className="h-full flex flex-col overflow-hidden">
@@ -359,6 +365,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                     icon={<Images className="size-5 " />}
                                     label="Xem ảnh"
                                     badge="12"
+                                    onClick={() => setView("images")}
                                 />
                             </section>
 
@@ -398,10 +405,24 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                                             className="group flex items-start justify-between gap-3 p-3 rounded-xl bg-muted hover:bg-accent transition cursor-pointer"
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-foreground truncate">
-                                                    {p.isUnsent ? "Tin nhắn đã thu hồi" : p.content}
-                                                </p>
-
+                                                <div className="text-sm font-medium text-foreground flex items-center gap-1 min-w-0">
+                                                    {p.isUnsent ? (
+                                                        "Tin nhắn đã thu hồi"
+                                                    ) : p.imgUrl ? (
+                                                        <>
+                                                            <img
+                                                                src={p.imgUrl}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    window.open(p.imgUrl, "_blank")
+                                                                }}
+                                                                className="w-16 h-16 object-cover rounded-lg mt-1 cursor-pointer"
+                                                            />
+                                                        </>
+                                                    ) : (
+                                                        <span className="truncate">{p.content}</span>
+                                                    )}
+                                                </div>
                                                 <span className="text-xs text-muted-foreground">
                                                     {new Date(p.createdAt).toLocaleString()}
                                                 </span>
@@ -873,6 +894,53 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                             >
                                 Thêm ({selectedUsers.length})
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* IMAGES */}
+                {view === "images" && (
+                    <div className="flex flex-col h-full">
+
+                        <div className="flex items-center gap-3 p-4 border-b shrink-0">
+                            <button onClick={() => setView("info")}>
+                                <ArrowLeft className="size-5" />
+                            </button>
+                            <h3 className="font-bold text-lg">Ảnh Đã Gửi</h3>
+                        </div>
+                        {/* content */}
+                        <div className="flex-1 overflow-y-auto p-3">
+                            {(() => {
+
+                                if (images.length === 0) {
+                                    return (
+                                        <p className="text-sm text-center text-muted-foreground mt-10">
+                                            Chưa có ảnh nào
+                                        </p>
+                                    );
+                                }
+
+                                return (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {images.map((m: any) => (
+                                            <img
+                                                key={m._id}
+                                                src={m.imgUrl}
+                                                alt="chat-img"
+                                                onClick={() => window.open(m.imgUrl, "_blank")}
+                                                className="
+                                                w-full h-[110px]
+                                                object-cover
+                                                rounded-lg
+                                                cursor-pointer
+                                                hover:scale-[1.05]
+                                                transition
+                                            "
+                                            />
+                                        ))}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     </div>
                 )}

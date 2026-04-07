@@ -1,6 +1,7 @@
 import express from 'express'
-import { forwardDirectMessage, forwardGroupMessage, sendDirectMessage, sendGroupMessage, togglePinMessage, toggleReaction, unsendMessage } from '../controllers/messageController.js'
+import { forwardDirectMessage, forwardGroupMessage, sendDirectMessage, sendGroupMessage, togglePinMessage, toggleReaction, unsendMessage, uploadChatImage } from '../controllers/messageController.js'
 import { checkFriendship, checkGroupMembership } from '../middlewares/friendMiddleware.js'
+import { upload } from '../middlewares/uploadMiddleware.js'
 
 const router = express.Router()
 
@@ -20,5 +21,8 @@ router.patch('/:messageId/pin-message', togglePinMessage)
 
 //reation
 router.patch('/:messageId/reaction', toggleReaction)
+
+//gửi ảnh
+router.post("/upload-image", upload.single("file"), uploadChatImage);
 
 export default router

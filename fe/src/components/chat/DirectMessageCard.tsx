@@ -7,6 +7,7 @@ import UserAvatar from './UserAvatar'
 import StatusBadge from './StatusBadge'
 import UnreadCountBadge from './UnreadCountBadge'
 import { useSocketStore } from '@/stores/useSocketStore'
+import { ImageIcon } from 'lucide-react'
 
 const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
 
@@ -67,17 +68,24 @@ const DirectMessageCard = ({ conver }: { conver: Conversation }) => {
                 <div className="flex items-center gap-1 min-w-0">
                     <p
                         className={cn(
-                            "flex-1 truncate text-sm leading-snug",
+                            "flex-1 truncate text-sm leading-snug flex items-center gap-1",
                             unreadCounts > 0
                                 ? "font-medium text-foreground"
                                 : "text-muted-foreground"
                         )}
                     >
-                        {conver?.lastMessage?.content === null
-                            ? conver.lastMessage.senderId._id === user._id
+                        {conver?.lastMessage?.imgUrl ? (
+                            <>
+                                <ImageIcon className="w-4 h-4 shrink-0" />
+                                <span className="truncate">Đã gửi một ảnh</span>
+                            </>
+                        ) : conver?.lastMessage?.content === null ? (
+                            conver.lastMessage.senderId._id === user._id
                                 ? "Bạn đã thu hồi tin nhắn"
                                 : "Tin nhắn đã thu hồi"
-                            : conver?.lastMessage?.content ?? ""}
+                        ) : (
+                            conver?.lastMessage?.content
+                        )}
                     </p>
 
                     {timestamp && (

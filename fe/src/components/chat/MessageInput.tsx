@@ -1,8 +1,8 @@
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { Conversation } from "@/types/chat";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { ImagePlus, Send } from "lucide-react";
+import { ImagePlus, Loader, Send } from "lucide-react";
 import { Input } from "../ui/input";
 import EmojiPicker from "./EmojiPicker";
 import { useChatStore } from "@/stores/useChatStore";
@@ -14,7 +14,7 @@ import { useSocketStore } from "@/stores/useSocketStore";
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     const { user } = useAuthStore();
 
-    const { sendDirectMessage, sendGroupMessage, toggleRestrict } = useChatStore();
+    const { sendDirectMessage, sendGroupMessage, toggleRestrict, uploadImageMessage } = useChatStore();
 
     const [unrestricting, setUnrestricting] = useState(false) //để loading khi bỏ hạn chế cho nút
 
@@ -112,6 +112,30 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
 
     const bg = getColor("--background");
 
+    //gửi ảnh
+    const fileRef = useRef<HTMLInputElement>(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !selectedConvo?._id) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("conversationId", selectedConvo._id);
+
+        try {
+            setUploadingImage(true);
+            await uploadImageMessage(formData);
+        } catch (err) {
+            toast.error("Upload ảnh thất bại");
+        } finally {
+            setUploadingImage(false);
+        }
+
+        e.target.value = ""; //reset để chọn lại cùng file
+    };
+
     return (
         <div
             className="p-3 min-h-[56px]"
@@ -166,20 +190,32 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="hover:bg-primary/10 transition-smooth"
+                        onClick={() => fileRef.current?.click()}
                     >
                         <ImagePlus className="size-4" />
                     </Button>
+
+                    <input
+                        type="file"
+                        hidden
+                        ref={fileRef}
+                        accept="image/*"
+                        onChange={handleUpload}
+                    />
 
                     <div className="flex-1 relative">
                         <Input
                             onKeyPress={handleKeyPress}
                             value={value}
                             onChange={handleInputChange}
-                            placeholder="Soạn tin nhắn..."
+                            placeholder={uploadingImage ? "Đang gửi ảnh..." : "Soạn tin nhắn..."}
                             className="pr-20 h-9"
+                            disabled={uploadingImage}
                         />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                            {uploadingImage && (
+                                <Loader className="w-4 h-4 text-muted-foreground animate-spin" />
+                            )}
                             <EmojiPicker onChange={(emoji: string) => setValue(`${value}${emoji}`)} />
                         </div>
                     </div>
