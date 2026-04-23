@@ -1,5 +1,5 @@
 import { cn, formatMessageTime } from "@/lib/utils";
-import type { Conversation, Message, Participant } from "@/types/chat";
+import type { Conversation, Message } from "@/types/chat";
 import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -135,7 +135,7 @@ const MessageItem = ({
     //fallback nếu không còn trong group
     const displayName = participant?.displayName || message.sender?.displayName || "Người dùng đã rời";
     const avatarUrl = participant?.avatarUrl || message.sender?.avatarUrl || undefined;
-
+    const nickname = participant?.nickname;
 
     // nếu message là của người bị hạn chế thì không hiện nút ghim
     const { user } = useAuthStore()
@@ -182,6 +182,13 @@ const MessageItem = ({
                         message.isOwn ? "items-end" : "items-start"
                     )}
                 >
+                    {/* tên của ng gửi nếu là nhóm */}
+                    {selectedConvo.type === "group" && !message.isOwn && isGroupBreak && (
+                        <span className="text-xs text-muted-foreground mb-1 px-1">
+                            {nickname ? nickname : displayName}
+                        </span>
+                    )}
+
                     {/* forwarded */}
                     {message.isForwarded && (
                         <div className="flex items- center gap-1 mb-1 px-1 text-muted-foreground/70">
@@ -228,7 +235,7 @@ const MessageItem = ({
                                 {showReactionsMenu && (
                                     <div
                                         className={cn(
-                                            "absolute bottom-full mb-2 flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm z-50 transform origin-bottom pop-bounce",
+                                            "absolute bottom-full mb-3 flex gap-2 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg z-50 transform origin-bottom pop-bounce backdrop-blur-sm",
                                             message.isOwn ? "right-0" : "left-0"
                                         )}
                                     >
@@ -242,9 +249,9 @@ const MessageItem = ({
                                                 <button
                                                     key={emoji}
                                                     className={cn(
-                                                        "p-1 text-lg rounded-lg transition-colors duration-150 flex items-center justify-center",
-                                                        "hover:bg-gray-200 dark:hover:bg-gray-700",
-                                                        isSelected ? "bg-gray-300 dark:bg-gray-600" : ""
+                                                        "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center text-lg hover:scale-125 active:scale-95",
+                                                        "hover:bg-gray-200 dark:hover:bg-gray-800",
+                                                        isSelected ? "bg-blue-200 dark:bg-blue-900/50 scale-110" : ""
                                                     )}
                                                     onClick={() => {
                                                         toggleReaction(message.conversationId, message._id, emoji, currentUserId!);
@@ -386,28 +393,24 @@ const MessageItem = ({
                             {/* reactions modal */}
                             {isReactionsModalOpen && (
                                 <div
-                                    className="fixed inset-0 flex items-center justify-center z-50 bg-black/40"
+                                    className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 backdrop-blur-sm"
                                     onClick={() => setIsReactionsModalOpen(false)}
                                 >
                                     <div
-                                        className="p-8 rounded-3xl shadow-lg max-w-md w-full animate-scaleIn border"
+                                        className="p-6 rounded-3xl shadow-2xl max-w-md w-full animate-scaleIn border border-white/20 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
                                         style={{
-                                            backgroundColor: isDark
-                                                ? (getColor("--background-dark").includes("gradient") ? "white" : `hsl(${getColor("--background-dark")})`)
-                                                : (getColor("--background").includes("gradient") ? "white" : `hsl(${getColor("--background")})`),
-                                            borderColor: `hsl(${getColor(isDark ? "--msg-status-seen-dark" : "--msg-status-seen")})`,
-                                            background: isDark ? getColor("--background-dark") : getColor("--background")
+                                            borderColor: `hsl(${getColor(isDark ? "--msg-status-seen-dark" : "--msg-status-seen")} / 0.3)`,
                                         }}
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <h3
-                                            className="text-xl font-extrabold mb-4 text-center tracking-wide"
+                                            className="text-lg font-bold mb-4 text-center tracking-wide"
                                             style={{ color: `hsl(${getColor(isDark ? "--msg-received-text-dark" : "--msg-received-text")})` }}
                                         >
                                             Cảm Xúc
                                         </h3>
 
-                                        <ul className="max-h-100 overflow-y-auto beautiful-scrollbar space-y-2 pr-1">
+                                        <ul className="max-h-100 overflow-y-auto beautiful-scrollbar space-y-1.5 pr-2">
                                             {orderedReactions.map(({ emoji, userId }) => {
                                                 const user = selectedConvo.participants.find((p) => p._id === userId);
                                                 const displayName = user?.displayName ?? "Người dùng";
@@ -417,12 +420,17 @@ const MessageItem = ({
                                                 return (
                                                     <li
                                                         key={`${emoji}-${userId}`}
-                                                        className={`flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer ${isMine ? "hover:brightness-90 active:scale-[0.98]" : ""
-                                                            }`} style={{
-                                                                backgroundColor: isMine
-                                                                    ? `hsl(${getColor(isDark ? "--chat-bubble-received-dark" : "--chat-bubble-received")} / 0.4)`
-                                                                    : "transparent"
-                                                            }}
+                                                        className={`flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer ${isMine
+                                                            ? "hover:brightness-110 active:scale-95 hover:shadow-md"
+                                                            : "hover:brightness-105"
+                                                            }`}
+                                                        style={{
+                                                            backgroundColor: isMine
+                                                                ? `hsl(${getColor(isDark ? "--chat-bubble-received-dark" : "--chat-bubble-received")} / 0.2)`
+                                                                : isDark
+                                                                    ? "rgba(255,255,255,0.05)"
+                                                                    : "rgba(0,0,0,0.02)",
+                                                        }}
                                                         onClick={() => {
                                                             if (isMine) removeReaction(emoji);
                                                         }}
@@ -438,20 +446,26 @@ const MessageItem = ({
                                                                 </span>
                                                                 {isMine && (
                                                                     <span
-                                                                        className="text-[10px] font-bold text-gray-900/70 dark:text-white/70"                                                                    >
-                                                                        Nhấn để gỡ
+                                                                        className="text-[11px] font-medium"
+                                                                        style={{
+                                                                            color: `hsl(${getColor(isDark ? "--msg-status-seen-dark" : "--msg-status-seen")})`
+                                                                        }}
+                                                                    >
+                                                                        Nhấn để gỡ bỏ
                                                                     </span>
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <span className="text-2xl">{emoji}</span>
+                                                        <span className="text-3xl animate-bounce" style={{ animationDelay: "0s" }}>
+                                                            {emoji}
+                                                        </span>
                                                     </li>
                                                 );
                                             })}
                                         </ul>
 
                                         <button
-                                            className="mt-6 w-full py-3 text-sm font-bold rounded-xl transition-all active:scale-95 shadow-md hover:opacity-60"
+                                            className="mt-5 w-full py-2.5 text-sm font-bold rounded-2xl transition-all active:scale-95 shadow-md hover:shadow-lg hover:opacity-80"
                                             style={{
                                                 background: getColor(isDark ? "--send-btn-bg-dark" : "--send-btn-bg").includes("gradient")
                                                     ? getColor(isDark ? "--send-btn-bg-dark" : "--send-btn-bg")

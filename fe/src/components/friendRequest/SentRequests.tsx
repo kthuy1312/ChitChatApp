@@ -20,7 +20,7 @@ const SentRequests = () => {
 
 
   return (
-    <div className="space-y-3 mt-4">
+    <div className="space-y-3 mt-4 max-h-[500px] overflow-y-auto pr-2 beautiful-scrollbar">
       <>
         {sentList.map((req) => (
           <FriendRequestItem

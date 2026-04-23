@@ -175,8 +175,10 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
     const [selectedUsers, setSelectedUsers] = useState<string[]>([])
 
     useEffect(() => {
-        getFriends()
-    }, [])
+        if (view === "addMember") {
+            getFriends()
+        }
+    }, [view])
 
     //bỏ member đã có trong group
     const existingIds = chat.participants.map(
@@ -263,7 +265,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
 
     return (
         <>
-            <div className="h-full flex flex-col overflow-hidden">
+            <div className="h-full flex flex-col overflow-hidden ">
                 {view === "info" && (
                     <div className="flex flex-col overflow-hidden bg-background">
                         <div className="relative flex flex-col items-center p-7 bg-gradient-to-b from-primary/10 via-background to-background border-b border-border/50">
@@ -393,7 +395,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
 
                 {/* PIN */}
                 {view === "pinned" && (
-                    <div className="flex flex-col h-full">
+                    <div className="flex flex-col h-full ">
                         <div className="flex items-center gap-3 p-4 border-b shrink-0">
                             <button onClick={() => setView("info")}>
                                 <ArrowLeft className="size-5" />
@@ -402,7 +404,7 @@ const ConversationInfo = ({ chat, otherUser, isOnline, statusText, onPinnedMessa
                         </div>
 
                         {/* list pinned*/}
-                        <div className="flex-1 overflow-y-auto beautiful-scrollbar p-4 space-y-3">
+                        <div className="flex-1 overflow-y-auto beautiful-scrollbar p-4 space-y-3 ">
                             {chat.pinnedMessages?.length > 0 ? (
                                 (chat.pinnedMessages as PinnedMessage[])
                                     .slice()

@@ -52,7 +52,7 @@ const FriendRequestItem = ({ requestInfo, actions, type }: RequestItemProps) => 
 
       {/* Message */}
       {message && (
-        <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-sm text-foreground/90">
+        <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-sm text-foreground/90 max-h-24 overflow-y-auto beautiful-scrollbar">
           {message}
         </div>
       )}

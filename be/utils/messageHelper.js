@@ -57,10 +57,4 @@ export const emitNewMessage = async (io, conversation, message) => {
 
     //emit vào room conversation (user đã join sẵn)
     io.to(conversation._id.toString()).emit("new-message", payload);
-
-    //emit trực tiếp tới từng user 
-    conversation.participants.forEach((p) => {
-        const userId = p.userID._id.toString();
-        io.to(userId).emit("new-message", payload);
-    });
 };

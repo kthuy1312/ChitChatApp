@@ -122,10 +122,11 @@ const ForwardMessageModal = ({
                 c.participants.some(p => p._id === friend._id)
             );
 
-            if (!convo) return false;
+            // Nếu không có conversation thì hiển thị bình thường
+            if (!convo) return true;
 
             const me = convo.participants.find(p => p._id === user._id);
-            return me && !me.isRestricted; //nếu mình đã hạn chế ng đó thì bỏ
+            return !me?.isRestricted; //nếu mình đã hạn chế ng đó thì bỏ
         });
     }, [friends, conversations, user?._id]);
 
@@ -145,7 +146,7 @@ const ForwardMessageModal = ({
                     </TabsList>
 
                     <TabsContent value="friends">
-                        <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                        <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
                             {filteredFriends.map((item: any) => {
                                 const isLoading = loadingId === item._id;
                                 const isSent = sentIds.includes(item._id);
@@ -208,7 +209,7 @@ const ForwardMessageModal = ({
                     </TabsContent>
 
                     <TabsContent value="groups">
-                        <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                        <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
                             {groupChats.map((item) => {
                                 const isLoading = loadingId === item._id;
                                 const isSent = sentIds.includes(item._id);

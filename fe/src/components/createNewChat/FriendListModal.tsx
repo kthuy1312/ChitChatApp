@@ -39,10 +39,14 @@ const FriendListModal = () => {
         c.participants.some(p => p._id === friend._id)
       );
 
-      if (!convo) return false;
+      // Nếu có conversation, kiểm tra isRestricted
+      if (convo) {
+        const me = convo.participants.find(p => p._id === user._id);
+        return me && !me.isRestricted;
+      }
 
-      const me = convo.participants.find(p => p._id === user._id);
-      return me && !me.isRestricted; //nếu mình đã hạn chế ng đó thì bỏ
+      // Nếu chưa có conversation, vẫn hiển thị bạn bè
+      return true;
     });
   }, [friends, conversations, user?._id]);
 

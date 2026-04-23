@@ -161,7 +161,7 @@ export const getConversations = async (req, res) => {
             //nếu user đã clear conver
             if (clearedRecord) {
                 filteredPinned = conver.pinnedMessages.filter(p => {
-                    return new Date(p.createdAt) > new Date(clearedRecord.timestamp);
+                    return new Date(p.pinnedAt) > new Date(clearedRecord.timestamp);
                 });
             }
 
