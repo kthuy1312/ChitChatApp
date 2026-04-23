@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo2.png" alt="ChitChat Logo" width="96" height="96" />
+  <img src="fe/public/logo2.png" alt="ChitChat Logo" width="96" height="96" />
 </p>
 
 <h1 align="center">ChitChat</h1>
