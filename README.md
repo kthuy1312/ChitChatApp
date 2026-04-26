@@ -268,6 +268,7 @@ ChitChat/
 │   └── 📄 package.json
 │
 ├── 📂 be/                          # Backend (Express + MongoDB)
+│   ├── 📂 postman/                 # Chứa Postman collection & API testing files
 │   ├── 📂 src/
 │   │   ├── 📂 controllers/         # Auth, User, Friend, Message, Conversation
 │   │   ├── 📂 models/              # User, Message, Conversation, Friend, ...
