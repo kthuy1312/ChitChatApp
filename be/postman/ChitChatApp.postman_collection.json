@@ -1,0 +1,1294 @@
+{
+  "info": {
+    "_postman_id": "cbe8a145-a393-498e-837a-023400b0e943",
+    "name": "ChitChatApp",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37851469",
+    "_collection_link": "https://go.postman.co/collection/37851469-cbe8a145-a393-498e-837a-023400b0e943?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "user6",
+                  "type": "text",
+                  "uuid": "94de1afe-a78a-4a72-a274-a77b618a7e85"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "317e32c6-2dcf-4908-a032-795c3269e936"
+                },
+                {
+                  "key": "email",
+                  "value": "6@gmail.com",
+                  "type": "text",
+                  "uuid": "570f1558-719a-42d6-b451-5eaefb276bbc"
+                },
+                {
+                  "key": "lastName",
+                  "value": "ebe",
+                  "type": "text",
+                  "uuid": "930d1feb-eaea-4e70-9e02-be033b8b5707"
+                },
+                {
+                  "key": "firstName",
+                  "value": "cute 6",
+                  "type": "text",
+                  "uuid": "9e2e2efa-e505-4e42-b09e-2beabc438115"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/signup",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Signin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "user1",
+                  "type": "text",
+                  "uuid": "3c356834-6729-416e-8001-c614cc443edf"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "86a83c77-8391-480b-b90b-37257bac9348"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/signin",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "signin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Signout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "user3",
+                  "type": "text",
+                  "uuid": "3c356834-6729-416e-8001-c614cc443edf"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "86a83c77-8391-480b-b90b-37257bac9348"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/signout",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "signout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "user3",
+                  "type": "text",
+                  "uuid": "3c356834-6729-416e-8001-c614cc443edf"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "86a83c77-8391-480b-b90b-37257bac9348"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/refresh",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "oldPwd",
+                  "value": "1234567",
+                  "type": "text",
+                  "uuid": "3c356834-6729-416e-8001-c614cc443edf"
+                },
+                {
+                  "key": "newPwd",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "86a83c77-8391-480b-b90b-37257bac9348"
+                },
+                {
+                  "key": "confirmNewPwd",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "ad2647f8-cfd7-46ba-80ee-6796fd9308f2"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/changePassword",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "changePassword"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "Get User In4",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/users/me",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/users/all",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search User By Username",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseURL}}/users/search?username=user1",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "user1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "user1",
+                  "type": "text",
+                  "uuid": "3c356834-6729-416e-8001-c614cc443edf"
+                },
+                {
+                  "key": "displayName",
+                  "value": "zenitsu dang iu",
+                  "type": "text",
+                  "uuid": "86a83c77-8391-480b-b90b-37257bac9348"
+                },
+                {
+                  "key": "phone",
+                  "value": "123456",
+                  "type": "text",
+                  "uuid": "920106f9-d7d3-4810-9cd9-31089276cad5"
+                },
+                {
+                  "key": "bio",
+                  "value": "ngiu tui là nezuko",
+                  "type": "text",
+                  "uuid": "fb33daf3-d562-458f-9444-6b7d6afc604f"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/users/profile",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "friends",
+      "item": [
+        {
+          "name": "Send Friend Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "to",
+                  "value": "695d4b804bce73b1a89c1e44",
+                  "type": "text",
+                  "uuid": "e3713180-e737-4e09-9387-ce374b13b8ca"
+                },
+                {
+                  "key": "message",
+                  "value": "user1 -> user3",
+                  "type": "text",
+                  "uuid": "9c75c2b9-1476-4a32-bb97-482a0195c8f2"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/friends/requests",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "friends",
+                "requests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Friend Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseURL}}/friends/requests/695d41765faa194dd4c47fae/accept",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "friends",
+                "requests",
+                "695d41765faa194dd4c47fae",
+                "accept"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Decline Friend Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseURL}}/friends/requests/695d4be24bce73b1a89c1e57/decline",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "friends",
+                "requests",
+                "695d4be24bce73b1a89c1e57",
+                "decline"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Friends",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseURL}}/friends",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "friends"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Request",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseURL}}/friends/requests",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "friends",
+                "requests"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "messages",
+      "item": [
+        {
+          "name": "Pin Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/messages/69cac2ded4a4892b14055890/pin-message",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "69cac2ded4a4892b14055890",
+                "pin-message"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Direct Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "recipientId",
+                  "value": "69582d8f5b7fc1de2c7d99f2",
+                  "type": "text",
+                  "uuid": "85170a17-9e5e-48e6-b29c-cfed6096067a"
+                },
+                {
+                  "key": "content",
+                  "value": "tn đầu tiên từ user1 -> user2",
+                  "type": "text",
+                  "uuid": "ef677c24-d5f5-4370-a01b-785a237f88df"
+                },
+                {
+                  "key": "conversationId",
+                  "value": "695ff1fec8d6615b35896b7a",
+                  "type": "text",
+                  "uuid": "3c09c126-207b-44a8-bec4-a1dd671200f3"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/messages/direct",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "direct"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Group Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "conversationId",
+                  "value": "6963e0395ec97e5bff80745b",
+                  "type": "text",
+                  "uuid": "da01efe3-c82f-4395-8f07-34440c023c35"
+                },
+                {
+                  "key": "content",
+                  "value": "tn group tu user2 -> user1",
+                  "type": "text",
+                  "uuid": "77a49029-0cd8-4da7-8321-a176488f7d45"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/messages/group",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "group"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Forward Direct Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "originalMessageId",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "c0855001-e1fb-4632-88a2-d547ee93cdfb"
+                },
+                {
+                  "key": "recipientId",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "1ed98539-8bda-41ba-988c-c12cfec8c108"
+                },
+                {
+                  "key": "targetConversationIds",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "62b50530-c6a1-463a-89d7-e20b5bc409b4"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/messages/forward-direct",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "forward-direct"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unsend Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/messages/69ca9b5f405529252af9fca9/unsend",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "69ca9b5f405529252af9fca9",
+                "unsend"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Forward Group Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "originalMessageId",
+                  "value": "69cc1017600fe5dc5f00b3b6",
+                  "type": "text",
+                  "uuid": "abb10743-5cc0-4c84-a98f-2ac92a2f7ffd"
+                },
+                {
+                  "key": "conversationId",
+                  "value": "6994acdcadca46f7e2842dfa",
+                  "type": "text",
+                  "uuid": "9146823c-90f4-4571-90ac-98e5b63b34f7"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/messages/forward-group",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "forward-group"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/69710a99451900d0f47e9546/messages/search?q=dd",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "69710a99451900d0f47e9546",
+                "messages",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "dd"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reaction Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "emoji",
+                  "value": "😡",
+                  "type": "text",
+                  "uuid": "d6dbce16-2449-45d3-9f18-427ed037b158"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/messages/69d231626e9a9912de817d53/reaction",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "messages",
+                "69d231626e9a9912de817d53",
+                "reaction"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "conversation",
+      "item": [
+        {
+          "name": "Create Conversation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"type\":\"group\",\r\n    \"name\":\"Nhom ABC\",\r\n    \"memberIds\":[\r\n        \"6957d8a5aa107d436c0df06e\"\r\n        // ,\"69582d8f5b7fc1de2c7d99f2\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/conversations/",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Messages",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/695ff1fec8d6615b35896b7a/messages",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "695ff1fec8d6615b35896b7a",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pin Conversation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/69711166eb6a56535b029a03/pin",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "69711166eb6a56535b029a03",
+                "pin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversations By UserId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/user",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Achive Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/69711166eb6a56535b029a03/archive",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "69711166eb6a56535b029a03",
+                "archive"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restrict Conversation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/6970f2d84da69e983683a009/restrict",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "6970f2d84da69e983683a009",
+                "restrict"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Leave Group",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/conversations/6963e0395ec97e5bff80745b/leaveGroup",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "6963e0395ec97e5bff80745b",
+                "leaveGroup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Nick Name",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "targetId",
+                  "value": "6970e167c382a4d562a480f7",
+                  "type": "text",
+                  "uuid": "abb10743-5cc0-4c84-a98f-2ac92a2f7ffd"
+                },
+                {
+                  "key": "nickname",
+                  "value": "sach se",
+                  "type": "text",
+                  "uuid": "9146823c-90f4-4571-90ac-98e5b63b34f7"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/conversations/69710a99451900d0f47e9546/nickname",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "69710a99451900d0f47e9546",
+                "nickname"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Members To Group",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userIds\": [\r\n    \"6970e167c382a4d562a480f7\",\r\n    \"69582d8f5b7fc1de2c7d99f2\"\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/conversations/6994acdcadca46f7e2842dfa/members",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "6994acdcadca46f7e2842dfa",
+                "members"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userIds\": [\r\n    \"6970e167c382a4d562a480f7\",\r\n    \"69582d8f5b7fc1de2c7d99f2\"\r\n  ]\r\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/conversations/69a33ad75d34905cf66a47a7/members/69582d8f5b7fc1de2c7d99f2",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "conversations",
+                "69a33ad75d34905cf66a47a7",
+                "members",
+                "69582d8f5b7fc1de2c7d99f2"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": ""
+    }
+  ]
+}

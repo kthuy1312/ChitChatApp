@@ -310,7 +310,7 @@ npm install
 Tạo file `.env` trong thư mục `be/`:
 
 ```env
-PORT=8081
+PORT=8080
 MONGODB_URI=mongodb://localhost:27017/chitchat
 JWT_SECRET=your_jwt_secret
 JWT_REFRESH_SECRET=your_jwt_refresh_secret
@@ -330,7 +330,7 @@ npm install
 Tạo file `.env.development` trong thư mục `fe/`:
 
 ```env
-VITE_API_URL=http://localhost:8081
+VITE_API_URL=http://localhost:8080
 ```
 
 ### 4. Chạy Ứng Dụng
@@ -347,8 +347,12 @@ npm run dev
 
 Truy cập: **http://localhost:5173**
 
-API Docs: **http://localhost:8081/api-docs**
-
+API Docs / Postman:
+- **Swagger UI:** http://localhost:8080/api-docs
+- **Postman Collection:** Mở file `be/postman/ChitChatApp.postman_collection.json`  
+  hoặc truy cập:  
+  https://www.postman.com/restless-capsule-236537/workspace/lkt/collection/37851469-cbe8a145-a393-498e-837a-023400b0e943?action=share&source=copy-link&creator=37851469
+    
 ---
 
 ## 🔌 API Endpoints
@@ -375,7 +379,7 @@ API Docs: **http://localhost:8081/api-docs**
 | POST | `/api/messages/send` | Gửi tin nhắn |
 | POST | `/api/messages/image` | Gửi ảnh |
 
-> 📄 Xem đầy đủ tại **Swagger UI**: `http://localhost:8081/api-docs`
+> 📄 Xem đầy đủ tại **Swagger UI**: `http://localhost:8080/api-docs`
 
 ---
 
