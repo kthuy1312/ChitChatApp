@@ -68,7 +68,9 @@ const ForwardMessageModal = ({
         }
     }, [open]);
 
-    const handleFowardDirect = async (id: string) => {
+    const handleFowardDirect = async (e: React.MouseEvent, id: string) => {
+        e.preventDefault();
+        e.stopPropagation();
         try {
             setLoadingId(id);
             await forwardDirectMessage(id, messageId);
@@ -80,7 +82,9 @@ const ForwardMessageModal = ({
         }
     };
 
-    const handleFowardGroup = async (conversationId: string) => {
+    const handleFowardGroup = async (e: React.MouseEvent, conversationId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
         try {
             setLoadingId(conversationId);
             await forwardGroupMessage(conversationId, messageId);
@@ -185,9 +189,10 @@ const ForwardMessageModal = ({
                                         </div>
 
                                         <Button
+                                            type="button"
                                             size="default"
                                             disabled={isLoading || isSent}
-                                            onClick={() => handleFowardDirect(item._id)}
+                                            onClick={(e) => handleFowardDirect(e, item._id)}
                                             className="flex items-center gap-1 text-white"
                                         >
                                             {isLoading
@@ -230,9 +235,10 @@ const ForwardMessageModal = ({
                                         </div>
 
                                         <Button
+                                            type="button"
                                             size="default"
                                             disabled={isLoading || isSent}
-                                            onClick={() => handleFowardGroup(item._id)}
+                                            onClick={(e) => handleFowardGroup(e, item._id)}
                                             className="flex items-center gap-1 text-white"
                                         >
                                             {isLoading

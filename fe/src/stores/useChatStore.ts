@@ -57,7 +57,9 @@ export const useChatStore = create<ChatState>()(
 
       fetchConversations: async () => {
         try {
-          set({ converloading: true });
+          if (get().conversations.length === 0) {
+            set({ converloading: true });
+          }
           const { conversations } = await chatService.fetchConversations();
 
           const currentUserId = useAuthStore.getState().user?._id;
@@ -77,7 +79,7 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      fetchMessages: async (conversationId) => {
+      fetchMessages: async (conversationId, isBackground = false) => {
         const { activeConversationId, messages } = get();
         const { user } = useAuthStore.getState();
 
@@ -91,7 +93,9 @@ export const useChatStore = create<ChatState>()(
 
         if (nextCursor === null) return;
 
-        set({ messageLoading: true });
+        if (!isBackground) {
+          set({ messageLoading: true });
+        }
 
         try {
           const { messages: fetched, cursor } = await chatService.fetchMessages(
@@ -123,7 +127,9 @@ export const useChatStore = create<ChatState>()(
         } catch (error) {
           console.error("Lỗi xảy ra khi fetchMessages:", error);
         } finally {
-          set({ messageLoading: false });
+          if (!isBackground) {
+            set({ messageLoading: false });
+          }
         }
       },
 
@@ -190,8 +196,8 @@ export const useChatStore = create<ChatState>()(
           let prevItems = get().messages[converId]?.items ?? [];
 
           if (prevItems.length === 0) {
-            //nếu chưa có tn nào thì phải fetch tn cũ trước
-            await fetchMessages(message.conversationId);
+            //nếu chưa có tn nào thì phải fetch tn cũ trước (fetch ngầm không loading)
+            await fetchMessages(message.conversationId, true);
           }
 
           set((state) => {
