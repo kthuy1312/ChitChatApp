@@ -16,7 +16,7 @@ interface MessageItemProps {
     index: number;
     messages: Message[];
     selectedConvo: Conversation;
-    lastMessageStatus: "delivered" | "seen";
+    lastMessageStatus: "delivered" | "seen" | "hidden";
     isTyping?: boolean;
 }
 
@@ -484,7 +484,8 @@ const MessageItem = ({
 
                     {/* seen / delivered */}
                     {message.isOwn &&
-                        message._id === selectedConvo.lastMessage?._id && (
+                        message._id === selectedConvo.lastMessage?._id && 
+                        lastMessageStatus !== "hidden" && (
                             <Badge
                                 className="text-xs px-2 py-1.5 h-6 border-0 mt-2 mb-1"
                                 style={{

@@ -66,7 +66,7 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
     const [showScrollDown, setShowScrollDown] = useState(false);
 
     //ktr tn đã đọc hay chưa
-    const [lastMessageStatus, setLastMessageStatus] = useState<"delivered" | "seen">("delivered")
+    const [lastMessageStatus, setLastMessageStatus] = useState<"delivered" | "seen" | "hidden">("delivered")
 
     //hiện cho banner phần ghim
     const latestPinned = selectedConvo?.pinnedMessages
@@ -119,6 +119,12 @@ const ChatWindowBody = ({ scrollToPinnedRef }: { scrollToPinnedRef?: React.Mutab
     useEffect(() => {
         const lastMessage = selectedConvo?.lastMessage;
         if (!lastMessage) { return; }
+
+        const isRestricted = selectedConvo?.participants?.some((p: any) => p.isRestricted) ?? false;
+        if (isRestricted) {
+            setLastMessageStatus("delivered");
+            return;
+        }
 
         //đã có ai đó đọc r thì set thành seen
         const seenBy = selectedConvo?.seenBy ?? []

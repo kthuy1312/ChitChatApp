@@ -23,10 +23,7 @@ io.use(socketAuthMiddleWare)
 
 const onlineUsers = new Map(); //{userId:socketId}
 
-//những online user kh bị hạn chế để truyền
-const getVisibleOnlineUsers = async (userId) => {
-    const onlineUserIds = Array.from(onlineUsers.keys())
-
+const getRestrictedUserIds = async (userId) => {
     //tìm tất cả conver của user với type direct 
     const conversations = await Conversation.find({
         type: "direct",
@@ -54,6 +51,13 @@ const getVisibleOnlineUsers = async (userId) => {
         }
     })
 
+    return restrictedUserIds
+}
+
+//những online user kh bị hạn chế để truyền
+const getVisibleOnlineUsers = async (userId) => {
+    const onlineUserIds = Array.from(onlineUsers.keys())
+    const restrictedUserIds = await getRestrictedUserIds(userId)
     return onlineUserIds.filter(id => !restrictedUserIds.includes(id))
 }
 
@@ -113,14 +117,21 @@ io.on('connection', async (socket) => {
 
         }
 
-        //Thông báo cho những người khác
-        io.emit("user-offline-status", {
-            userId,
-            offlineAt: currentTime
-        });
+        const restrictedUserIds = await getRestrictedUserIds(userId);
 
-        //Cập nhật lại list online chung
-        io.emit("online-users", Array.from(onlineUsers.keys())); // convert sang array
+        //Thông báo cho những người khác (trừ những người bị hạn chế)
+        for (const [targetUserId, targetSocketId] of onlineUsers.entries()) {
+            if (!restrictedUserIds.includes(targetUserId)) {
+                io.to(targetSocketId).emit("user-offline-status", {
+                    userId,
+                    offlineAt: currentTime
+                });
+            }
+
+            //Cập nhật lại list online chung cho từng người
+            const visibleUsers = await getVisibleOnlineUsers(targetUserId);
+            io.to(targetSocketId).emit("online-users", visibleUsers);
+        }
 
         console.log(`socket disconnected: ${socket.id}`);
 
