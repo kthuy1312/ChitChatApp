@@ -20,6 +20,11 @@ export const chatService = {
         return { messages: res.data.messages, cursor: res.data.nextCursor }
     },
 
+    async searchGroupChats(q: string) {
+        const res = await api.get(`/conversations/groups/search?q=${q}`)
+        return res.data.groups
+    },
+
     async sendDirectMessage(recipientId: string, content: string, imgUrl?: string, conversationId?: string): Promise<FetchMessageProps> {
         const res = await api.post("/messages/direct", {
             recipientId, content, imgUrl, conversationId

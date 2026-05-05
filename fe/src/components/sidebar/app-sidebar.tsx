@@ -23,6 +23,7 @@ import { useThemeStore } from "@/stores/useThemeStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import ConversationSkeleton from "../skeleton/ConversationSkeleton";
 import { useChatStore } from "@/stores/useChatStore";
+import SearchGroupChatModal from "../chat/SearchGroupChatModal";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isDark, toggleTheme } = useThemeStore();
@@ -30,10 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { converloading } = useChatStore();
 
   return (
-    <Sidebar
-      variant="inset"
-      {...props}
-    >
+    <Sidebar variant="inset" {...props}>
       {/* Header */}
       <SidebarHeader>
         <SidebarMenu>
@@ -74,7 +72,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
               </a>
             </SidebarMenuButton>
-
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -91,10 +88,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Group Chat */}
         <SidebarGroup>
           <div className="flex items-center justify-between">
-            <SidebarGroupLabel className="uppercase">nhóm chat</SidebarGroupLabel>
-            <NewGroupChatModal />
-          </div>
+            <SidebarGroupLabel className="uppercase text-xs font-semibold tracking-wide text-muted-foreground">
+              nhóm chat
+            </SidebarGroupLabel>
 
+            <div className="flex items-center gap-1">
+              <SearchGroupChatModal />
+              <NewGroupChatModal />
+            </div>
+          </div>
           <SidebarGroupContent>
             {converloading ? <ConversationSkeleton /> : <GroupChatList />}
           </SidebarGroupContent>
@@ -103,10 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Dirrect Message */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase">bạn bè</SidebarGroupLabel>
-          <SidebarGroupAction
-            title="Kết Bạn"
-            className="cursor-pointer"
-          >
+          <SidebarGroupAction title="Kết Bạn" className="cursor-pointer">
             <AddFriendModal />
           </SidebarGroupAction>
 

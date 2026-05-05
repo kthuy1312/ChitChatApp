@@ -4,6 +4,77 @@ import Message from "../models/Message.js";
 import User from "../models/User.js";
 import { io, onlineUsers, getVisibleOnlineUsers } from "../socket/index.js";
 
+export const searchGroupChats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { q } = req.query;
+
+    const query = {
+      type: "group",
+      "participants.userID": userId,
+    };
+
+    if (q) {
+      query["group.name"] = { $regex: q, $options: "i" };
+    }
+
+    const groups = await Conversation.find(query).populate({
+      path: "participants.userID",
+      select: "displayName avatarUrl offlineAt bio phone email username",
+    });
+
+    const formatted = groups.map((conver) => {
+      const participants = (conver.participants || []).map((p) => ({
+        _id: p.userID?._id,
+        displayName: p.userID?.displayName,
+        avatarUrl: p.userID?.avatarUrl ?? null,
+        offlineAt: p.userID?.offlineAt || null,
+        joinedAt: p.joinedAt,
+        isPinned: p.isPinned ?? false,
+        isArchived: p.isArchived ?? false,
+        isRestricted: p.isRestricted ?? false,
+        nickname: p.nickname || null,
+        bio: p.userID?.bio || null,
+        phone: p.userID?.phone || null,
+        email: p.userID?.email || null,
+        username: p.userID?.username || null,
+      }));
+
+      const {
+        participants: _,
+        isPinned,
+        isArchived,
+        isRestricted,
+        ...safe
+      } = conver.toObject();
+
+      const clearedRecord = conver.clearedAt.find(
+        (c) => c.userId.toString() === userId.toString(),
+      );
+
+      let filteredPinned = conver.pinnedMessages;
+
+      if (clearedRecord) {
+        filteredPinned = conver.pinnedMessages.filter((p) => {
+          return new Date(p.createdAt) > new Date(clearedRecord.timestamp);
+        });
+      }
+
+      return {
+        ...safe,
+        unreadCounts: conver.unreadCounts || {},
+        participants,
+        pinnedMessages: filteredPinned,
+      };
+    });
+
+    return res.status(200).json({ groups: formatted });
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm nhóm", error);
+    return res.status(500).json({ message: "Lỗi hệ thống" });
+  }
+};
+
 export const createConversation = async (req, res) => {
   try {
     const { type, name, memberIds } = req.body;
