@@ -2,9 +2,11 @@ import { useFriendStore } from "@/stores/useFriendStore";
 import FriendRequestItem from "./FriendRequestItem";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const ReceivedRequests = () => {
   const { acceptRequest, declineRequest, loading, receivedList } = useFriendStore();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   if (!receivedList || receivedList.length === 0) {
     return (
@@ -19,22 +21,27 @@ const ReceivedRequests = () => {
     );
   }
 
-
   const handleAccept = async (requestId: string) => {
+    setLoadingId(requestId);
     try {
       await acceptRequest(requestId);
       toast.success("Đồng ý kết bạn thành công");
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingId(null);
     }
   };
 
   const handleDecline = async (requestId: string) => {
+    setLoadingId(requestId);
     try {
       await declineRequest(requestId);
       toast.info("Đã từ chối kết bạn");
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -50,19 +57,19 @@ const ReceivedRequests = () => {
                 size="sm"
                 variant="primary"
                 onClick={() => handleAccept(req._id)}
-                disabled={loading}
+                disabled={loading && loadingId === req._id}
                 className="w-full"
               >
-                {loading ? "Đang xử lý  ..." : "Chấp nhận"}
+                {loading && loadingId === req._id ? "Đang xử lý..." : "Chấp nhận"}
               </Button>
               <Button
                 size="sm"
                 variant="destructiveOutline"
                 onClick={() => handleDecline(req._id)}
-                disabled={loading}
+                disabled={loading && loadingId === req._id}
                 className="w-full"
               >
-                {loading ? "Đang xử lý..." : "Từ chối"}
+                {loading && loadingId === req._id ? "Đang xử lý..." : "Từ chối"}
               </Button>
             </>
           }
