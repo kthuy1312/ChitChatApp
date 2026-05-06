@@ -59,6 +59,11 @@ export const emitNewMessage = async (io, conversation, message) => {
     unreadCounts: formattedConversation.unreadCounts,
   };
 
-  //emit vào room conversation (user đã join sẵn)
-  io.to(conversation._id.toString()).emit("new-message", payload);
+  const roomIds = [
+    conversation._id.toString(),
+    ...participants.map((p) => p._id?.toString()).filter(Boolean),
+  ];
+
+  //emit vào room conversation (user đã join sẵn) và personal rooms của từng user (để user chưa join kịp vẫn nhận đc)
+  io.to(roomIds).emit("new-message", payload);
 };
