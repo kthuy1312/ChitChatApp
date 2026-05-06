@@ -46,8 +46,10 @@ export const emitNewMessage = async (io, conversation, message) => {
   }));
 
   const formattedConversation = {
+    //copy toàn bộ field của object vào object mới
     ...conversation.toObject(),
     participants,
+    //Object.fromEntries() chuyển 1 danh sách cặp [key, value] thành obj
     unreadCounts: Object.fromEntries(conversation.unreadCounts || new Map()),
   };
 

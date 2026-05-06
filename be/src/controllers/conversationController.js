@@ -296,6 +296,7 @@ export const getMessages = async (req, res) => {
         .json({ message: "Không tìm thấy cuộc trò chuyện" });
     }
 
+    //tạo một object điều kiện
     const query = { conversationId };
 
     //nếu user đã clear data trước đó
@@ -304,6 +305,8 @@ export const getMessages = async (req, res) => {
     );
 
     if (clearData) {
+      //lấy các record có createdAt > clearData.timestamp
+      //chỉ lấy tin nhắn được gửi sau khi user clear
       query.createdAt = { $gt: clearData.timestamp };
     }
 
@@ -317,8 +320,9 @@ export const getMessages = async (req, res) => {
     }
 
     let messages = await Message.find(query)
+      //sx theo createdAt giảm dần (mới đến cũ) tại muốn tính từ tin mới mới truoc
       .sort({ createdAt: -1 })
-      .limit(+limit + 1);
+      .limit(+limit + 1); //check còn data nữa hay không
 
     let nextCursor = null;
 
@@ -329,7 +333,7 @@ export const getMessages = async (req, res) => {
       messages.pop(); //bỏ tin cuối cùng ra
     }
 
-    messages = messages.reverse();
+    messages = messages.reverse(); //đổi lại thành tn từ cũ đến mới 
 
     return res.status(200).json({
       messages,

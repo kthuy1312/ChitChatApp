@@ -47,7 +47,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     socket.on("new-message", ({ message, conversation, unreadCounts }) => {
       const currentUserId = useAuthStore.getState().user?._id;
 
-      // Filter pinnedMessages if user had cleared the conversation
+      // Filter pinnedMessages nếu user đã clear hội thoại
       if (currentUserId && conversation.clearedAt) {
         const clearedRecord = conversation.clearedAt.find(
           (c: any) => c.userId === currentUserId,
@@ -176,7 +176,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             if (
               clearedRecord &&
               new Date(pinnedMessage.createdAt) <=
-                new Date(clearedRecord.timestamp)
+              new Date(clearedRecord.timestamp)
             ) {
               return;
             }
